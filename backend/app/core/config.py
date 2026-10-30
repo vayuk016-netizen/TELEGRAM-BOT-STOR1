@@ -1,10 +1,15 @@
+import os
+from pathlib import Path
 from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+ENV_PATH = BACKEND_DIR / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(ENV_PATH) if ENV_PATH.exists() else ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=True,
@@ -53,8 +58,8 @@ class Settings(BaseSettings):
     JWT_SECRET: str = "super_secret_jwt_key_change_me_in_production_32bytes_min"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200
-    ADMIN_USERNAME: str = "adminhakcambodai168@gmail.com"
-    ADMIN_PASSWORD: str = "adminhak&168$"
+    ADMIN_USERNAME: str = "vayuk016@gmail.com"
+    ADMIN_PASSWORD: str = "sp169926"
 
     # Digital Key Encryption (AES-Fernet key)
     # Default 32-byte urlsafe base64 key
@@ -62,6 +67,8 @@ class Settings(BaseSettings):
 
     # Telegram Bot
     BOT_TOKEN: str = "123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+    TELEGRAM_BOT_USERNAME: str = "sopha9926"
+    ADMIN_TELEGRAM_ID: Optional[int] = None
     TELEGRAM_WEBHOOK_URL: Optional[str] = None
 
     # KHQR / Payment

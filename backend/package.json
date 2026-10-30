@@ -1,0 +1,9 @@
+{
+  "name": "telegram-store-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "./.venv/bin/uvicorn app.main:app --reload --port 8000",
+    "start": "./.venv/bin/uvicorn app.main:app --port 8000"
+  }
+}

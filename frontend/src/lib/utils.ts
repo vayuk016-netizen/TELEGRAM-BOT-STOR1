@@ -12,3 +12,9 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 2,
   }).format(amount);
 }
+
+export function formatImageUrl(url?: string | null): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  return url;
+}

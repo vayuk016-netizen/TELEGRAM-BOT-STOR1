@@ -59,3 +59,28 @@ def decrypt_key_content(encrypted_text: str) -> str:
     cipher = _get_fernet_cipher()
     decrypted_bytes = cipher.decrypt(encrypted_text.encode("utf-8"))
     return decrypted_bytes.decode("utf-8")
+
+
+# Telegram Login Widget Verification
+def verify_telegram_auth(data: Dict[str, Any], bot_token: str) -> bool:
+    """
+    Verifies Telegram Login Widget payload using HMAC-SHA256.
+    Reference: https://core.telegram.org/widgets/login#checking-authorization
+    """
+    import hashlib
+    import hmac
+
+    check_hash = data.get("hash")
+    if not check_hash:
+        return False
+
+    data_check_list = []
+    for k in sorted(data.keys()):
+        if k != "hash" and data[k] is not None:
+            data_check_list.append(f"{k}={data[k]}")
+    data_check_string = "\n".join(data_check_list)
+
+    secret_key = hashlib.sha256(bot_token.encode("utf-8")).digest()
+    calculated_hash = hmac.new(secret_key, data_check_string.encode("utf-8"), hashlib.sha256).hexdigest()
+
+    return hmac.compare_digest(calculated_hash, check_hash)

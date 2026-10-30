@@ -96,8 +96,8 @@ Render នឹងដំណើរការ FastAPI Application និង Telegram 
 | `CLOUDINARY_CLOUD_NAME` | `ឈ្មោះ cloud របស់អ្នក` | ពី Cloudinary Dashboard |
 | `CLOUDINARY_API_KEY` | `លេខកូដ API` | ពី Cloudinary Dashboard |
 | `CLOUDINARY_API_SECRET` | `កូដសម្ងាត់ API` | ពី Cloudinary Dashboard |
-| `ADMIN_USERNAME` | `adminhakcambodai168@gmail.com` | អ៊ីមែលសម្រាប់ឡុកចូល Admin Panel |
-| `ADMIN_PASSWORD` | `adminhak&168$` | ពាក្យសម្ងាត់សម្រាប់ឡុកចូល Admin Panel |
+| `ADMIN_USERNAME` | `vayuk016@gmail.com` | អ៊ីមែលសម្រាប់ឡុកចូល Admin Panel |
+| `ADMIN_PASSWORD` | `sp169926` | ពាក្យសម្ងាត់សម្រាប់ឡុកចូល Admin Panel |
 | `KHQR_MERCHANT_NAME` | `DIGITAL STORE KH` | ឈ្មោះហាងសម្រាប់បង្ហាញលើ KHQR |
 | `KHQR_MERCHANT_CITY` | `PHNOM PENH` | ទីក្រុងរបស់ហាង |
 | `KHQR_ACCOUNT_NUMBER` | `លេខគណនីបាគងរបស់អ្នក` | គណនីបាគងសម្រាប់ទទួលប្រាក់ |

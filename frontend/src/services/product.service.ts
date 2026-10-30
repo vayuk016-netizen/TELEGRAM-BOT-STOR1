@@ -39,4 +39,15 @@ export const productService = {
   async deleteProduct(id: number): Promise<void> {
     await apiClient.delete(`/products/${id}`);
   },
+
+  async uploadProductImage(file: File): Promise<{ image_url: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await apiClient.post<{ image_url: string }>("/products/upload-image", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  },
 };

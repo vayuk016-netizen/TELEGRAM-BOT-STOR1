@@ -23,28 +23,35 @@ class PurchaseService:
         self.stock_repo = StockRepository(session)
         self.order_repo = OrderRepository(session)
 
-    async def execute_purchase(self, telegram_id: int, product_id: int) -> Tuple[Order, str]:
+    async def execute_purchase(self, telegram_id: int, product_id: int, quantity: int = 1) -> Tuple[Order, str]:
         """
-        Executes a race-condition safe digital item purchase.
+        Executes a race-condition safe digital item purchase for 1 or more keys.
         
         Steps in an Atomic DB Transaction:
         1. Fetch & lock product entity.
-        2. Safely lock 1 unsold digital key via PostgreSQL FOR UPDATE SKIP LOCKED.
+        2. Safely lock `quantity` unsold digital keys via PostgreSQL FOR UPDATE SKIP LOCKED.
         3. Lock user row with FOR UPDATE and verify balance sufficiency.
-        4. Deduct balance from user.
-        5. Decrypt digital key content for instant delivery.
+        4. Deduct total price from user.
+        5. Decrypt digital key contents for instant delivery.
         6. Log Order & OrderItem records.
-        7. Flag digital key as sold with order reference.
+        7. Flag digital keys as sold with order reference.
         """
+        if quantity < 1:
+            quantity = 1
+
         # Step 1: Check product validity
         product = await self.product_repo.get_by_id(product_id)
         if not product or not product.is_active:
             raise ProductNotFoundException("Product is not available for purchase.")
 
-        # Step 2: Lock 1 unsold key safely
-        digital_key = await self.stock_repo.fetch_and_lock_unsold_key(product_id)
-        if not digital_key:
-            raise OutOfStockException(f"Sorry, '{product.title}' is currently out of stock!")
+        # Step 2: Lock `quantity` unsold keys safely
+        digital_keys = await self.stock_repo.fetch_and_lock_unsold_keys(product_id, quantity)
+        if len(digital_keys) < quantity:
+            left = len(digital_keys)
+            if left == 0:
+                raise OutOfStockException(f"Sorry, '{product.title}' is currently out of stock!")
+            else:
+                raise OutOfStockException(f"Sorry, '{product.title}' only has {left} item(s) available in stock!")
 
         # Step 3: Fetch & lock user record
         user = await self.user_repo.get_by_telegram_id_for_update(telegram_id)
@@ -55,18 +62,23 @@ class PurchaseService:
             raise InsufficientBalanceException("Your account is currently suspended.")
 
         # Step 4: Verify balance
-        if user.balance < product.price:
-            needed = product.price - user.balance
+        total_price = product.price * quantity
+        if user.balance < total_price:
+            needed = total_price - user.balance
             raise InsufficientBalanceException(
-                f"Insufficient balance! Required: ${product.price:.2f}, Balance: ${user.balance:.2f}. "
+                f"Insufficient balance! Required: ${total_price:.2f}, Balance: ${user.balance:.2f}. "
                 f"Please top up ${needed:.2f} more."
             )
 
         # Step 5: Deduct balance
-        user.balance -= product.price
+        user.balance -= total_price
 
-        # Step 6: Decrypt key content
-        plain_key_content = decrypt_key_content(digital_key.encrypted_content)
+        # Step 6: Decrypt key contents
+        decrypted_keys = [decrypt_key_content(k.encrypted_content) for k in digital_keys]
+        if len(decrypted_keys) == 1:
+            plain_key_content = decrypted_keys[0]
+        else:
+            plain_key_content = "\n".join([f"{i+1}. {k}" for i, k in enumerate(decrypted_keys)])
 
         # Step 7: Record Order & OrderItem
         order = await self.order_repo.create_order_with_item(
@@ -74,10 +86,12 @@ class PurchaseService:
             product_id=product.id,
             unit_price=product.price,
             delivered_payload=plain_key_content,
+            total_amount=total_price,
         )
 
-        # Step 8: Mark key sold
-        await self.stock_repo.mark_key_as_sold(key_id=digital_key.id, order_id=order.id)
+        # Step 8: Mark keys as sold
+        key_ids = [k.id for k in digital_keys]
+        await self.stock_repo.mark_keys_as_sold(key_ids=key_ids, order_id=order.id)
 
         # Commit explicit transaction
         await self.session.commit()

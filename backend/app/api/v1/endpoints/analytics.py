@@ -36,13 +36,11 @@ async def get_analytics_overview(
     user_repo = UserRepository(db)
     prod_repo = ProductRepository(db)
 
-    metrics, total_users, low_stock_count, recent_orders, chart_data = await asyncio.gather(
-        order_repo.get_dashboard_metrics(),
-        user_repo.count_total_users(),
-        prod_repo.count_low_stock_products(threshold=5),
-        order_repo.get_recent_orders_with_user(limit=10),
-        order_repo.get_weekly_sales_chart()
-    )
+    metrics = await order_repo.get_dashboard_metrics()
+    total_users = await user_repo.count_total_users()
+    low_stock_count = await prod_repo.count_low_stock_products(threshold=5)
+    recent_orders = await order_repo.get_recent_orders_with_user(limit=10)
+    chart_data = await order_repo.get_weekly_sales_chart()
     live_feed = []
 
     for order, user, prod in recent_orders:

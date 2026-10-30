@@ -12,11 +12,35 @@ import UsersPage from "@/app/(dashboard)/users/page";
 import BroadcastPage from "@/app/(dashboard)/broadcast/page";
 import SettingsPage from "@/app/(dashboard)/settings/page";
 
+// Customer Storefront Components
+import { StoreLayout } from "@/components/storefront/StoreLayout";
+import { HomePage } from "@/pages/store/Home";
+import { StoreProductsPage } from "@/pages/store/Products";
+import { StoreProductDetailPage } from "@/pages/store/ProductDetail";
+import { StoreCheckoutPage } from "@/pages/store/Checkout";
+import { StoreMyOrdersPage } from "@/pages/store/MyOrders";
+import { StoreContactPage } from "@/pages/store/Contact";
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth Route */}
+        {/* ======================================================== */}
+        {/* 🛍️ Customer-Facing Storefront Routes (Public)           */}
+        {/* ======================================================== */}
+        <Route element={<StoreLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products" element={<StoreProductsPage />} />
+          <Route path="/products/:id" element={<StoreProductDetailPage />} />
+          <Route path="/checkout/:id" element={<StoreCheckoutPage />} />
+          <Route path="/my-orders" element={<StoreMyOrdersPage />} />
+          <Route path="/orders/lookup" element={<StoreMyOrdersPage />} />
+          <Route path="/contact" element={<StoreContactPage />} />
+        </Route>
+
+        {/* ======================================================== */}
+        {/* 🔐 Admin Authentication Route                           */}
+        {/* ======================================================== */}
         <Route
           path="/login"
           element={
@@ -26,20 +50,31 @@ export default function App() {
           }
         />
 
-        {/* Protected Dashboard Routes */}
+        {/* ======================================================== */}
+        {/* ⚙️ Protected Admin Dashboard Routes                     */}
+        {/* ======================================================== */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardWrapper />}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/stock" element={<StockPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/users" element={<UsersPage />} />
-            <Route path="/broadcast" element={<BroadcastPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={<DashboardPage />} />
+            <Route path="/admin/products" element={<ProductsPage />} />
+            <Route path="/admin/stock" element={<StockPage />} />
+            <Route path="/admin/orders" element={<OrdersPage />} />
+            <Route path="/admin/users" element={<UsersPage />} />
+            <Route path="/admin/broadcast" element={<BroadcastPage />} />
+            <Route path="/admin/settings" element={<SettingsPage />} />
+
+            {/* Dashboard path aliases */}
+            <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+            <Route path="/dashboard/products" element={<Navigate to="/admin/products" replace />} />
+            <Route path="/dashboard/stock" element={<Navigate to="/admin/stock" replace />} />
+            <Route path="/dashboard/orders" element={<Navigate to="/admin/orders" replace />} />
+            <Route path="/dashboard/users" element={<Navigate to="/admin/users" replace />} />
+            <Route path="/dashboard/broadcast" element={<Navigate to="/admin/broadcast" replace />} />
+            <Route path="/dashboard/settings" element={<Navigate to="/admin/settings" replace />} />
           </Route>
         </Route>
 
-        {/* Catch-all redirect to Dashboard */}
+        {/* Catch-all redirect to Home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

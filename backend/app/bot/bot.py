@@ -18,6 +18,25 @@ dp = Dispatcher(storage=MemoryStorage())
 bot_task: Optional[asyncio.Task] = None
 
 
+async def run_bot_polling(bot_instance: Bot, dp_instance: Dispatcher):
+    """
+    Auto-reconnecting long-polling loop.
+    Prevents the Telegram bot task from silently terminating on temporary network hiccups or conflicts.
+    """
+    retry_delay = 3
+    while True:
+        try:
+            await bot_instance.delete_webhook(drop_pending_updates=False)
+            logger.info("Telegram Bot polling started successfully.")
+            await dp_instance.start_polling(bot_instance, handle_signals=False)
+        except asyncio.CancelledError:
+            logger.info("Telegram Bot polling task stopped cleanly.")
+            break
+        except Exception as e:
+            logger.error(f"Telegram Bot polling error: {e}. Reconnecting in {retry_delay}s...")
+            await asyncio.sleep(retry_delay)
+
+
 async def reload_bot(new_token: str):
     global bot_task, bot
     logger.info("Bot token reload initiated...")
@@ -55,7 +74,7 @@ async def reload_bot(new_token: str):
             logger.error(f"Error while stopping Bot polling task: {e}")
 
         logger.info("Restarting Bot polling task with new token...")
-        bot_task = asyncio.create_task(dp.start_polling(bot))
+        bot_task = asyncio.create_task(run_bot_polling(bot, dp))
         logger.info("Bot polling task successfully restarted.")
     else:
         logger.info("Bot was not running in long polling mode. Token configuration updated.")

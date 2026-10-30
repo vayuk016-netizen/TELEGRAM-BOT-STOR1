@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from app.api.dependencies import get_current_admin
@@ -18,13 +19,12 @@ class SettingsResponse(BaseModel):
 
 
 def update_env_variable(key: str, value: str):
-    # __file__ is in backend/app/api/v1/endpoints/settings.py
-    # 4 levels up is backend/
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    env_path = os.path.join(base_dir, ".env")
+    # settings.py -> endpoints -> v1 -> api -> app -> backend (5 levels up)
+    backend_dir = Path(__file__).resolve().parents[4]
+    env_path = backend_dir / ".env"
 
     lines = []
-    if os.path.exists(env_path):
+    if env_path.exists():
         with open(env_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
@@ -115,8 +115,8 @@ async def upload_qr(
             pass
 
     # Ensure static directory exists
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    static_dir = os.path.join(base_dir, "app", "static")
+    app_dir = Path(__file__).resolve().parents[3]
+    static_dir = app_dir / "static"
     os.makedirs(static_dir, exist_ok=True)
 
     filename = f"aba_qr{file_ext}"

@@ -21,6 +21,16 @@ export default function SettingsPage() {
   const { sidebarBg, headerBg, setSidebarBg, setHeaderBg, resetColors } = useCustomColorStore();
 
   const { t, language } = useLanguageStore();
+  const isKh = language === "km";
+
+  const getErrorMessage = (err: any, fallback: string) => {
+    if (err.message === "Network Error" || err.code === "ERR_NETWORK") {
+      return isKh
+        ? "កំហុសបណ្តាញ៖ មិនអាចភ្ជាប់ទៅកាន់ Backend API (http://localhost:8000) បានទេ។ សូមប្រាកដថាអ្នកបានដំណើរការ backend Server (npm run dev:backend)។"
+        : "Network Error: Cannot connect to backend server at http://localhost:8000. Please make sure the backend is running (`npm run dev:backend`).";
+    }
+    return err.response?.data?.detail || err.message || fallback;
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -28,14 +38,14 @@ export default function SettingsPage() {
         const data = await settingsService.getSettings();
         setBotToken(data.bot_token);
       } catch (err: any) {
-        const errMsg = err.response?.data?.detail || err.message || t("fail_load");
+        const errMsg = getErrorMessage(err, t("fail_load"));
         setError(errMsg);
       } finally {
         setLoading(false);
       }
     };
     fetchSettings();
-  }, [t]);
+  }, [t, isKh]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +59,7 @@ export default function SettingsPage() {
       });
       setSuccess(t("success_save"));
     } catch (err: any) {
-      const errMsg = err.response?.data?.detail || err.message || t("fail_save");
+      const errMsg = getErrorMessage(err, t("fail_save"));
       setError(errMsg);
     } finally {
       setSaving(false);
@@ -71,8 +81,6 @@ export default function SettingsPage() {
       </div>
     );
   }
-
-  const isKh = language === "km";
 
   const customColorPresets = [
     { name: "Default", sidebar: "", header: "" },

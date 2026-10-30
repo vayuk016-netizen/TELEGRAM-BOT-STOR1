@@ -44,6 +44,10 @@ async def run_async_migrations() -> None:
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={
+            "statement_cache_size": 0,
+            "prepared_statement_cache_size": 0,
+        } if ":6543" in settings.async_database_url or "pooler" in settings.async_database_url else {},
     )
 
     async with connectable.connect() as connection:

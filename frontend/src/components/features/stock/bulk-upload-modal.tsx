@@ -11,6 +11,7 @@ interface BulkUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
   products: Product[];
+  initialProductId?: number | null;
   onSuccess: () => void;
 }
 
@@ -18,9 +19,20 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
   isOpen,
   onClose,
   products,
+  initialProductId,
   onSuccess,
 }) => {
-  const [productId, setProductId] = useState<number>(products[0]?.id || 0);
+  const [productId, setProductId] = useState<number>(
+    initialProductId || products[0]?.id || 0
+  );
+
+  React.useEffect(() => {
+    if (initialProductId) {
+      setProductId(initialProductId);
+    } else if (products.length > 0 && !productId) {
+      setProductId(products[0].id);
+    }
+  }, [initialProductId, products]);
   const [rawKeysText, setRawKeysText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);

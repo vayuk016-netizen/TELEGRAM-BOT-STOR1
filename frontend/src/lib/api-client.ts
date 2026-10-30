@@ -32,7 +32,11 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("access_token");
+    const isPublic = config.url?.startsWith("/public");
+    const adminToken = localStorage.getItem("access_token");
+    const customerToken = localStorage.getItem("customer_token");
+
+    const token = isPublic ? (customerToken || adminToken) : (adminToken || customerToken);
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -44,7 +48,9 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      if (!window.location.pathname.startsWith("/login")) {
+      const isPublic = error.config?.url?.startsWith("/public");
+      const isAdminRoute = window.location.pathname.startsWith("/admin") || window.location.pathname === "/";
+      if (!isPublic && isAdminRoute && !window.location.pathname.startsWith("/login")) {
         localStorage.removeItem("access_token");
         document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
         window.location.href = "/login";

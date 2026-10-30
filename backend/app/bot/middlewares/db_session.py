@@ -20,10 +20,12 @@ class DbSessionMiddleware(BaseMiddleware):
                 data["session"] = session
                 try:
                     result = await handler(event, data)
-                    await session.commit()
+                    if session.is_active:
+                        await session.commit()
                     return result
                 except Exception as e:
-                    await session.rollback()
+                    if session.is_active:
+                        await session.rollback()
                     raise e
         except Exception as e:
             logger.error(f"Database connection/operation failed in bot: {e}")

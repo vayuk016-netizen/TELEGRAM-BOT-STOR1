@@ -24,6 +24,9 @@ export interface Order {
   user_id: number;
   total_amount: number;
   status: string;
+  source?: string;
+  payment_method?: string;
+  receipt_url?: string;
   created_at: string;
   user?: CustomerUser;
   items: OrderItem[];

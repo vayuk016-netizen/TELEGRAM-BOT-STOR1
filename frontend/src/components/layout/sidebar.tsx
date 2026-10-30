@@ -31,13 +31,13 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const navItems = [
-  { titleKey: "dashboard", href: "/", icon: "LayoutDashboard" },
-  { titleKey: "products", href: "/products", icon: "Package" },
-  { titleKey: "stock_keys", href: "/stock", icon: "Key" },
-  { titleKey: "orders", href: "/orders", icon: "ShoppingCart" },
-  { titleKey: "users", href: "/users", icon: "Users" },
-  { titleKey: "broadcast", href: "/broadcast", icon: "Megaphone" },
-  { titleKey: "settings", href: "/settings", icon: "Settings" },
+  { titleKey: "dashboard", href: "/admin", icon: "LayoutDashboard" },
+  { titleKey: "products", href: "/admin/products", icon: "Package" },
+  { titleKey: "stock_keys", href: "/admin/stock", icon: "Key" },
+  { titleKey: "orders", href: "/admin/orders", icon: "ShoppingCart" },
+  { titleKey: "users", href: "/admin/users", icon: "Users" },
+  { titleKey: "broadcast", href: "/admin/broadcast", icon: "Megaphone" },
+  { titleKey: "settings", href: "/admin/settings", icon: "Settings" },
 ];
 
 function isColorDark(colorHex: string) {
@@ -155,6 +155,18 @@ export const Sidebar: React.FC = () => {
             </Link>
           );
         })}
+
+        {/* View Storefront Link */}
+        <Link
+          to="/"
+          className={cn(
+            "group relative flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all duration-200 mt-4 border border-blue-500/20 bg-blue-500/5 text-blue-400 hover:bg-blue-500/10",
+            !isOpen && "justify-center px-0"
+          )}
+        >
+          <span className="text-sm">🛍️</span>
+          {isOpen && <span>View Live Store</span>}
+        </Link>
       </nav>
 
       {/* User profile / UserNav at the bottom */}

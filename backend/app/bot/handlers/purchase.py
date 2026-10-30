@@ -15,10 +15,46 @@ from app.bot.utils.localization import get_text
 router = Router()
 
 
+def build_buy_confirmation_text(product, db_user, qty: int, stock_count: int, lang: str) -> str:
+    prod_lbl = "Product" if lang == "en" else "ផលិតផល"
+    qty_lbl = "Quantity" if lang == "en" else "ចំនួន"
+    unit_price_lbl = "Unit Price" if lang == "en" else "តម្លៃ"
+    total_lbl = "Total Price" if lang == "en" else "តម្លៃសរុប"
+    bal_lbl = "Your Balance" if lang == "en" else "តុល្យភាពរបស់អ្នក"
+    stock_lbl = "In Stock" if lang == "en" else "ស្តុកនៅសល់"
+
+    total_price = product.price * qty
+
+    if qty == 1:
+        return (
+            f"{get_text(lang, 'buy_confirm_title')}\n\n"
+            f"📦 <b>{prod_lbl}:</b> {product.title}\n"
+            f"🔢 <b>{qty_lbl}:</b> <b>{qty}</b>\n"
+            f"💵 <b>{unit_price_lbl}:</b> ${product.price:.2f}\n"
+            f"💳 <b>{bal_lbl}:</b> ${db_user.balance:.2f}\n"
+            f"📊 <b>{stock_lbl}:</b> {stock_count}\n\n"
+            f"{get_text(lang, 'buy_confirm_prompt')}"
+        )
+
+    return (
+        f"{get_text(lang, 'buy_confirm_title')}\n\n"
+        f"📦 <b>{prod_lbl}:</b> {product.title}\n"
+        f"🔢 <b>{qty_lbl}:</b> <b>{qty}</b>\n"
+        f"💵 <b>{unit_price_lbl}:</b> ${product.price:.2f}\n"
+        f"💰 <b>{total_lbl}:</b> <b>${total_price:.2f}</b>\n"
+        f"💳 <b>{bal_lbl}:</b> ${db_user.balance:.2f}\n"
+        f"📊 <b>{stock_lbl}:</b> {stock_count}\n\n"
+        f"{get_text(lang, 'buy_confirm_prompt')}"
+    )
+
+
 @router.callback_query(F.data.startswith("buy_confirm:"))
 async def buy_confirm_prompt(callback: CallbackQuery, session: AsyncSession, db_user: User):
     lang = db_user.language_code or "km"
-    product_id = int(callback.data.split(":")[1])
+    parts = callback.data.split(":")
+    product_id = int(parts[1])
+    qty = int(parts[2]) if len(parts) > 2 else 1
+
     product_repo = ProductRepository(session)
     res = await product_repo.get_product_with_stock(product_id)
 
@@ -34,21 +70,49 @@ async def buy_confirm_prompt(callback: CallbackQuery, session: AsyncSession, db_
         await callback.answer(f"⚠️ {msg}", show_alert=True)
         return
 
-    prod_lbl = "Product" if lang == "en" else "ផលិតផល"
-    price_lbl = "Price" if lang == "en" else "តម្លៃត្រូវទូទាត់"
-    bal_lbl = "Your Balance" if lang == "en" else "តុល្យភាពរបស់អ្នក"
-
-    text = (
-        f"{get_text(lang, 'buy_confirm_title')}\n\n"
-        f"📦 <b>{prod_lbl}:</b> {product.title}\n"
-        f"💵 <b>{price_lbl}:</b> ${product.price:.2f}\n"
-        f"💳 <b>{bal_lbl}:</b> ${db_user.balance:.2f}\n\n"
-        f"{get_text(lang, 'buy_confirm_prompt')}"
-    )
-
-    kb = get_buy_confirm_keyboard(product.id)
+    text = build_buy_confirmation_text(product, db_user, qty, stock_count, lang)
+    kb = get_buy_confirm_keyboard(product.id, current_qty=qty, available_stock=stock_count, lang=lang)
     await callback.message.edit_text(text, reply_markup=kb)
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("buy_qty:"))
+async def buy_qty_handler(callback: CallbackQuery, session: AsyncSession, db_user: User):
+    lang = db_user.language_code or "km"
+    parts = callback.data.split(":")
+    product_id = int(parts[1])
+    qty = int(parts[2])
+
+    product_repo = ProductRepository(session)
+    res = await product_repo.get_product_with_stock(product_id)
+
+    if not res:
+        msg = "Product not found!" if lang == "en" else "មិនរកឃើញផលិតផល!"
+        await callback.answer(f"⚠️ {msg}", show_alert=True)
+        return
+
+    product, stock_count = res
+
+    if qty > stock_count:
+        msg = f"Only {stock_count} item(s) left in stock!" if lang == "en" else f"ស្តុកនៅសល់ត្រឹមតែ {stock_count} ប៉ុណ្ណោះ!"
+        await callback.answer(f"⚠️ {msg}", show_alert=True)
+        return
+
+    text = build_buy_confirmation_text(product, db_user, qty, stock_count, lang)
+    kb = get_buy_confirm_keyboard(product.id, current_qty=qty, available_stock=stock_count, lang=lang)
+    try:
+        await callback.message.edit_text(text, reply_markup=kb)
+    except Exception:
+        pass
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("noop_stock:"))
+async def noop_stock_handler(callback: CallbackQuery, db_user: User):
+    lang = db_user.language_code or "km"
+    limit = callback.data.split(":")[1]
+    msg = f"Only {limit} item(s) left in stock!" if lang == "en" else f"ស្តុកនៅសល់ត្រឹមតែ {limit} ប៉ុណ្ណោះ!"
+    await callback.answer(f"⚠️ {msg}", show_alert=True)
 
 
 @router.callback_query(F.data == "cancel_buy")
@@ -61,13 +125,16 @@ async def cancel_buy_handler(callback: CallbackQuery, db_user: User):
 @router.callback_query(F.data.startswith("buy_execute:"))
 async def execute_purchase_handler(callback: CallbackQuery, session: AsyncSession, db_user: User):
     lang = db_user.language_code or "km"
-    product_id = int(callback.data.split(":")[1])
+    parts = callback.data.split(":")
+    product_id = int(parts[1])
+    qty = int(parts[2]) if len(parts) > 2 else 1
     purchase_service = PurchaseService(session)
 
     try:
         order, plain_key_content = await purchase_service.execute_purchase(
             telegram_id=db_user.telegram_id,
             product_id=product_id,
+            quantity=qty,
         )
 
         delivery_text = get_text(
@@ -82,22 +149,22 @@ async def execute_purchase_handler(callback: CallbackQuery, session: AsyncSessio
         alert_msg = "Purchase successful!" if lang == "en" else "ប្រគល់ទំនិញជោគជ័យ!"
         await callback.answer(f"🎉 {alert_msg}", show_alert=True)
 
-    except OutOfStockException:
-        msg = "Product out of stock!" if lang == "en" else "ស្តុកត្រូវបានលក់អស់ហើយ!"
-        await callback.answer(f"❌ {msg}", show_alert=True)
+    except OutOfStockException as e:
+        await callback.answer(f"❌ {str(e)}", show_alert=True)
     except InsufficientBalanceException:
         product_repo = ProductRepository(session)
         res = await product_repo.get_product_with_stock(product_id)
-        price = res[0].price if res else 0.0
+        unit_price = res[0].price if res else 0.0
+        total_price = float(unit_price) * qty
         
         text = get_text(
             lang,
             "insufficient_balance",
-            price=price,
+            price=total_price,
             balance=db_user.balance,
         )
         from app.bot.keyboards.inline import get_insufficient_balance_keyboard
-        kb = get_insufficient_balance_keyboard(product_id, float(price), db_user.telegram_id, lang)
+        kb = get_insufficient_balance_keyboard(product_id, float(total_price), db_user.telegram_id, lang)
         
         await callback.message.edit_text(text, reply_markup=kb)
         await callback.answer()
@@ -143,7 +210,19 @@ async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
         aba_number=settings.ABA_ACCOUNT_NUMBER,
     )
     
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    qr_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+            ],
+            [
+                InlineKeyboardButton(text="🔙 Back" if lang == "en" else "🔙 ត្រឡប់ក្រោយ", callback_data=f"prod:{product_id}"),
+            ]
+        ]
+    )
+
     await callback.message.delete()
-    await callback.message.answer_photo(photo=photo, caption=caption)
+    await callback.message.answer_photo(photo=photo, caption=caption, reply_markup=qr_kb)
     await callback.answer()
 

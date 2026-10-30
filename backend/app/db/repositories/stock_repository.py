@@ -30,10 +30,39 @@ class StockRepository(BaseRepository[DigitalKey]):
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
 
+    async def fetch_and_lock_unsold_keys(self, product_id: int, quantity: int = 1) -> List[DigitalKey]:
+        stmt = (
+            select(DigitalKey)
+            .where(
+                DigitalKey.product_id == product_id,
+                DigitalKey.is_sold.is_(False),
+            )
+            .order_by(DigitalKey.id.asc())
+            .limit(quantity)
+            .with_for_update(skip_locked=True)
+        )
+        res = await self.session.execute(stmt)
+        return list(res.scalars().all())
+
     async def mark_key_as_sold(self, key_id: int, order_id: int) -> None:
         stmt = (
             update(DigitalKey)
             .where(DigitalKey.id == key_id)
+            .values(
+                is_sold=True,
+                order_id=order_id,
+                sold_at=datetime.now(timezone.utc),
+            )
+        )
+        await self.session.execute(stmt)
+        await self.session.flush()
+
+    async def mark_keys_as_sold(self, key_ids: List[int], order_id: int) -> None:
+        if not key_ids:
+            return
+        stmt = (
+            update(DigitalKey)
+            .where(DigitalKey.id.in_(key_ids))
             .values(
                 is_sold=True,
                 order_id=order_id,

@@ -16,7 +16,7 @@ TRANSLATIONS = {
             "• <b>💰 បញ្ចូលទឹកប្រាក់:</b> បញ្ចូលទឹកប្រាក់តាមរយៈ KHQR ស្វ័យប្រវត្តិ\n"
             "• <b>Referral Program:</b> ណែនាំមិត្តភក្ដិដើម្បីទទួលបានប្រាក់បន្ថែម\n"
             "• <b>ប្រវត្តិបញ្ជាទិញ:</b> ពិនិត្យមើលកូដ/អាខោនដែលបានទិញរួច\n\n"
-            "📞 ទំនាក់ទំនងផ្នែកសេវាអតិថិជន: @StoreSupportAdmin"
+            "📞 ទំនាក់ទំនងផ្នែកសេវាអតិថិជន: @sopha9926"
         ),
         "lang_select": "<b>🌐 សូមជ្រើសរើសភាសារបស់អ្នក (Please choose your language)៖</b>",
         "lang_updated": "🌐 ភាសារបស់អ្នកត្រូវបានផ្លាស់ប្តូរទៅជា <b>ភាសាខ្មែរ 🇰🇭</b> រួចរាល់ហើយ!",
@@ -123,7 +123,7 @@ TRANSLATIONS = {
             "• <b>💰 Top Up:</b> Fund your account with automatic KHQR\n"
             "• <b>Referral Program:</b> Invite friends to earn commission rewards\n"
             "• <b>Order History:</b> View bought keys and license details\n\n"
-            "📞 Customer Support: @StoreSupportAdmin"
+            "📞 Customer Support: @sopha9926"
         ),
         "lang_select": "<b>🌐 Please choose your language (សូមជ្រើសរើសភាសារបស់អ្នក):</b>",
         "lang_updated": "🌐 Your language has been updated to <b>English 🇬🇧</b>!",

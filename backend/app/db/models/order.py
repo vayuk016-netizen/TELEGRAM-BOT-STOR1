@@ -11,7 +11,10 @@ class Order(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     total_amount: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
-    status: Mapped[str] = mapped_column(String(50), default="COMPLETED", nullable=False)  # COMPLETED, CANCELLED
+    status: Mapped[str] = mapped_column(String(50), default="COMPLETED", nullable=False)  # PENDING, PAID, COMPLETED, CANCELLED
+    source: Mapped[str] = mapped_column(String(50), default="telegram", server_default="telegram", nullable=False)  # telegram, website
+    payment_method: Mapped[Optional[str]] = mapped_column(String(50), default="balance", nullable=True)  # balance, khqr, manual
+    receipt_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="orders")
     items: Mapped[List["OrderItem"]] = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")

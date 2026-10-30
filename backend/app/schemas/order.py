@@ -21,6 +21,9 @@ class OrderResponse(BaseModel):
     user_id: int
     total_amount: Decimal
     status: str
+    source: str = "telegram"
+    payment_method: Optional[str] = "balance"
+    receipt_url: Optional[str] = None
     created_at: datetime
     user: Optional[UserResponse] = None
     items: List[OrderItemResponse] = []

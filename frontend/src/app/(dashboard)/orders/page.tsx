@@ -50,6 +50,7 @@ export default function OrdersPage() {
         <TableHeader>
           <TableRow>
             <TableHead>Order ID</TableHead>
+            <TableHead>Source</TableHead>
             <TableHead>Customer</TableHead>
             <TableHead>Purchased Item</TableHead>
             <TableHead>Total Amount</TableHead>
@@ -60,7 +61,7 @@ export default function OrdersPage() {
         <TableBody>
           {orders.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-slate-500 text-xs">
+              <TableCell colSpan={7} className="text-center py-8 text-slate-500 text-xs">
                 {loading ? "Loading order audit logs..." : "No customer orders recorded yet."}
               </TableCell>
             </TableRow>
@@ -70,10 +71,20 @@ export default function OrdersPage() {
                 ? `@${order.user.username}` || order.user.first_name
                 : `User #${order.user_id}`;
               const itemTitle = order.items?.[0]?.product?.title || "Digital License Key";
+              const isWebsite = order.source === "website";
 
               return (
                 <TableRow key={order.id}>
                   <TableCell className="font-mono text-xs text-slate-400">#{order.id}</TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide border ${
+                      isWebsite
+                        ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                        : "bg-sky-500/10 text-sky-400 border-sky-500/20"
+                    }`}>
+                      {isWebsite ? "🌐 Website" : "🤖 Telegram"}
+                    </span>
+                  </TableCell>
                   <TableCell className="font-semibold text-slate-100">
                     <div className="flex items-center gap-2">
                       <UserCheck className="h-4 w-4 text-blue-400" />

@@ -9,10 +9,12 @@ from app.api.v1.endpoints import (
     webhooks,
     broadcast,
     settings,
+    public,
 )
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
+api_v1_router.include_router(public.router)
 api_v1_router.include_router(auth.router)
 api_v1_router.include_router(analytics.router)
 api_v1_router.include_router(products.router)

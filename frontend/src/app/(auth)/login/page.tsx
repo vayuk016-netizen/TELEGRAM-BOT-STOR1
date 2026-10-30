@@ -35,7 +35,7 @@ export default function LoginPage() {
       await authService.login(username, password);
       const user = await authService.getMe();
       setUser(user);
-      navigate("/");
+      navigate("/admin");
     } catch (err: any) {
       if (err.code === "ERR_NETWORK" || !err.response) {
         const apiUrl = (import.meta as any).env?.VITE_API_URL || "https://telegram-bot-stor1.onrender.com/api/v1";
@@ -93,7 +93,7 @@ export default function LoginPage() {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="adminhakcambodai168@gmail.com"
+                  placeholder="vayuk016@gmail.com"
                   className="pl-10 h-11 bg-slate-50 border-slate-300 text-[#0f172a] font-extrabold placeholder:text-slate-400 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-sm rounded-xl shadow-sm transition-all"
                   required
                 />

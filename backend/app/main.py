@@ -16,17 +16,22 @@ async def lifespan(app: FastAPI):
     from app.db.models import Base
     from app.core.database import engine
     from sqlalchemy import text
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        
-        # Ensure database index on orders(created_at) is created for maximum performance
-        try:
-            await conn.execute(text("CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_orders_created_at ON orders (created_at);"))
-        except Exception:
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            
+            # Ensure database index and store columns exist
             try:
                 await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at);"))
+                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT 'telegram';"))
+                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'balance';"))
+                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS receipt_url VARCHAR(500);"))
+                await conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);"))
             except Exception:
                 pass
+        print("Database connected and schema initialized.")
+    except Exception as e:
+        print(f"Warning: Could not connect to database on startup: {e}")
 
     # Startup actions
     await init_redis()
@@ -39,12 +44,9 @@ async def lifespan(app: FastAPI):
     # If long polling or webhook mode setup
     import app.bot.bot as bot_module
     if not settings.TELEGRAM_WEBHOOK_URL:
-        # Start bot polling in background task for local dev
-        try:
-            bot_module.bot_task = asyncio.create_task(dp.start_polling(bot))
-            print("Telegram Bot started in long polling mode.")
-        except Exception as e:
-            print(f"Error starting Telegram Bot polling: {e}")
+        # Start bot polling in resilient auto-reconnecting background task for local dev
+        bot_module.bot_task = asyncio.create_task(bot_module.run_bot_polling(bot, dp))
+        print("Telegram Bot long polling manager initiated.")
     else:
         # Register Telegram Webhook on startup
         try:
@@ -104,7 +106,7 @@ for legacy_folder in [
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # CORS middleware for Next.js Admin Dashboard frontend
-origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://127.0.0.1:5173"]
 if settings.FRONTEND_URL:
     if "," in settings.FRONTEND_URL:
         origins.extend([o.strip() for o in settings.FRONTEND_URL.split(",") if o.strip()])

@@ -113,12 +113,12 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <label className="text-xs font-semibold text-slate-300">Active Status:</label>
+          <label className="text-xs font-semibold text-slate-300">Stock Status:</label>
           <button
             type="button"
             onClick={() => setIsActive(!isActive)}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              isActive ? "bg-emerald-500" : "bg-slate-600"
+              isActive ? "bg-emerald-500" : "bg-rose-500"
             }`}
           >
             <span
@@ -127,8 +127,8 @@ export const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
               }`}
             />
           </button>
-          <span className={`text-xs font-medium ${isActive ? "text-emerald-400" : "text-slate-500"}`}>
-            {isActive ? "Active" : "Inactive"}
+          <span className={`text-xs font-medium ${isActive ? "text-emerald-400" : "text-rose-400"}`}>
+            {isActive ? "In-Stock" : "Out-Stock"}
           </span>
         </div>
 

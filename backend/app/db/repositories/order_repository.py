@@ -19,12 +19,20 @@ class OrderRepository(BaseRepository[Order]):
         user_id: int,
         product_id: int,
         unit_price: Decimal,
-        delivered_payload: str,
+        delivered_payload: Optional[str] = None,
+        total_amount: Optional[Decimal] = None,
+        source: str = "telegram",
+        payment_method: str = "balance",
+        status: str = "COMPLETED",
+        receipt_url: Optional[str] = None,
     ) -> Order:
         order = Order(
             user_id=user_id,
-            total_amount=unit_price,
-            status="COMPLETED",
+            total_amount=total_amount if total_amount is not None else unit_price,
+            status=status,
+            source=source,
+            payment_method=payment_method,
+            receipt_url=receipt_url,
         )
         self.session.add(order)
         await self.session.flush()

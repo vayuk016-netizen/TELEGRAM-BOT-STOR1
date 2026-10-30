@@ -1,7 +1,12 @@
+import os
+import shutil
+import uuid
+from pathlib import Path
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_db, get_current_admin
+from app.core.config import settings
 from app.db.repositories.product_repository import ProductRepository
 from app.db.models.product import Category, Product
 from app.schemas.product import (
@@ -134,3 +139,46 @@ async def delete_product(
     if not prod:
         raise HTTPException(status_code=404, detail="Product not found")
     await repo.delete(prod)
+
+
+@router.post("/upload-image")
+async def upload_product_image(
+    file: UploadFile = File(...),
+    admin=Depends(get_current_admin),
+):
+    file_ext = os.path.splitext(file.filename)[1].lower() if file.filename else ".jpg"
+    if file_ext not in [".png", ".jpg", ".jpeg", ".webp", ".gif"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid image format. Allowed formats: PNG, JPG, JPEG, WEBP, GIF",
+        )
+
+    # If Cloudinary is configured
+    if settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY and settings.CLOUDINARY_API_SECRET:
+        try:
+            import cloudinary
+            import cloudinary.uploader
+            cloudinary.config(
+                cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+                api_key=settings.CLOUDINARY_API_KEY,
+                api_secret=settings.CLOUDINARY_API_SECRET,
+            )
+            upload_result = cloudinary.uploader.upload(file.file, folder="products", resource_type="image")
+            secure_url = upload_result.get("secure_url")
+            if secure_url:
+                return {"image_url": secure_url}
+        except Exception:
+            pass
+
+    # Local fallback inside static/uploads/products
+    app_dir = Path(__file__).resolve().parents[3]
+    upload_dir = app_dir / "static" / "uploads" / "products"
+    os.makedirs(upload_dir, exist_ok=True)
+
+    filename = f"{uuid.uuid4().hex}{file_ext}"
+    file_path = upload_dir / filename
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {"image_url": f"/static/uploads/products/{filename}"}

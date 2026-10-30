@@ -82,7 +82,16 @@ async def process_custom_topup_amount(message: Message, state: FSMContext, db_us
         aba_number=settings.ABA_ACCOUNT_NUMBER,
     )
 
-    await message.answer_photo(photo=photo, caption=caption)
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    support_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+            ]
+        ]
+    )
+
+    await message.answer_photo(photo=photo, caption=caption, reply_markup=support_kb)
 
 
 async def generate_topup_qr_response(callback: CallbackQuery, db_user: User, amount: Decimal):
@@ -113,5 +122,14 @@ async def generate_topup_qr_response(callback: CallbackQuery, db_user: User, amo
         aba_number=settings.ABA_ACCOUNT_NUMBER,
     )
 
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    support_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+            ]
+        ]
+    )
+
     await callback.message.delete()
-    await callback.message.answer_photo(photo=photo, caption=caption)
+    await callback.message.answer_photo(photo=photo, caption=caption, reply_markup=support_kb)

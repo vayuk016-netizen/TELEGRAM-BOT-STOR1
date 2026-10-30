@@ -38,7 +38,14 @@ async def start_handler(message: Message, db_user: User):
 async def help_handler(message: Message, db_user: User):
     lang = db_user.language_code or "km"
     help_text = get_text(lang, "help")
-    await message.answer(help_text)
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+            ]
+        ]
+    )
+    await message.answer(help_text, reply_markup=kb)
 
 
 @router.message(F.text.in_({"🌐 ភាសា", "🌐 Language"}))
