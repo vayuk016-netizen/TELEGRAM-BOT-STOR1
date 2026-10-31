@@ -15,6 +15,7 @@ class Order(Base, TimestampMixin):
     source: Mapped[str] = mapped_column(String(50), default="telegram", server_default="telegram", nullable=False)  # telegram, website
     payment_method: Mapped[Optional[str]] = mapped_column(String(50), default="balance", nullable=True)  # balance, khqr, manual
     receipt_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    khqr_md5: Mapped[Optional[str]] = mapped_column(String(64), index=True, nullable=True)
 
     user: Mapped["User"] = relationship("User", back_populates="orders")
     items: Mapped[List["OrderItem"]] = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")

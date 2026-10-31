@@ -327,13 +327,21 @@ export default function StockPage() {
                     <div className="space-y-3">
                       
                       {/* Card Thumbnail Image (or Icon fallback) */}
-                      <div className="relative w-full h-36 rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
+                      <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
                         {prod.image_url ? (
-                          <img
-                            src={prod.image_url}
-                            alt={prod.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          <>
+                            <img
+                              src={prod.image_url}
+                              alt=""
+                              aria-hidden="true"
+                              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-110 pointer-events-none"
+                            />
+                            <img
+                              src={prod.image_url}
+                              alt={prod.title}
+                              className="relative z-10 w-full h-full object-contain p-1 group-hover:scale-[1.03] transition-transform duration-300"
+                            />
+                          </>
                         ) : (
                           <div className="text-4xl text-slate-600 flex flex-col items-center justify-center gap-1">
                             <span>{cat?.icon || "🔑"}</span>

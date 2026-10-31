@@ -9,21 +9,21 @@ export const StoreFooter: React.FC = () => {
   const { t } = useLanguageStore();
 
   return (
-    <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950 font-kantumruy-pro pt-14 pb-10 transition-colors">
+    <footer className="border-t border-slate-800 bg-slate-950 font-kantumruy-pro pt-14 pb-10 transition-colors text-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
           
           {/* Col 1: Brand Info */}
           <div className="md:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
-                <Sparkles className="h-5 w-5" />
+              <div className="h-9 w-9 rounded-xl overflow-hidden bg-white border border-blue-500/30 shadow-md flex-shrink-0 p-0.5 flex items-center justify-center">
+                <img src="/logo.png" alt="SP Store" className="h-full w-full object-contain rounded-lg" />
               </div>
-              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-                DIGITAL STORE KH
+              <span className="font-extrabold text-base tracking-tight text-slate-100">
+                SP STORE
               </span>
             </Link>
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-md">
+            <p className="text-xs text-slate-400 leading-relaxed max-w-md">
               {t("hero_subtitle")}
             </p>
             <div className="flex flex-wrap items-center gap-2 pt-2">
@@ -38,18 +38,18 @@ export const StoreFooter: React.FC = () => {
 
           {/* Col 2: Navigation Links */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-100">
               {t("nav_products")}
             </h4>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <ul className="space-y-2 text-xs text-slate-400">
               <li>
-                <Link to="/products" className="hover:text-blue-500 transition-colors">
-                  {t("nav_products")}
+                <Link to="/" className="hover:text-blue-500 transition-colors">
+                  {t("nav_home")}
                 </Link>
               </li>
               <li>
-                <Link to="/my-orders" className="hover:text-blue-500 transition-colors">
-                  {t("nav_orders")}
+                <Link to="/products" className="hover:text-blue-500 transition-colors">
+                  {t("nav_products")}
                 </Link>
               </li>
               <li>
@@ -62,10 +62,10 @@ export const StoreFooter: React.FC = () => {
 
           {/* Col 3: Customer Support & Telegram */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-100">
               {t("nav_contact")}
             </h4>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-slate-400">
               Need assistance or custom account setup? Contact our 24/7 support team directly on Telegram:
             </p>
             <a
@@ -81,7 +81,7 @@ export const StoreFooter: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="pt-8 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-500">
+        <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>© {new Date().getFullYear()} {t("copyright")}</p>
           <div className="flex items-center gap-2">
             <span>Powered by Telegram Bot & Bakong KHQR</span>

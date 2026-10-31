@@ -2,6 +2,8 @@ import { apiClient } from "@/lib/api-client";
 
 export interface SettingsData {
   bot_token: string;
+  bakong_api_token?: string;
+  bakong_account_id?: string;
   khqr_merchant_name?: string;
   khqr_merchant_city?: string;
   khqr_account_number?: string;

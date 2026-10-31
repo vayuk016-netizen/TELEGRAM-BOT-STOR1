@@ -9,6 +9,14 @@ from app.core.config import settings
 
 logger = logging.getLogger("uvicorn.error")
 
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError:
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
 bot = Bot(
     token=settings.BOT_TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)

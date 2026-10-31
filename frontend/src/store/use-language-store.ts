@@ -58,7 +58,7 @@ const translations: Record<Language, Record<string, string>> = {
     fail_load: "Failed to load system settings.",
     fail_save: "Failed to save settings.",
     // Storefront Keys
-    store_name: "Digital Subscription Store",
+    store_name: "SP Store",
     nav_home: "Home",
     nav_products: "Products",
     nav_orders: "My Orders",
@@ -169,7 +169,7 @@ const translations: Record<Language, Record<string, string>> = {
     fail_load: "បរាជ័យក្នុងការទាញយកការកំណត់ប្រព័ន្ធ។",
     fail_save: "បរាជ័យក្នុងការរក្សាទុកការកំណត់。",
     // Storefront Keys (Khmer)
-    store_name: "ហាងលក់សេវាកម្មឌីជីថលស្វ័យប្រវត្ត",
+    store_name: "ហាង SP Store",
     nav_home: "ទំព័រដើម",
     nav_products: "ផលិតផលទាំងអស់",
     nav_orders: "ប្រវត្តិបញ្ជាទិញ",

@@ -77,17 +77,15 @@ export const Sidebar: React.FC = () => {
         isDark ? "border-slate-800" : "border-slate-200"
       )}>
         <div className="flex items-center gap-3.5 flex-1 min-w-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-indigo-500 text-white shadow-md shadow-blue-500/20 border border-blue-400/20 transform transition-transform duration-300 hover:rotate-6 flex-shrink-0">
-            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-              <path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42 10.532-6.645c.498-.303.953-.14.578.192l-8.533 7.701-.33 4.955c.485 0 .7-.223.971-.483l2.334-2.27 4.857 3.589c.895.493 1.538.24 1.761-.828l3.19-15.027c.326-1.307-.5-1.898-1.36-1.517z" />
-            </svg>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden bg-white shadow-md shadow-blue-500/20 border border-blue-400/20 transform transition-transform duration-300 hover:rotate-6 flex-shrink-0 p-0.5">
+            <img src="/logo.png" alt="SP Store" className="h-full w-full object-contain rounded-lg" />
           </div>
           {isOpen && (
             <span className={cn(
               "font-extrabold text-[13px] uppercase tracking-wider font-sans truncate leading-none mt-0.5",
               isDark ? "text-white" : "text-slate-100"
             )}>
-              STORE MANAGER
+              SP STORE
             </span>
           )}
         </div>

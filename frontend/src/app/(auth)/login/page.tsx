@@ -56,11 +56,11 @@ export default function LoginPage() {
         <div>
           {/* Brand Header */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 border border-blue-200 text-blue-600 shadow-sm">
-              <Bot className="h-6 w-6" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-blue-200 shadow-sm overflow-hidden p-0.5">
+              <img src="/logo.png" alt="SP Store" className="h-full w-full object-contain rounded-lg" />
             </div>
             <div>
-              <h2 className="text-base font-extrabold text-[#0f172a] tracking-wide">Store Manager Bot</h2>
+              <h2 className="text-base font-extrabold text-[#0f172a] tracking-wide">SP Store</h2>
               <span className="text-[11px] font-mono font-bold text-blue-700 tracking-wider">AUTOMATION CONTROL PANEL</span>
             </div>
           </div>

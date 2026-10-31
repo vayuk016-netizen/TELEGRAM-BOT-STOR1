@@ -415,6 +415,16 @@ async def create_website_order(
         }
 
     # B) PAYMENT VIA BAKONG KHQR OR MANUAL ABA/WING
+    from app.services.bakong_service import BakongService
+    khqr_info = BakongService.generate_khqr(
+        amount=total_amount,
+        bill_number=f"TG_{user.telegram_id}_{int(time.time())}",
+        currency="USD",
+    )
+    khqr_string = khqr_info["khqr_string"]
+    khqr_md5 = khqr_info["md5"]
+    khqr_qr_url = khqr_info["qr_url"]
+
     # Create PENDING order
     order = await order_repo.create_order_with_item(
         user_id=user.id,
@@ -425,12 +435,9 @@ async def create_website_order(
         source="website",
         payment_method=payload.payment_method,
         status="PENDING",
+        khqr_md5=khqr_md5 if payload.payment_method == "khqr" else None,
     )
     await db.commit()
-
-    # Generate KHQR payload
-    khqr_string = PaymentService.generate_khqr_payload(user.telegram_id, total_amount)
-    khqr_qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=350x350&data={khqr_string}"
 
     # Notify admin on Telegram
     msg_admin = (
@@ -451,6 +458,7 @@ async def create_website_order(
         "payment_method": payload.payment_method,
         "khqr_string": khqr_string,
         "khqr_qr_url": khqr_qr_url,
+        "khqr_md5": khqr_md5,
         "aba": {
             "account_name": settings.ABA_ACCOUNT_NAME,
             "account_number": settings.ABA_ACCOUNT_NUMBER,
@@ -464,6 +472,8 @@ async def create_website_order(
 # -------------------------------------------------------------
 @router.get("/orders/{order_id}")
 async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
+    from app.services.bakong_service import BakongService
+
     stmt = (
         select(Order)
         .options(selectinload(Order.items).selectinload(OrderItem.product), selectinload(Order.user))
@@ -473,6 +483,18 @@ async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
     order = res.scalar_one_or_none()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+
+    # If pending and paid via KHQR, automatically verify with Bakong API!
+    if order.status == "PENDING" and order.payment_method == "khqr" and order.khqr_md5:
+        tx_data = await BakongService.check_transaction_by_md5(order.khqr_md5)
+        if tx_data:
+            paid_amt = Decimal(str(tx_data.get("amount", "0")))
+            if paid_amt >= order.total_amount:
+                fulfilled, _ = await BakongService.verify_and_fulfill_order(order, db, tx_data)
+                if fulfilled:
+                    # Refresh order state
+                    res = await db.execute(stmt)
+                    order = res.scalar_one_or_none()
 
     item = order.items[0] if order.items else None
     product = item.product if item else None
@@ -505,6 +527,8 @@ async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
 # -------------------------------------------------------------
 @router.post("/orders/{order_id}/verify-payment")
 async def verify_order_payment(order_id: int, db: AsyncSession = Depends(get_db)):
+    from app.services.bakong_service import BakongService
+
     stmt = (
         select(Order)
         .options(selectinload(Order.items).selectinload(OrderItem.product), selectinload(Order.user))
@@ -524,57 +548,33 @@ async def verify_order_payment(order_id: int, db: AsyncSession = Depends(get_db)
             "message": "Order is already paid and delivered.",
         }
 
-    # Fetch product and quantity needed
-    item = order.items[0]
-    product = item.product
-    quantity = int(order.total_amount / item.unit_price) if item.unit_price else 1
-
-    # Atomically lock and reserve digital keys
-    stock_repo = StockRepository(db)
-    digital_keys = await stock_repo.fetch_and_lock_unsold_keys(product.id, quantity)
-    if len(digital_keys) < quantity:
+    if not order.khqr_md5:
         raise HTTPException(
             status_code=400,
-            detail=f"Insufficient keys in stock to fulfill this order ({len(digital_keys)} available). Please contact support.",
+            detail="Order does not have a Bakong KHQR transaction to verify.",
         )
 
-    # Decrypt keys
-    decrypted_keys = [decrypt_key_content(k.encrypted_content) for k in digital_keys]
-    if len(decrypted_keys) == 1:
-        delivered_payload = decrypted_keys[0]
-    else:
-        delivered_payload = "\n".join([f"{i+1}. {k}" for i, k in enumerate(decrypted_keys)])
-
-    # Update item and order status
-    item.delivered_payload = delivered_payload
-    order.status = "COMPLETED"
-
-    # Mark keys sold
-    await stock_repo.mark_keys_as_sold([k.id for k in digital_keys], order.id)
-    await db.commit()
-
-    # Send instant delivery message to customer Telegram
-    if order.user and order.user.telegram_id:
-        msg_user = (
-            f"🎉 <b>KHQR Payment Received! Product Delivered</b>\n\n"
-            f"🧾 <b>Order ID:</b> <code>#{order.id}</code>\n"
-            f"📦 <b>Product:</b> {product.title} (x{quantity})\n"
-            f"💰 <b>Total Paid:</b> ${order.total_amount:.2f}\n\n"
-            f"🔑 <b>Your Account Data / License Key:</b>\n"
-            f"<code>{delivered_payload}</code>\n\n"
-            f"<i>Thank you for purchasing!</i>"
+    # Real verification with Bakong API!
+    tx_data = await BakongService.check_transaction_by_md5(order.khqr_md5)
+    if not tx_data:
+        raise HTTPException(
+            status_code=400,
+            detail="Payment not detected yet. Please ensure you completed your scan payment in your banking app and try again.",
         )
-        await notify_customer_telegram(order.user.telegram_id, msg_user)
 
-    # Send alert to Admin on Telegram
-    msg_admin = (
-        f"✅ <b>Order #{order.id} KHQR Payment CONFIRMED!</b>\n"
-        f"👤 Customer: {order.user.first_name if order.user else 'Customer'}\n"
-        f"📦 Item: {product.title} x{quantity}\n"
-        f"💵 Amount: ${order.total_amount:.2f}\n"
-        f"🚀 Digital keys delivered instantly to customer."
-    )
-    await notify_admin_telegram(msg_admin)
+    paid_amt = Decimal(str(tx_data.get("amount", "0")))
+    if paid_amt < order.total_amount:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Paid amount (${paid_amt:.2f}) is less than order total (${order.total_amount:.2f}). Please contact support.",
+        )
+
+    fulfilled, delivered_payload = await BakongService.verify_and_fulfill_order(order, db, tx_data)
+    if not fulfilled:
+        raise HTTPException(
+            status_code=400,
+            detail=delivered_payload or "Insufficient stock to fulfill keys automatically. Admin has been notified.",
+        )
 
     return {
         "order_id": order.id,

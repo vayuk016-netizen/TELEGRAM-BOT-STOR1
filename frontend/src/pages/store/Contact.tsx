@@ -13,13 +13,13 @@ export const StoreContactPage: React.FC = () => {
       
       {/* Title */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+        <span className="text-xs font-bold uppercase tracking-wider text-blue-500">
           24/7 CUSTOMER CARE
         </span>
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-100">
           {t("nav_contact")}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
           Need help with your subscription or have questions about automated Bakong KHQR delivery?
           Our customer support team is available 24/7 on Telegram.
         </p>
@@ -32,10 +32,10 @@ export const StoreContactPage: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+          <h2 className="text-2xl font-black text-slate-100">
             Official Telegram Support
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
             Click below to start a direct chat with our support manager on Telegram:
           </p>
         </div>
@@ -56,22 +56,22 @@ export const StoreContactPage: React.FC = () => {
 
       {/* Feature Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
-        <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-2 text-center">
+        <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2 text-center">
           <Clock className="h-6 w-6 text-blue-500 mx-auto" />
-          <h4 className="font-bold text-sm text-slate-900 dark:text-white">24/7 Availability</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Our Telegram Bot and automated fulfillment run non-stop 365 days a year.</p>
+          <h4 className="font-bold text-sm text-slate-100">24/7 Availability</h4>
+          <p className="text-xs text-slate-400">Our Telegram Bot and automated fulfillment run non-stop 365 days a year.</p>
         </div>
 
-        <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-2 text-center">
+        <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2 text-center">
           <ShieldCheck className="h-6 w-6 text-emerald-500 mx-auto" />
-          <h4 className="font-bold text-sm text-slate-900 dark:text-white">Guaranteed Warranty</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">All CapCut, Canva and digital subscription accounts come with full period replacement warranty.</p>
+          <h4 className="font-bold text-sm text-slate-100">Guaranteed Warranty</h4>
+          <p className="text-xs text-slate-400">All CapCut, Canva and digital subscription accounts come with full period replacement warranty.</p>
         </div>
 
-        <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-2 text-center">
+        <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2 text-center">
           <Sparkles className="h-6 w-6 text-purple-500 mx-auto" />
-          <h4 className="font-bold text-sm text-slate-900 dark:text-white">Fast Response</h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Average response time under 5 minutes for payment slips or custom team licenses.</p>
+          <h4 className="font-bold text-sm text-slate-100">Fast Response</h4>
+          <p className="text-xs text-slate-400">Average response time under 5 minutes for payment slips or custom team licenses.</p>
         </div>
       </div>
     </div>

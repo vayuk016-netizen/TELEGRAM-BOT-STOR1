@@ -196,8 +196,8 @@ export const StoreCheckoutPage: React.FC = () => {
   if (loadingProduct) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center animate-pulse space-y-4">
-        <div className="h-8 w-48 bg-slate-200 dark:bg-slate-800 rounded-lg mx-auto" />
-        <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+        <div className="h-8 w-48 bg-slate-800 rounded-lg mx-auto" />
+        <div className="h-64 bg-slate-800 rounded-2xl" />
       </div>
     );
   }
@@ -205,7 +205,7 @@ export const StoreCheckoutPage: React.FC = () => {
   if (!product) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-xl font-bold">Product Not Found</h2>
+        <h2 className="text-xl font-bold text-slate-100">Product Not Found</h2>
         <Button onClick={() => navigate("/products")}>Back to Products</Button>
       </div>
     );
@@ -215,13 +215,13 @@ export const StoreCheckoutPage: React.FC = () => {
   const isDelivered = orderDetail?.status === "COMPLETED" || orderDetail?.status === "PAID";
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 text-slate-100">
       
       {/* Header & Back Link */}
       <div className="flex items-center justify-between">
         <Link
           to={`/products/${product.id}`}
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white"
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-100 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back to Product</span>
@@ -233,7 +233,7 @@ export const StoreCheckoutPage: React.FC = () => {
 
       {/* Error Banner */}
       {errorMsg && (
-        <div className="flex items-start gap-3 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-600 dark:text-rose-400 font-semibold animate-in fade-in">
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-500 font-semibold animate-in fade-in">
           <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <span>{errorMsg}</span>
         </div>
@@ -249,10 +249,10 @@ export const StoreCheckoutPage: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-100">
               {t("status_completed")}
             </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
               Your order <span className="font-mono font-bold text-blue-500">#{orderDetail?.order_id}</span> has been confirmed. Your digital credentials are ready below:
             </p>
           </div>
@@ -260,7 +260,7 @@ export const StoreCheckoutPage: React.FC = () => {
           {/* Delivered Keys Box */}
           <div className="text-left space-y-2 max-w-xl mx-auto">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              <span className="font-bold uppercase tracking-wider text-slate-100">
                 {t("delivered_keys")}
               </span>
               <button
@@ -272,18 +272,12 @@ export const StoreCheckoutPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-900 dark:bg-black text-emerald-400 font-mono text-sm border border-slate-800 shadow-inner select-all whitespace-pre-wrap break-all leading-relaxed">
+            <div className="p-5 rounded-2xl bg-slate-950 text-emerald-400 font-mono text-sm border border-slate-800 shadow-inner select-all whitespace-pre-wrap break-all leading-relaxed">
               {orderDetail?.delivered_payload || "Digital key delivered. Please check your Telegram."}
             </div>
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link to="/my-orders">
-              <Button variant="outline" className="text-xs font-bold rounded-xl gap-2">
-                <Clock className="h-4 w-4" />
-                <span>View Order History</span>
-              </Button>
-            </Link>
             <Link to="/products">
               <Button className="text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white">
                 Continue Shopping
@@ -297,17 +291,17 @@ export const StoreCheckoutPage: React.FC = () => {
       {/* PAYMENT IN PROGRESS: KHQR or Manual ABA Slip Screen      */}
       {/* ======================================================== */}
       {!isDelivered && activeOrder && (
-        <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-6 sm:p-8 shadow-xl backdrop-blur-md space-y-8">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 shadow-xl backdrop-blur-md space-y-8">
           
           <div className="text-center space-y-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
               <Clock className="h-3.5 w-3.5 animate-spin" />
               <span>{t("status_pending")}</span>
             </span>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-100">
               Order #{activeOrder.order_id} Created
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-400">
               Total Due: <span className="font-bold text-blue-500 font-mono text-base">${activeOrder.total_amount?.toFixed(2)}</span>
             </p>
           </div>
@@ -333,12 +327,12 @@ export const StoreCheckoutPage: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+              <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
                 {t("scan_qr_desc")}
               </p>
 
               {/* Status Indicator */}
-              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-600 dark:text-blue-400 font-semibold flex items-center justify-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-500 font-semibold flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 <span>{t("auto_verifying")}</span>
               </div>
@@ -356,14 +350,14 @@ export const StoreCheckoutPage: React.FC = () => {
           {/* Option B: Manual ABA / Wing Transfer Details */}
           {activeOrder.payment_method === "manual" && (
             <div className="max-w-md mx-auto space-y-6">
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   ABA Bank Direct Transfer
                 </h4>
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Account Name:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{activeOrder.aba?.account_name || "HAK HAK"}</span>
+                    <span className="font-bold text-slate-100">{activeOrder.aba?.account_name || "HAK HAK"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400">Account No:</span>
@@ -371,7 +365,7 @@ export const StoreCheckoutPage: React.FC = () => {
                       <span className="font-mono font-bold text-blue-500">{activeOrder.aba?.account_number || "000 111 222"}</span>
                       <button
                         onClick={() => handleCopy(activeOrder.aba?.account_number || "000 111 222")}
-                        className="text-slate-400 hover:text-white"
+                        className="text-slate-400 hover:text-slate-100"
                       >
                         <Copy className="h-3.5 w-3.5" />
                       </button>
@@ -390,7 +384,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setReceiptFile(e.target.files?.[0] || null)}
-                    className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs rounded-xl"
+                    className="h-11 bg-slate-950 border-slate-800 text-xs rounded-xl"
                   />
                   <Button
                     onClick={handleUploadReceipt}
@@ -423,9 +417,9 @@ export const StoreCheckoutPage: React.FC = () => {
           <div className="md:col-span-7 space-y-6">
             
             {/* Telegram User Integration */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 space-y-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                   <Send className="h-4 w-4 text-blue-500" />
                   <span>Telegram Delivery Details</span>
                 </h3>
@@ -442,7 +436,7 @@ export const StoreCheckoutPage: React.FC = () => {
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                  <label className="text-xs font-semibold text-slate-400 block mb-1">
                     Telegram User ID / Username (Optional)
                   </label>
                   <Input
@@ -450,7 +444,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     value={telegramIdInput}
                     onChange={(e) => setTelegramIdInput(e.target.value)}
                     placeholder="e.g. 123456789 or @username"
-                    className="h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs rounded-xl"
+                    className="h-10 bg-slate-950 border-slate-800 text-xs rounded-xl"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
                     Enter your Telegram ID so our bot sends your purchased keys directly to your Telegram chat.
@@ -460,8 +454,8 @@ export const StoreCheckoutPage: React.FC = () => {
             </div>
 
             {/* Payment Method Selector */}
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
+              <h3 className="text-sm font-bold text-slate-100">
                 {t("select_payment")}
               </h3>
 
@@ -472,7 +466,7 @@ export const StoreCheckoutPage: React.FC = () => {
                   className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
                     paymentMethod === "khqr"
                       ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/20"
-                      : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                      : "border-slate-800 hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -480,7 +474,7 @@ export const StoreCheckoutPage: React.FC = () => {
                       KHQR
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-slate-900 dark:text-white">
+                      <div className="font-bold text-xs text-slate-100">
                         {t("pay_khqr")}
                       </div>
                       <span className="text-[10px] text-slate-400">
@@ -503,7 +497,7 @@ export const StoreCheckoutPage: React.FC = () => {
                   className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
                     paymentMethod === "manual"
                       ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/20"
-                      : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                      : "border-slate-800 hover:border-slate-700"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -511,7 +505,7 @@ export const StoreCheckoutPage: React.FC = () => {
                       ABA
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-slate-900 dark:text-white">
+                      <div className="font-bold text-xs text-slate-100">
                         {t("pay_manual")}
                       </div>
                       <span className="text-[10px] text-slate-400">
@@ -535,7 +529,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
                       paymentMethod === "balance"
                         ? "border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/20"
-                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                        : "border-slate-800 hover:border-slate-700"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -543,7 +537,7 @@ export const StoreCheckoutPage: React.FC = () => {
                         <Wallet className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="font-bold text-xs text-slate-900 dark:text-white">
+                        <div className="font-bold text-xs text-slate-100">
                           {t("pay_balance")}
                         </div>
                         <span className="text-[10px] text-emerald-500 font-bold">
@@ -566,8 +560,8 @@ export const StoreCheckoutPage: React.FC = () => {
 
           {/* Right Column: Order Summary Card */}
           <div className="md:col-span-5 space-y-6">
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 space-y-4 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-100 border-b border-slate-800 pb-3">
                 {t("order_summary")}
               </h3>
 
@@ -581,7 +575,7 @@ export const StoreCheckoutPage: React.FC = () => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                  <h4 className="font-bold text-xs text-slate-100 truncate">
                     {product.title}
                   </h4>
                   <span className="text-[10px] text-slate-400">
@@ -592,20 +586,20 @@ export const StoreCheckoutPage: React.FC = () => {
 
               {/* Quantity Changer */}
               <div className="flex items-center justify-between text-xs pt-2">
-                <span className="text-slate-500">{t("quantity")}:</span>
+                <span className="text-slate-400">{t("quantity")}:</span>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="h-7 w-7 rounded-lg border border-slate-200 dark:border-slate-800 font-bold"
+                    className="h-7 w-7 rounded-lg border border-slate-800 text-slate-100 hover:bg-slate-800 font-bold"
                   >
                     -
                   </button>
-                  <span className="font-bold font-mono px-1">{quantity}</span>
+                  <span className="font-bold font-mono px-1 text-slate-100">{quantity}</span>
                   <button
                     type="button"
                     onClick={() => setQuantity(Math.min(product.stock_count, quantity + 1))}
-                    className="h-7 w-7 rounded-lg border border-slate-200 dark:border-slate-800 font-bold"
+                    className="h-7 w-7 rounded-lg border border-slate-800 text-slate-100 hover:bg-slate-800 font-bold"
                   >
                     +
                   </button>
@@ -613,18 +607,18 @@ export const StoreCheckoutPage: React.FC = () => {
               </div>
 
               {/* Subtotal and Total */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs">
-                <div className="flex justify-between text-slate-500">
+              <div className="pt-3 border-t border-slate-800 space-y-1.5 text-xs">
+                <div className="flex justify-between text-slate-400">
                   <span>Subtotal</span>
-                  <span className="font-mono">${totalPrice.toFixed(2)}</span>
+                  <span className="font-mono text-slate-100">${totalPrice.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-slate-500">
+                <div className="flex justify-between text-slate-400">
                   <span>Delivery Fee</span>
                   <span className="text-emerald-500 font-bold">FREE ($0.00)</span>
                 </div>
-                <div className="flex justify-between items-baseline pt-2 border-t border-slate-100 dark:border-slate-800">
-                  <span className="font-bold text-slate-900 dark:text-white">Total</span>
-                  <span className="text-xl font-black text-blue-600 dark:text-blue-400 font-mono">
+                <div className="flex justify-between items-baseline pt-2 border-t border-slate-800">
+                  <span className="font-bold text-slate-100">Total</span>
+                  <span className="text-xl font-black text-blue-500 font-mono">
                     ${totalPrice.toFixed(2)}
                   </span>
                 </div>

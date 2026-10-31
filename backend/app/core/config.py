@@ -71,16 +71,19 @@ class Settings(BaseSettings):
     ADMIN_TELEGRAM_ID: Optional[int] = None
     TELEGRAM_WEBHOOK_URL: Optional[str] = None
 
-    # KHQR / Payment
+    # KHQR / Payment / Bakong Open API
+    BAKONG_API_TOKEN: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmJiNjZhYzJhOWIzNGNiNCJ9LCJpYXQiOjE3OTMyNjc4MDMsImV4cCI6MTgwMTA0MzgwM30.KJBslDbpo0H-tsgnpj5-lpRyvHVEsldQPBjKIE2pPMY"
+    BAKONG_API_URL: str = "https://api-bakong.nbc.gov.kh/v1"
+    BAKONG_ACCOUNT_ID: str = "sopha@abaa"
     KHQR_MERCHANT_NAME: str = "DIGITAL STORE KH"
     KHQR_MERCHANT_CITY: str = "PHNOM PENH"
-    KHQR_ACCOUNT_NUMBER: str = "000111222"
+    KHQR_ACCOUNT_NUMBER: str = "126103017113061"
     KHQR_SECRET: str = "khqr_webhook_secret_key"
 
     # ABA Payment specific config
-    ABA_ACCOUNT_NAME: str = "HAK HAK"
-    ABA_ACCOUNT_NUMBER: str = "000 111 222"
-    ABA_QR_LINK: str = "https://example.com/aba_qr.jpg"
+    ABA_ACCOUNT_NAME: str = "SOPHA VONG"
+    ABA_ACCOUNT_NUMBER: str = "126103017113061"
+    ABA_QR_LINK: str = ""
 
     # Cloudinary Config (Optional for Production CDN Media Storage)
     CLOUDINARY_CLOUD_NAME: Optional[str] = None

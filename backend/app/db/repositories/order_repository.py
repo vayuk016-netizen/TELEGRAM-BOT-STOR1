@@ -25,6 +25,7 @@ class OrderRepository(BaseRepository[Order]):
         payment_method: str = "balance",
         status: str = "COMPLETED",
         receipt_url: Optional[str] = None,
+        khqr_md5: Optional[str] = None,
     ) -> Order:
         order = Order(
             user_id=user_id,
@@ -33,6 +34,7 @@ class OrderRepository(BaseRepository[Order]):
             source=source,
             payment_method=payment_method,
             receipt_url=receipt_url,
+            khqr_md5=khqr_md5,
         )
         self.session.add(order)
         await self.session.flush()

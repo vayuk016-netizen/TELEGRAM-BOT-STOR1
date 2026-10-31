@@ -56,11 +56,12 @@ class PaymentService:
     @staticmethod
     def generate_khqr_payload(telegram_id: int, amount: Decimal) -> str:
         """
-        Generates simulated KHQR string payload for user scan.
-        Format: Bakong KHQR Standard payload structure
+        Generates standard Bakong EMVCo KHQR string payload for user scan.
         """
-        return (
-            f"00020101021238580016A0000007270000010115{settings.KHQR_ACCOUNT_NUMBER}"
-            f"520459995303840540{float(amount):.2f}5802KH5915{settings.KHQR_MERCHANT_NAME}"
-            f"6010{settings.KHQR_MERCHANT_CITY}62150511TG_{telegram_id}6304ABCD"
+        from app.services.bakong_service import BakongService
+        result = BakongService.generate_khqr(
+            amount=amount,
+            bill_number=f"TG_{telegram_id}",
+            currency="USD",
         )
+        return result["khqr_string"]

@@ -7,12 +7,18 @@ import { settingsService } from "@/services/settings.service";
 import { useLanguageStore } from "@/store/use-language-store";
 import { useThemeStore } from "@/store/use-theme-store";
 import { useCustomColorStore } from "@/store/use-custom-color-store";
-import { Bot, Save, Eye, EyeOff, AlertCircle, CheckCircle2, Sun, Moon, Palette, RotateCcw } from "lucide-react";
+import { Bot, Save, Eye, EyeOff, AlertCircle, CheckCircle2, Sun, Moon, Palette, RotateCcw, QrCode, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const [botToken, setBotToken] = useState("");
   const [showToken, setShowToken] = useState(false);
+  const [bakongToken, setBakongToken] = useState("");
+  const [showBakongToken, setShowBakongToken] = useState(false);
+  const [bakongAccountId, setBakongAccountId] = useState("");
+  const [abaAccountName, setAbaAccountName] = useState("");
+  const [abaAccountNumber, setAbaAccountNumber] = useState("");
+  const [merchantName, setMerchantName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -36,7 +42,12 @@ export default function SettingsPage() {
     const fetchSettings = async () => {
       try {
         const data = await settingsService.getSettings();
-        setBotToken(data.bot_token);
+        setBotToken(data.bot_token || "");
+        setBakongToken(data.bakong_api_token || "");
+        setBakongAccountId(data.bakong_account_id || "");
+        setAbaAccountName(data.aba_account_name || "");
+        setAbaAccountNumber(data.aba_account_number || "");
+        setMerchantName(data.khqr_merchant_name || "");
       } catch (err: any) {
         const errMsg = getErrorMessage(err, t("fail_load"));
         setError(errMsg);
@@ -56,6 +67,11 @@ export default function SettingsPage() {
     try {
       await settingsService.updateSettings({
         bot_token: botToken,
+        bakong_api_token: bakongToken,
+        bakong_account_id: bakongAccountId,
+        aba_account_name: abaAccountName,
+        aba_account_number: abaAccountNumber,
+        khqr_merchant_name: merchantName,
       });
       setSuccess(t("success_save"));
     } catch (err: any) {
@@ -153,6 +169,109 @@ export default function SettingsPage() {
               <p className="text-[10px] text-gray-500 dark:text-slate-500 mt-1 pl-1">
                 {isKh ? "ទទួលបានពី Telegram @BotFather។ សូមរក្សាទុកវាជាសម្ងាត់។" : "Obtained from @BotFather. Keep this token secret."}
               </p>
+            </div>
+          </div>
+
+          {/* Section 2: Bakong Open API & KHQR Auto Payment */}
+          <div className="space-y-4 pt-4 border-t border-slate-800">
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <QrCode className="h-4.5 w-4.5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">
+                  {isKh ? "ការកំណត់ Bakong Open API & KHQR Auto Payment" : "Bakong Open API & KHQR Auto Payment"}
+                </h2>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400">
+                  {isKh
+                    ? "ពិនិត្យការទូទាត់ស្វ័យប្រវត្តតាមប្រព័ន្ធ NBC Bakong Open API"
+                    : "Automated payment verification powered by NBC Bakong Open API"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-slate-300 block">
+                  {isKh ? "Bakong Developer Bearer Token" : "Bakong Developer API Token"}
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showBakongToken ? "text" : "password"}
+                    value={bakongToken}
+                    onChange={(e) => setBakongToken(e.target.value)}
+                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    className="pr-10 h-11 bg-slate-950/80 border-slate-800 focus:border-emerald-500 text-sm font-mono text-gray-900 dark:text-slate-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowBakongToken(!showBakongToken)}
+                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-350 transition-colors"
+                  >
+                    {showBakongToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-500 dark:text-slate-500 pl-1">
+                  {isKh
+                    ? "Token ទទួលបានពី https://api-bakong.nbc.gov.kh សម្រាប់ពិនិត្យ Transaction ស្វ័យប្រវត្ត"
+                    : "Bearer token obtained from https://api-bakong.nbc.gov.kh for automatic transaction verification."}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-slate-300 block">
+                  {isKh ? "Bakong Account ID (Tag 29 KHQR)" : "Bakong Account ID"}
+                </label>
+                <Input
+                  type="text"
+                  value={bakongAccountId}
+                  onChange={(e) => setBakongAccountId(e.target.value)}
+                  placeholder="sopha@abaa"
+                  className="h-11 bg-slate-950/80 border-slate-800 focus:border-emerald-500 text-sm font-mono text-gray-900 dark:text-slate-100"
+                />
+                <p className="text-[10px] text-gray-500 dark:text-slate-500 pl-1">
+                  {isKh ? "ឧទាហរណ៍៖ sopha@abaa ឬ phone_number@abaa" : "Example: sopha@abaa or phone_number@abaa"}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-slate-300 block">
+                  {isKh ? "ឈ្មោះហាងក្នុង QR (Merchant Name)" : "KHQR Merchant Name"}
+                </label>
+                <Input
+                  type="text"
+                  value={merchantName}
+                  onChange={(e) => setMerchantName(e.target.value)}
+                  placeholder="DIGITAL STORE KH"
+                  className="h-11 bg-slate-950/80 border-slate-800 focus:border-emerald-500 text-sm text-gray-900 dark:text-slate-100 uppercase"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-slate-300 block">
+                  {isKh ? "លេខគណនី ABA (Account Number)" : "ABA Account Number"}
+                </label>
+                <Input
+                  type="text"
+                  value={abaAccountNumber}
+                  onChange={(e) => setAbaAccountNumber(e.target.value)}
+                  placeholder="126103017113061"
+                  className="h-11 bg-slate-950/80 border-slate-800 focus:border-emerald-500 text-sm font-mono text-gray-900 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-700 dark:text-slate-300 block">
+                  {isKh ? "ឈ្មោះម្ចាស់គណនី ABA (Account Name)" : "ABA Account Name"}
+                </label>
+                <Input
+                  type="text"
+                  value={abaAccountName}
+                  onChange={(e) => setAbaAccountName(e.target.value)}
+                  placeholder="SOPHA VONG"
+                  className="h-11 bg-slate-950/80 border-slate-800 focus:border-emerald-500 text-sm text-gray-900 dark:text-slate-100 uppercase"
+                />
+              </div>
             </div>
           </div>
 

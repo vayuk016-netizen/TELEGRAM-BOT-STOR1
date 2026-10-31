@@ -55,24 +55,36 @@ async def process_custom_topup_amount(message: Message, state: FSMContext, db_us
 
     await state.clear()
 
-    # Generate QR response
+    # Generate real Bakong KHQR
+    import time
     from app.core.config import settings
-    import os
-    
-    khqr_string = PaymentService.generate_khqr_payload(db_user.telegram_id, amount)
-    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={khqr_string}"
-    
+    from app.services.bakong_service import BakongService
+    from app.core.database import async_session_factory
+    from app.db.models.transaction import Transaction
+
+    khqr_info = BakongService.generate_khqr(
+        amount=amount,
+        bill_number=f"TOP_{db_user.telegram_id}_{int(time.time())}",
+        currency="USD",
+    )
+    khqr_string = khqr_info["khqr_string"]
+    md5 = khqr_info["md5"]
+    qr_url = khqr_info["qr_url"]
+
+    # Record pending transaction in DB
+    async with async_session_factory() as session:
+        tx = Transaction(
+            user_id=db_user.id,
+            amount=amount,
+            payment_method="KHQR",
+            khqr_md5=md5,
+            status="PENDING",
+            description=f"Telegram KHQR Top-up (${amount:.2f})",
+        )
+        session.add(tx)
+        await session.commit()
+
     photo = qr_url
-    if settings.ABA_QR_LINK:
-        if settings.ABA_QR_LINK.startswith("/static/"):
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            local_path = os.path.join(base_dir, "app", settings.ABA_QR_LINK.lstrip("/"))
-            if os.path.exists(local_path):
-                from aiogram.types import FSInputFile
-                photo = FSInputFile(local_path)
-        else:
-            photo = settings.ABA_QR_LINK
-            
     caption = get_text(
         lang,
         "topup_qr_caption",
@@ -85,6 +97,12 @@ async def process_custom_topup_amount(message: Message, state: FSMContext, db_us
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     support_kb = InlineKeyboardMarkup(
         inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🔄 ពិនិត្យការទូទាត់ (Check Payment)" if lang == "km" else "🔄 Check Payment",
+                    callback_data=f"check_topup:{md5}",
+                ),
+            ],
             [
                 InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
             ]
@@ -96,23 +114,35 @@ async def process_custom_topup_amount(message: Message, state: FSMContext, db_us
 
 async def generate_topup_qr_response(callback: CallbackQuery, db_user: User, amount: Decimal):
     lang = db_user.language_code or "km"
+    import time
     from app.core.config import settings
-    import os
-    
-    khqr_string = PaymentService.generate_khqr_payload(db_user.telegram_id, amount)
-    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={khqr_string}"
-    
+    from app.services.bakong_service import BakongService
+    from app.core.database import async_session_factory
+    from app.db.models.transaction import Transaction
+
+    khqr_info = BakongService.generate_khqr(
+        amount=amount,
+        bill_number=f"TOP_{db_user.telegram_id}_{int(time.time())}",
+        currency="USD",
+    )
+    khqr_string = khqr_info["khqr_string"]
+    md5 = khqr_info["md5"]
+    qr_url = khqr_info["qr_url"]
+
+    # Record pending transaction in DB
+    async with async_session_factory() as session:
+        tx = Transaction(
+            user_id=db_user.id,
+            amount=amount,
+            payment_method="KHQR",
+            khqr_md5=md5,
+            status="PENDING",
+            description=f"Telegram KHQR Top-up (${amount:.2f})",
+        )
+        session.add(tx)
+        await session.commit()
+
     photo = qr_url
-    if settings.ABA_QR_LINK:
-        if settings.ABA_QR_LINK.startswith("/static/"):
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            local_path = os.path.join(base_dir, "app", settings.ABA_QR_LINK.lstrip("/"))
-            if os.path.exists(local_path):
-                from aiogram.types import FSInputFile
-                photo = FSInputFile(local_path)
-        else:
-            photo = settings.ABA_QR_LINK
-            
     caption = get_text(
         lang,
         "topup_qr_caption",
@@ -126,6 +156,12 @@ async def generate_topup_qr_response(callback: CallbackQuery, db_user: User, amo
     support_kb = InlineKeyboardMarkup(
         inline_keyboard=[
             [
+                InlineKeyboardButton(
+                    text="🔄 ពិនិត្យការទូទាត់ (Check Payment)" if lang == "km" else "🔄 Check Payment",
+                    callback_data=f"check_topup:{md5}",
+                ),
+            ],
+            [
                 InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
             ]
         ]
@@ -133,3 +169,39 @@ async def generate_topup_qr_response(callback: CallbackQuery, db_user: User, amo
 
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, caption=caption, reply_markup=support_kb)
+
+
+@router.callback_query(F.data.startswith("check_topup:"))
+async def check_topup_handler(callback: CallbackQuery, db_user: User):
+    parts = callback.data.split(":")
+    md5 = parts[1]
+    lang = db_user.language_code or "km"
+
+    from app.core.database import async_session_factory
+    from app.services.bakong_service import BakongService
+
+    async with async_session_factory() as session:
+        success, new_balance = await BakongService.check_and_credit_topup_by_md5(md5, session)
+        if success:
+            msg_alert = (
+                f"🎉 ការទូទាត់ជោគជ័យ! បានបញ្ចូលទឹកប្រាក់។ តុល្យភាពថ្មី: ${new_balance:.2f}"
+                if lang == "km"
+                else f"🎉 Payment Confirmed! Balance topped up. New balance: ${new_balance:.2f}"
+            )
+            await callback.answer(msg_alert, show_alert=True)
+            try:
+                await callback.message.delete()
+            except Exception:
+                pass
+            await callback.message.answer(
+                f"✅ <b>បញ្ចូលទឹកប្រាក់បានជោគជ័យ!</b>\n\n💵 <b>តុល្យភាពបច្ចុប្បន្ន:</b> ${new_balance:.2f}"
+                if lang == "km"
+                else f"✅ <b>Top-up Successful!</b>\n\n💵 <b>Current Balance:</b> ${new_balance:.2f}"
+            )
+        else:
+            msg_unpaid = (
+                "⏳ មិនទាន់ទទួលបានការទូទាត់ទេ។ សូមស្កេនទូទាត់តាម App ធនាគារ រួចចុចពិនិត្យម្តងទៀត!"
+                if lang == "km"
+                else "⏳ Payment not detected yet. Please complete the scan in your bank app and try again!"
+            )
+            await callback.answer(msg_unpaid, show_alert=True)

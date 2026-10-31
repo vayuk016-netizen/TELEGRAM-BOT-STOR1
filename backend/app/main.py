@@ -26,6 +26,8 @@ async def lifespan(app: FastAPI):
                 await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT 'telegram';"))
                 await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'balance';"))
                 await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS receipt_url VARCHAR(500);"))
+                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS khqr_md5 VARCHAR(64);"))
+                await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_orders_khqr_md5 ON orders (khqr_md5);"))
                 await conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);"))
             except Exception:
                 pass
@@ -40,6 +42,10 @@ async def lifespan(app: FastAPI):
     # Start scheduled broadcast polling service
     from app.services.broadcast_scheduler import start_scheduler, stop_scheduler
     scheduler_task = asyncio.create_task(start_scheduler())
+
+    # Start automated Bakong KHQR payment verifier
+    from app.services.payment_scheduler import start_payment_scheduler, stop_payment_scheduler
+    start_payment_scheduler()
 
     # If long polling or webhook mode setup
     import app.bot.bot as bot_module
@@ -62,6 +68,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown actions
+    stop_payment_scheduler()
     await stop_scheduler(scheduler_task)
 
     if bot_module.bot_task:

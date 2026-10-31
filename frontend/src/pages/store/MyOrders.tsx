@@ -101,10 +101,10 @@ export const StoreMyOrdersPage: React.FC = () => {
       {/* Page Title */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-100">
             {t("nav_orders")}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Track your order status and retrieve your delivered license keys anytime.
           </p>
         </div>
@@ -113,7 +113,7 @@ export const StoreMyOrdersPage: React.FC = () => {
         {!customer && (
           <div className="flex items-center gap-2 p-2 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs">
             <Send className="h-4 w-4 text-blue-500" />
-            <span className="font-semibold text-blue-600 dark:text-blue-400">
+            <span className="font-semibold text-blue-500">
               Have Telegram? Login to view all orders:
             </span>
             <a
@@ -129,7 +129,7 @@ export const StoreMyOrdersPage: React.FC = () => {
       </div>
 
       {/* 🔍 Search / Lookup Order by ID Box */}
-      <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-6 space-y-4 shadow-sm backdrop-blur-md">
+      <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 space-y-4 shadow-sm backdrop-blur-md">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
           Instant Order Lookup (By Order ID)
         </h3>
@@ -142,7 +142,7 @@ export const StoreMyOrdersPage: React.FC = () => {
               value={orderSearchId}
               onChange={(e) => setOrderSearchId(e.target.value)}
               placeholder="Enter your Order ID (e.g. 101)..."
-              className="pl-10 h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-xs rounded-xl"
+              className="pl-10 h-11 bg-slate-950 border-slate-800 text-xs rounded-xl"
             />
           </div>
           <Button
@@ -162,11 +162,11 @@ export const StoreMyOrdersPage: React.FC = () => {
 
       {/* Result of Searched Order */}
       {searchedOrder && (
-        <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-6 sm:p-8 space-y-6 shadow-md animate-in fade-in">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 sm:p-8 space-y-6 shadow-md animate-in fade-in">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
               <span className="text-xs font-mono font-bold text-slate-400">ORDER RECORD</span>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-xl font-black text-slate-100 flex items-center gap-2">
                 <span>#{searchedOrder.order_id}</span>
                 <span className="text-slate-400 font-normal">|</span>
                 <span>{searchedOrder.product?.title}</span>
@@ -181,7 +181,7 @@ export const StoreMyOrdersPage: React.FC = () => {
               }`}>
                 {searchedOrder.status === "COMPLETED" ? t("status_completed") : t("status_pending")}
               </span>
-              <span className="text-base font-black text-blue-600 dark:text-blue-400 font-mono">
+              <span className="text-base font-black text-blue-500 font-mono">
                 ${searchedOrder.total_amount?.toFixed(2)}
               </span>
             </div>
@@ -204,12 +204,12 @@ export const StoreMyOrdersPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="p-5 rounded-2xl bg-slate-900 dark:bg-black text-emerald-400 font-mono text-sm border border-slate-800 shadow-inner select-all whitespace-pre-wrap break-all leading-relaxed">
+              <div className="p-5 rounded-2xl bg-slate-950 text-emerald-400 font-mono text-sm border border-slate-800 shadow-inner select-all whitespace-pre-wrap break-all leading-relaxed">
                 {searchedOrder.delivered_payload}
               </div>
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 font-medium">
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-500 font-medium">
               Payment is awaiting confirmation. License keys will appear here automatically as soon as payment is confirmed.
             </div>
           )}
@@ -219,7 +219,7 @@ export const StoreMyOrdersPage: React.FC = () => {
       {/* 📜 Logged In Customer Orders Table */}
       {customer && (
         <div className="space-y-4">
-          <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <h3 className="text-base font-extrabold text-slate-100 flex items-center gap-2">
             <Clock className="h-4 w-4 text-blue-500" />
             <span>Order History for @{customer.username || customer.first_name}</span>
           </h3>
@@ -227,21 +227,21 @@ export const StoreMyOrdersPage: React.FC = () => {
           {loadingOrders ? (
             <div className="p-8 text-center text-xs text-slate-400">Loading orders...</div>
           ) : customerOrders.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 space-y-2">
+            <div className="text-center py-12 rounded-2xl border border-dashed border-slate-800 p-8 space-y-2">
               <ShoppingBag className="h-8 w-8 text-slate-400 mx-auto" />
-              <p className="text-xs text-slate-500">{t("no_orders_found")}</p>
+              <p className="text-xs text-slate-400">{t("no_orders_found")}</p>
             </div>
           ) : (
             <div className="space-y-4">
               {customerOrders.map((ord) => (
                 <div
                   key={ord.order_id}
-                  className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 space-y-3"
+                  className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-3"
                 >
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs font-bold text-slate-400">#{ord.order_id}</span>
-                      <span className="font-bold text-sm text-slate-900 dark:text-white">{ord.product_title}</span>
+                      <span className="font-bold text-sm text-slate-100">{ord.product_title}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-mono font-bold text-blue-500 text-sm">${ord.total_amount?.toFixed(2)}</span>
@@ -265,7 +265,7 @@ export const StoreMyOrdersPage: React.FC = () => {
                           <span>{copiedKey === ord.delivered_payload ? "Copied" : "Copy"}</span>
                         </button>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-950 font-mono text-xs text-emerald-400 break-all select-all">
+                      <div className="p-3 rounded-xl bg-slate-950 font-mono text-xs text-emerald-400 break-all select-all border border-slate-800">
                         {ord.delivered_payload}
                       </div>
                     </div>

@@ -58,16 +58,16 @@ export const StoreProductsPage: React.FC = () => {
       
       {/* Page Title & Subtitle */}
       <div className="space-y-2">
-        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-100">
           {t("nav_products")}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-xs sm:text-sm text-slate-400">
           Browse all available instant-delivery digital tools, subscriptions, and activation keys.
         </p>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 space-y-4 shadow-sm backdrop-blur-md">
+      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 space-y-4 shadow-sm backdrop-blur-md">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           
           {/* Search Input */}
@@ -78,7 +78,7 @@ export const StoreProductsPage: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("search_products")}
-              className="pl-10 h-11 bg-slate-50 dark:bg-slate-950/80 border-slate-200 dark:border-slate-800 text-xs rounded-xl"
+              className="pl-10 h-11 bg-slate-950/80 border-slate-800 text-xs text-slate-100 placeholder:text-slate-500 rounded-xl"
             />
           </div>
 
@@ -91,7 +91,7 @@ export const StoreProductsPage: React.FC = () => {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="h-11 px-3.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="newest">{t("sort_newest")}</option>
               <option value="price_asc">{t("sort_price_low")}</option>
@@ -101,13 +101,13 @@ export const StoreProductsPage: React.FC = () => {
         </div>
 
         {/* Category Pill Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-slate-100 dark:border-slate-800/60 pb-1 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-slate-800/60 pb-1 scrollbar-none">
           <button
             onClick={() => setSelectedCategory(null)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
               selectedCategory === null
                 ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20"
-                : "bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
+                : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
             }`}
           >
             {t("all_categories")}
@@ -119,7 +119,7 @@ export const StoreProductsPage: React.FC = () => {
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${
                 selectedCategory === cat.id
                   ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
+                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
               }`}
             >
               <span>{cat.icon || "📦"}</span>
@@ -135,15 +135,15 @@ export const StoreProductsPage: React.FC = () => {
           {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
             <div
               key={n}
-              className="h-72 rounded-2xl bg-slate-200 dark:bg-slate-900 animate-pulse border border-slate-300 dark:border-slate-800"
+              className="h-72 rounded-2xl bg-slate-900/60 animate-pulse border border-slate-800"
             />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 space-y-3">
+        <div className="text-center py-20 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
           <ShoppingBag className="h-10 w-10 text-slate-400 mx-auto" />
-          <h4 className="font-bold text-base text-slate-700 dark:text-slate-300">No products found</h4>
-          <p className="text-xs text-slate-500">Try adjusting your search query or switching categories.</p>
+          <h4 className="font-bold text-base text-slate-100">No products found</h4>
+          <p className="text-xs text-slate-400">Try adjusting your search query or switching categories.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

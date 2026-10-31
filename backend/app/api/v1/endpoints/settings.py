@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import Optional
 from pathlib import Path
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
@@ -11,11 +12,25 @@ router = APIRouter(prefix="/settings", tags=["Settings"])
 
 
 class SettingsUpdate(BaseModel):
-    bot_token: str = Field(..., description="The Telegram Bot Token")
+    bot_token: Optional[str] = Field(None, description="The Telegram Bot Token")
+    bakong_api_token: Optional[str] = Field(None, description="NBC Bakong Open API Token")
+    bakong_account_id: Optional[str] = Field(None, description="Bakong Account ID (e.g. username@abaa)")
+    khqr_merchant_name: Optional[str] = Field(None, description="KHQR Merchant Name")
+    khqr_merchant_city: Optional[str] = Field(None, description="KHQR Merchant City")
+    aba_account_name: Optional[str] = Field(None, description="ABA Account Name")
+    aba_account_number: Optional[str] = Field(None, description="ABA Account Number")
+    aba_qr_link: Optional[str] = Field(None, description="ABA QR image link")
 
 
 class SettingsResponse(BaseModel):
     bot_token: str
+    bakong_api_token: Optional[str] = None
+    bakong_account_id: Optional[str] = None
+    khqr_merchant_name: Optional[str] = None
+    khqr_merchant_city: Optional[str] = None
+    aba_account_name: Optional[str] = None
+    aba_account_number: Optional[str] = None
+    aba_qr_link: Optional[str] = None
 
 
 def update_env_variable(key: str, value: str):
@@ -42,35 +57,54 @@ def update_env_variable(key: str, value: str):
         f.writelines(lines)
 
 
-@router.get("", response_model=SettingsResponse)
-async def get_settings(admin=Depends(get_current_admin)):
+def get_current_settings_response() -> SettingsResponse:
     return SettingsResponse(
         bot_token=settings.BOT_TOKEN,
+        bakong_api_token=settings.BAKONG_API_TOKEN,
+        bakong_account_id=settings.BAKONG_ACCOUNT_ID,
+        khqr_merchant_name=settings.KHQR_MERCHANT_NAME,
+        khqr_merchant_city=settings.KHQR_MERCHANT_CITY,
+        aba_account_name=settings.ABA_ACCOUNT_NAME,
+        aba_account_number=settings.ABA_ACCOUNT_NUMBER,
+        aba_qr_link=settings.ABA_QR_LINK,
     )
+
+
+@router.get("", response_model=SettingsResponse)
+async def get_settings(admin=Depends(get_current_admin)):
+    return get_current_settings_response()
 
 
 @router.post("", response_model=SettingsResponse)
 async def update_settings(payload: SettingsUpdate, admin=Depends(get_current_admin)):
     try:
-        token = payload.bot_token.strip()
-
-        if not token:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Bot Token is required",
-            )
-
-        # 1. Update .env file
-        try:
+        # Update Bot Token if provided
+        if payload.bot_token is not None and payload.bot_token.strip():
+            token = payload.bot_token.strip()
             update_env_variable("BOT_TOKEN", token)
-        except Exception as e:
-            raise Exception(f"Failed to update config (.env) file. Please check file write permissions. Error: {str(e)}")
+            settings.BOT_TOKEN = token
+            try:
+                await reload_bot(token)
+            except Exception as e:
+                pass
 
-        # 2. Reload the bot with the new token
-        try:
-            await reload_bot(token)
-        except Exception as e:
-            raise Exception(f"Failed to hot-reload bot client. Please make sure the bot token is valid. Error: {str(e)}")
+        # Update Bakong and Payment fields
+        mapping = {
+            "bakong_api_token": "BAKONG_API_TOKEN",
+            "bakong_account_id": "BAKONG_ACCOUNT_ID",
+            "khqr_merchant_name": "KHQR_MERCHANT_NAME",
+            "khqr_merchant_city": "KHQR_MERCHANT_CITY",
+            "aba_account_name": "ABA_ACCOUNT_NAME",
+            "aba_account_number": "ABA_ACCOUNT_NUMBER",
+            "aba_qr_link": "ABA_QR_LINK",
+        }
+
+        for field, env_key in mapping.items():
+            val = getattr(payload, field)
+            if val is not None:
+                cleaned_val = str(val).strip()
+                update_env_variable(env_key, cleaned_val)
+                setattr(settings, env_key, cleaned_val)
 
     except Exception as e:
         import traceback
@@ -80,9 +114,7 @@ async def update_settings(payload: SettingsUpdate, admin=Depends(get_current_adm
             detail=str(e),
         )
 
-    return SettingsResponse(
-        bot_token=settings.BOT_TOKEN,
-    )
+    return get_current_settings_response()
 
 
 @router.post("/upload-qr")

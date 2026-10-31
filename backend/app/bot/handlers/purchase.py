@@ -179,28 +179,52 @@ async def execute_purchase_handler(callback: CallbackQuery, session: AsyncSessio
 @router.callback_query(F.data.startswith("show_buy_qr:"))
 async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
     from decimal import Decimal
+    import time
     import os
     lang = db_user.language_code or "km"
     parts = callback.data.split(":")
     product_id = int(parts[1])
     price = Decimal(parts[2])
-    
-    from app.services.payment_service import PaymentService
-    khqr_string = PaymentService.generate_khqr_payload(db_user.telegram_id, price)
-    qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={khqr_string}"
-    
-    from app.core.config import settings
-    photo = qr_url
-    if settings.ABA_QR_LINK:
-        if settings.ABA_QR_LINK.startswith("/static/"):
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            local_path = os.path.join(base_dir, "app", settings.ABA_QR_LINK.lstrip("/"))
-            if os.path.exists(local_path):
-                from aiogram.types import FSInputFile
-                photo = FSInputFile(local_path)
-        else:
-            photo = settings.ABA_QR_LINK
 
+    from app.core.config import settings
+    from app.services.bakong_service import BakongService
+    from app.core.database import async_session_factory
+    from app.db.repositories.order_repository import OrderRepository
+    from app.db.repositories.product_repository import ProductRepository
+
+    # Create pending order in database
+    async with async_session_factory() as session:
+        prod_repo = ProductRepository(session)
+        product = await prod_repo.get(product_id)
+        if not product:
+            await callback.answer("⚠️ Product not found!", show_alert=True)
+            return
+
+        khqr_info = BakongService.generate_khqr(
+            amount=price,
+            bill_number=f"TG_{db_user.telegram_id}_{int(time.time())}",
+            currency="USD",
+        )
+        khqr_string = khqr_info["khqr_string"]
+        md5 = khqr_info["md5"]
+        qr_url = khqr_info["qr_url"]
+
+        order_repo = OrderRepository(session)
+        order = await order_repo.create_order_with_item(
+            user_id=db_user.id,
+            product_id=product.id,
+            unit_price=price,
+            delivered_payload=None,
+            total_amount=price,
+            source="telegram",
+            payment_method="khqr",
+            status="PENDING",
+            khqr_md5=md5,
+        )
+        await session.commit()
+        order_id = order.id
+
+    photo = qr_url
     caption = get_text(
         lang,
         "direct_qr_title",
@@ -209,10 +233,16 @@ async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
         aba_name=settings.ABA_ACCOUNT_NAME,
         aba_number=settings.ABA_ACCOUNT_NUMBER,
     )
-    
+
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     qr_kb = InlineKeyboardMarkup(
         inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🔄 ពិនិត្យការទូទាត់ (Check Payment)" if lang == "km" else "🔄 Check Payment",
+                    callback_data=f"check_buy:{order_id}",
+                ),
+            ],
             [
                 InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
             ],
@@ -225,4 +255,47 @@ async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
     await callback.message.delete()
     await callback.message.answer_photo(photo=photo, caption=caption, reply_markup=qr_kb)
     await callback.answer()
+
+
+@router.callback_query(F.data.startswith("check_buy:"))
+async def check_buy_handler(callback: CallbackQuery, db_user: User):
+    parts = callback.data.split(":")
+    order_id = int(parts[1])
+    lang = db_user.language_code or "km"
+
+    from app.core.database import async_session_factory
+    from app.services.bakong_service import BakongService
+
+    async with async_session_factory() as session:
+        fulfilled, delivered_payload = await BakongService.check_and_fulfill_order_by_id(order_id, session)
+        if fulfilled:
+            msg_alert = (
+                "🎉 ការទូទាត់ជោគជ័យ! ទំនិញត្រូវបានបញ្ជូនទៅ Telegram របស់អ្នករួចរាល់។"
+                if lang == "km"
+                else "🎉 Payment confirmed! Digital keys delivered below."
+            )
+            await callback.answer(msg_alert, show_alert=True)
+            try:
+                await callback.message.delete()
+            except Exception:
+                pass
+            msg_keys = (
+                f"✅ <b>ការបញ្ជាទិញ #{order_id} ទទួលបានជោគជ័យ!</b>\n\n"
+                f"🔑 <b>កូដទំនិញ / គណនីរបស់អ្នក៖</b>\n"
+                f"<code>{delivered_payload}</code>\n\n"
+                f"<i>សូមអរគុណសម្រាប់ការទិញ!</i>"
+                if lang == "km"
+                else f"✅ <b>Order #{order_id} Completed Successfully!</b>\n\n"
+                     f"🔑 <b>Your Account / License Key:</b>\n"
+                     f"<code>{delivered_payload}</code>\n\n"
+                     f"<i>Thank you for your purchase!</i>"
+            )
+            await callback.message.answer(msg_keys)
+        else:
+            msg_unpaid = (
+                "⏳ មិនទាន់ទទួលបានការទូទាត់ទេ។ សូមស្កេនទូទាត់តាម App ធនាគារ រួចចុចពិនិត្យម្តងទៀត!"
+                if lang == "km"
+                else "⏳ Payment not detected yet. Please complete the scan in your bank app and try again!"
+            )
+            await callback.answer(msg_unpaid, show_alert=True)
 
