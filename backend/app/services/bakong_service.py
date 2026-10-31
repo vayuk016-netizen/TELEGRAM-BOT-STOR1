@@ -1,4 +1,6 @@
+import base64
 import hashlib
+import io
 import json
 import logging
 import time
@@ -45,6 +47,81 @@ def format_tlv(tag: str, value: str) -> str:
     return f"{tag}{len(val_str):02d}{val_str}"
 
 
+def render_qr_image_bytes(data: str, size: int = 350) -> bytes:
+    """
+    Renders standard QR code image as PNG bytes locally with zero external network dependency.
+    """
+    try:
+        import qrcode
+        qr = qrcode.QRCode(box_size=10, border=2)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        if size:
+            img = img.resize((size, size))
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning(f"Local QR image rendering failed: {e}")
+        return b""
+
+
+class BakongTokenPool:
+    """
+    Manages a pool of Bakong Open API tokens with automatic rotation & failover.
+    When a token reaches its daily quota of 100 requests (errorCode: 17),
+    it automatically rotates to the next available token in the pool!
+    """
+    def __init__(self):
+        self._exhausted_tokens: Dict[str, float] = {}  # token -> exhausted_until
+        self._current_index: int = 0
+
+    def get_tokens(self) -> list:
+        return settings.bakong_token_list
+
+    def get_active_token(self) -> Optional[str]:
+        tokens = self.get_tokens()
+        if not tokens:
+            return None
+        now = time.time()
+        for i in range(len(tokens)):
+            idx = (self._current_index + i) % len(tokens)
+            tok = tokens[idx]
+            if now >= self._exhausted_tokens.get(tok, 0):
+                self._current_index = idx
+                return tok
+        # If all exhausted, fallback to first token
+        return tokens[0]
+
+    def mark_exhausted(self, token: str, duration_seconds: int = 3600 * 8):
+        """Marks token exhausted for 8 hours (or until daily reset)."""
+        self._exhausted_tokens[token] = time.time() + duration_seconds
+        tokens = self.get_tokens()
+        logger.warning(
+            f"Bakong Token [...{token[-8:] if len(token) > 8 else token}] daily quota reached. "
+            f"Rotating to next available token in pool ({len(tokens)} tokens configured)."
+        )
+        if tokens:
+            self._current_index = (self._current_index + 1) % len(tokens)
+
+    def get_status(self) -> Dict[str, Any]:
+        tokens = self.get_tokens()
+        now = time.time()
+        active = [f"...{t[-8:]}" for t in tokens if now >= self._exhausted_tokens.get(t, 0)]
+        exhausted = [f"...{t[-8:]}" for t in tokens if now < self._exhausted_tokens.get(t, 0)]
+        return {
+            "total_tokens": len(tokens),
+            "active_tokens_count": len(active),
+            "exhausted_tokens_count": len(exhausted),
+            "active_tokens": active,
+            "exhausted_tokens": exhausted,
+        }
+
+
+token_pool = BakongTokenPool()
+
+
 class BakongService:
     @staticmethod
     def generate_khqr(
@@ -55,16 +132,19 @@ class BakongService:
         merchant_name: Optional[str] = None,
         merchant_city: Optional[str] = None,
         expiration_hours: int = 24,
-    ) -> Dict[str, str]:
+    ) -> Dict[str, Any]:
         """
         Generates genuine EMVCo KHQR compliant payload with 24h expiration and returns:
         - khqr_string: The raw KHQR text
         - md5: The 32-character MD5 checksum hash required by Bakong Open API
-        - qr_url: QR code image URL for rendering in web / bot
+        - qr_data_url: Base64 data URI of the QR PNG for instant client rendering (0ms, no network)
+        - qr_url: Backend QR code endpoint or safe URL
+        - qr_png_bytes: Raw PNG bytes for direct Telegram Bot upload
+        - deep_link: Bakong mobile app deep link
         - expires_at_ms: Expiration timestamp in milliseconds
         """
-        acc = (account_id or settings.BAKONG_ACCOUNT_ID or "sopha@abaa").strip()
-        m_name = (merchant_name or settings.KHQR_MERCHANT_NAME or "DIGITAL STORE KH").strip()[:25]
+        acc = (account_id or settings.BAKONG_ACCOUNT_ID or "abaakhppxxx@abaa").strip()
+        m_name = (merchant_name or settings.KHQR_MERCHANT_NAME or "SOK SOPHA").strip()[:25]
         m_city = (merchant_city or settings.KHQR_MERCHANT_CITY or "PHNOM PENH").strip()[:15]
         currency_code = "840" if currency.upper() == "USD" else "116"
 
@@ -73,18 +153,44 @@ class BakongService:
             "010212",  # Tag 01: Point of Initiation (12 = Dynamic)
         ]
 
-        # Tag 29: Merchant Account Information Individual
-        sub_acc = format_tlv("00", acc)
-        parts.append(format_tlv("29", sub_acc))
+        # Check if Merchant account (Tag 30) or Individual account (Tag 29)
+        # ABA Pay / Merchant uses Tag 30 with MID (e.g. 126103017113061) and Acquiring Bank (ABA Bank)
+        merchant_id = getattr(settings, "BAKONG_MERCHANT_ID", None) or settings.KHQR_ACCOUNT_NUMBER or "126103017113061"
+        acquiring_bank = getattr(settings, "BAKONG_ACQUIRING_BANK", "ABA Bank")
 
-        # Tag 52: Merchant Category Code (5999 = General / Digital)
-        parts.append("52045999")
+        is_merchant = (
+            "abaakhpp" in acc.lower()
+            or bool(merchant_id and len(str(merchant_id).strip()) >= 10)
+        )
+
+        if is_merchant:
+            # Tag 30: Merchant Account Information
+            # Subtag 00: Bakong Account ID (e.g. abaakhppxxx@abaa)
+            # Subtag 01: Merchant ID / MID (e.g. 126103017113061)
+            # Subtag 02: Acquiring Bank Name (e.g. ABA Bank)
+            sub_tag30 = (
+                format_tlv("00", acc)
+                + format_tlv("01", str(merchant_id).strip())
+                + format_tlv("02", acquiring_bank.strip())
+            )
+            parts.append(format_tlv("30", sub_tag30))
+            # Tag 52: Merchant Category Code (5399: Retail / Specialty Stores per ABA standard)
+            parts.append("52045399")
+        else:
+            # Tag 29: Merchant Account Information Individual (e.g. user@abaa)
+            sub_acc = format_tlv("00", acc)
+            parts.append(format_tlv("29", sub_acc))
+            # Tag 52: Merchant Category Code (5999 = General / Digital)
+            parts.append("52045999")
 
         # Tag 53: Transaction Currency (840 = USD, 116 = KHR)
         parts.append(format_tlv("53", currency_code))
 
         # Tag 54: Transaction Amount
-        formatted_amount = f"{float(amount):.2f}"
+        if currency.upper() == "USD":
+            formatted_amount = f"{float(amount):.2f}"
+        else:
+            formatted_amount = f"{int(amount)}"
         parts.append(format_tlv("54", formatted_amount))
 
         # Tag 58: Country Code (KH)
@@ -96,18 +202,17 @@ class BakongService:
         # Tag 60: Merchant City
         parts.append(format_tlv("60", m_city))
 
-        # Tag 62: Additional Data Field (Tag 01: Bill Number)
+        # Tag 62: Additional Data Field (Tag 01: Bill Number, Tag 68: ABA PayWay Reference)
         clean_bill = str(bill_number).replace(" ", "_")[:25]
-        sub_bill = format_tlv("01", clean_bill)
-        parts.append(format_tlv("62", sub_bill))
+        sub_62 = format_tlv("01", clean_bill)
+        if "aba" in acc.lower() or "aba" in acquiring_bank.lower():
+            # Include ABA PayWay terminal reference for instant ABA Mobile app recognition
+            sub_62 += format_tlv("68", "0010PAYWAY@ABA010720916130209032636692")
+        parts.append(format_tlv("62", sub_62))
 
-        # Tag 99: Timestamp and Expiration (Default: 24h)
+        # Expiration timestamp (24 hours)
         now_ms = int(time.time() * 1000)
         exp_ms = now_ms + (expiration_hours * 3600 * 1000)
-        now_str = str(now_ms)
-        exp_str = str(exp_ms)
-        tag99_sub = f"00{len(now_str):02d}{now_str}01{len(exp_str):02d}{exp_str}"
-        parts.append(format_tlv("99", tag99_sub))
 
         # Tag 63: CRC Placeholder
         raw_payload = "".join(parts) + "6304"
@@ -117,49 +222,85 @@ class BakongService:
         # Compute MD5
         md5_hash = hashlib.md5(khqr_string.encode("utf-8")).hexdigest()
 
+        # Generate local PNG bytes and base64 data URI
+        png_bytes = render_qr_image_bytes(khqr_string, size=350)
+        qr_data_url = ""
+        if png_bytes:
+            b64_str = base64.b64encode(png_bytes).decode("ascii")
+            qr_data_url = f"data:image/png;base64,{b64_str}"
+
         encoded_qr = urllib.parse.quote(khqr_string)
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=350x350&data={encoded_qr}"
+        qr_url = f"/api/v1/public/qr?text={encoded_qr}"
+        external_qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=350x350&data={encoded_qr}"
+        deep_link = f"bakong://qr?data={encoded_qr}"
 
         return {
             "khqr_string": khqr_string,
             "md5": md5_hash,
+            "qr_data_url": qr_data_url,
             "qr_url": qr_url,
+            "external_qr_url": external_qr_url,
+            "qr_png_bytes": png_bytes,
+            "deep_link": deep_link,
             "expires_at_ms": exp_ms,
         }
 
     @staticmethod
     async def check_transaction_by_md5(md5: str) -> Optional[Dict[str, Any]]:
         """
-        Queries NBC Bakong Open API endpoint (/v1/check_transaction_by_md5)
-        Returns transaction dict if payment confirmed, None if not found or pending.
+        Queries NBC Bakong Open API endpoint (/v1/check_transaction_by_md5).
+        Utilizes TokenPool to automatically rotate tokens if daily quota (100 req/day)
+        is exceeded (errorCode: 17 or HTTP 429).
         """
-        if not settings.BAKONG_API_TOKEN or not md5:
+        tokens = token_pool.get_tokens()
+        if not tokens or not md5:
             return None
 
         url = f"{settings.BAKONG_API_URL.rstrip('/')}/check_transaction_by_md5"
-        headers = {
-            "Authorization": f"Bearer {settings.BAKONG_API_TOKEN.strip()}",
-            "Content-Type": "application/json",
-        }
         payload = {"md5": md5.strip()}
 
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                res = await client.post(url, json=payload, headers=headers)
-                if res.status_code == 200:
-                    data = res.json()
-                    # Bakong responseCode == 0 means payment confirmed!
-                    if data.get("responseCode") == 0:
-                        logger.info(f"Bakong payment CONFIRMED for MD5 {md5}: {data.get('data')}")
-                        return data.get("data")
+        attempts = 0
+        max_attempts = len(tokens)
+
+        while attempts < max_attempts:
+            token = token_pool.get_active_token()
+            if not token:
+                break
+            attempts += 1
+            headers = {
+                "Authorization": f"Bearer {token.strip()}",
+                "Content-Type": "application/json",
+            }
+
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    res = await client.post(url, json=payload, headers=headers)
+                    if res.status_code == 200:
+                        data = res.json()
+                        # Bakong responseCode == 0 means payment confirmed!
+                        if data.get("responseCode") == 0:
+                            logger.info(f"Bakong payment CONFIRMED for MD5 {md5}: {data.get('data')}")
+                            return data.get("data")
+                        elif data.get("errorCode") == 17:
+                            # 100 requests limit exceeded on this token! Rotate!
+                            logger.warning(
+                                f"Bakong Token [...{token[-8:] if len(token) > 8 else token}] "
+                                f"daily quota (100) exceeded. Auto-rotating to next token in pool..."
+                            )
+                            token_pool.mark_exhausted(token)
+                            continue  # Retry with next token in pool!
+                        else:
+                            # Pending or not found
+                            logger.debug(f"Bakong check MD5 {md5}: {data.get('responseMessage')}")
+                            return None
+                    elif res.status_code in [401, 429]:
+                        token_pool.mark_exhausted(token)
+                        continue
                     else:
-                        logger.debug(f"Bakong check MD5 {md5}: {data.get('responseMessage')}")
-                elif res.status_code == 401:
-                    logger.error("Bakong API returned 401 Unauthorized. Please renew BAKONG_API_TOKEN.")
-                else:
-                    logger.warning(f"Bakong API check HTTP {res.status_code}: {res.text}")
-        except Exception as e:
-            logger.error(f"Error querying Bakong API for MD5 {md5}: {e}")
+                        logger.warning(f"Bakong API check HTTP {res.status_code}: {res.text}")
+            except Exception as e:
+                logger.error(f"Error querying Bakong API for MD5 {md5}: {e}")
+                break
 
         return None
 

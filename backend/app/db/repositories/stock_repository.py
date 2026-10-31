@@ -77,6 +77,43 @@ class StockRepository(BaseRepository[DigitalKey]):
         await self.session.flush()
         return len(keys)
 
+    async def get_keys_by_product(
+        self, product_id: int, limit: int = 100, offset: int = 0, is_sold: Optional[bool] = None
+    ) -> List[DigitalKey]:
+        stmt = select(DigitalKey).where(DigitalKey.product_id == product_id)
+        if is_sold is not None:
+            stmt = stmt.where(DigitalKey.is_sold == is_sold)
+        stmt = stmt.order_by(DigitalKey.id.desc()).offset(offset).limit(limit)
+        res = await self.session.execute(stmt)
+        return list(res.scalars().all())
+
+    async def get_key_by_id(self, key_id: int) -> Optional[DigitalKey]:
+        stmt = select(DigitalKey).where(DigitalKey.id == key_id)
+        res = await self.session.execute(stmt)
+        return res.scalar_one_or_none()
+
+    async def delete_key_by_id(self, key_id: int) -> Optional[int]:
+        """Deletes key if unsold. Returns product_id if deleted, None otherwise."""
+        stmt = select(DigitalKey).where(DigitalKey.id == key_id)
+        res = await self.session.execute(stmt)
+        key = res.scalar_one_or_none()
+        if not key or key.is_sold:
+            return None
+        product_id = key.product_id
+        await self.session.delete(key)
+        await self.session.flush()
+        return product_id
+
+    async def clear_unsold_keys(self, product_id: int) -> int:
+        from sqlalchemy import delete
+        stmt = delete(DigitalKey).where(
+            DigitalKey.product_id == product_id,
+            DigitalKey.is_sold.is_(False),
+        )
+        res = await self.session.execute(stmt)
+        await self.session.flush()
+        return res.rowcount or 0
+
     async def get_stock_stats_by_product(self, product_id: int) -> dict:
         total_stmt = select(func.count(DigitalKey.id)).where(DigitalKey.product_id == product_id)
         unsold_stmt = select(func.count(DigitalKey.id)).where(

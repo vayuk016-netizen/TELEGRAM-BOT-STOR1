@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
@@ -73,15 +73,27 @@ class Settings(BaseSettings):
 
     # KHQR / Payment / Bakong Open API
     BAKONG_API_TOKEN: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmJiNjZhYzJhOWIzNGNiNCJ9LCJpYXQiOjE3OTMyNjc4MDMsImV4cCI6MTgwMTA0MzgwM30.KJBslDbpo0H-tsgnpj5-lpRyvHVEsldQPBjKIE2pPMY"
+    BAKONG_API_TOKENS: Optional[str] = None  # Comma-separated pool of multiple Bakong API tokens for auto-rotation
     BAKONG_API_URL: str = "https://api-bakong.nbc.gov.kh/v1"
-    BAKONG_ACCOUNT_ID: str = "sopha@abaa"
-    KHQR_MERCHANT_NAME: str = "DIGITAL STORE KH"
+
+    @property
+    def bakong_token_list(self) -> List[str]:
+        tokens = []
+        if self.BAKONG_API_TOKENS:
+            tokens.extend([t.strip() for t in self.BAKONG_API_TOKENS.split(",") if t.strip()])
+        if self.BAKONG_API_TOKEN and self.BAKONG_API_TOKEN.strip() not in tokens:
+            tokens.append(self.BAKONG_API_TOKEN.strip())
+        return tokens
+    BAKONG_ACCOUNT_ID: str = "abaakhppxxx@abaa"
+    BAKONG_MERCHANT_ID: str = "126103017113061"
+    BAKONG_ACQUIRING_BANK: str = "ABA Bank"
+    KHQR_MERCHANT_NAME: str = "SOK SOPHA"
     KHQR_MERCHANT_CITY: str = "PHNOM PENH"
     KHQR_ACCOUNT_NUMBER: str = "126103017113061"
     KHQR_SECRET: str = "khqr_webhook_secret_key"
 
     # ABA Payment specific config
-    ABA_ACCOUNT_NAME: str = "SOPHA VONG"
+    ABA_ACCOUNT_NAME: str = "SOK SOPHA"
     ABA_ACCOUNT_NUMBER: str = "126103017113061"
     ABA_QR_LINK: str = ""
 

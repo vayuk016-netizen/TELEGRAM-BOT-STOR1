@@ -7,14 +7,26 @@ import { Input } from "@/components/ui/input";
 import { Category, Product } from "@/types/product.types";
 import { productService } from "@/services/product.service";
 import { stockService } from "@/services/stock.service";
-import { Key, Shield, UploadCloud, Image as ImageIcon, X, Loader2, Link2, Check } from "lucide-react";
+import {
+  Key,
+  Shield,
+  UploadCloud,
+  Image as ImageIcon,
+  Loader2,
+  Link2,
+  Check,
+  AlertCircle,
+  Save,
+  Plus,
+} from "lucide-react";
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   categories: Category[];
   initialProduct?: Product | null;
-  onSuccess: () => void;
+  onSuccess: (product: Product, isNew: boolean) => void;
+  onOpenCreateCategory?: () => void;
 }
 
 export const ProductFormModal: React.FC<ProductFormModalProps> = ({
@@ -23,19 +35,25 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   categories,
   initialProduct,
   onSuccess,
+  onOpenCreateCategory,
 }) => {
   const [categoryId, setCategoryId] = useState<number>(
     initialProduct?.category_id || categories[0]?.id || 1
   );
   const [title, setTitle] = useState<string>(initialProduct?.title || "");
   const [description, setDescription] = useState<string>(initialProduct?.description || "");
-  const [price, setPrice] = useState<string>(initialProduct?.price ? String(initialProduct.price) : "");
+  const [price, setPrice] = useState<string>(
+    initialProduct?.price ? String(initialProduct.price) : ""
+  );
   const [imageUrl, setImageUrl] = useState<string>(initialProduct?.image_url || "");
-  const [isActive, setIsActive] = useState<boolean>(initialProduct ? (initialProduct.is_active ?? true) : true);
+  const [isActive, setIsActive] = useState<boolean>(
+    initialProduct ? (initialProduct.is_active ?? true) : true
+  );
   const [rawKeysText, setRawKeysText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [showUrlInput, setShowUrlInput] = useState<boolean>(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,16 +61,20 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file (PNG, JPG, JPEG, WEBP, GIF).");
+      setErrorMsg("សូមជ្រើសរើស File រូបភាពត្រឹមត្រូវ (PNG, JPG, WEBP, GIF)");
       return;
     }
 
     setUploadingImage(true);
+    setErrorMsg(null);
     try {
       const res = await productService.uploadProductImage(file);
       setImageUrl(res.image_url);
     } catch (err: any) {
-      alert(err.response?.data?.detail || "Failed to upload image. Please try again or paste image link.");
+      setErrorMsg(
+        err.response?.data?.detail ||
+          "Failed to upload image. Please paste image link or try again."
+      );
     } finally {
       setUploadingImage(false);
       if (fileInputRef.current) {
@@ -62,6 +84,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   useEffect(() => {
+    setErrorMsg(null);
     if (initialProduct) {
       setCategoryId(initialProduct.category_id);
       setTitle(initialProduct.title || "");
@@ -71,7 +94,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setIsActive(initialProduct.is_active ?? true);
       setRawKeysText("");
     } else {
-      setCategoryId(categories[0]?.id || 1);
+      const defaultCatId = categories[0]?.id || 1;
+      setCategoryId(defaultCatId);
       setTitle("");
       setDescription("");
       setPrice("");
@@ -88,43 +112,68 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !price || !categoryId) return;
+    if (!title.trim()) {
+      setErrorMsg("សូមបញ្ចូលឈ្មោះផលិតផល (Please enter product title).");
+      return;
+    }
+    const numPrice = Number(price);
+    if (isNaN(numPrice) || numPrice <= 0) {
+      setErrorMsg("តម្លៃផលិតផលត្រូវតែធំជាង $0 (Price must be greater than $0).");
+      return;
+    }
+    if (!categoryId) {
+      setErrorMsg("សូមជ្រើសរើស Category មួយ (Please select a category).");
+      return;
+    }
 
     setLoading(true);
+    setErrorMsg(null);
+
     try {
       let savedProduct: Product;
+      const isNew = !initialProduct;
+
       if (initialProduct) {
         savedProduct = await productService.updateProduct(initialProduct.id, {
           category_id: categoryId,
-          title,
-          description,
-          price: Number(price),
-          image_url: imageUrl,
+          title: title.trim(),
+          description: description.trim() || undefined,
+          price: numPrice,
+          image_url: imageUrl || undefined,
           is_active: isActive,
         });
       } else {
         savedProduct = await productService.createProduct({
           category_id: categoryId,
-          title,
-          description,
-          price: Number(price),
-          image_url: imageUrl,
+          title: title.trim(),
+          description: description.trim() || undefined,
+          price: numPrice,
+          image_url: imageUrl || undefined,
           is_active: isActive,
         });
       }
 
       // If keys are provided, upload them immediately to add to stock
       if (rawKeysText.trim()) {
-        await stockService.bulkUploadKeys({
-          product_id: savedProduct.id,
-          raw_keys_text: rawKeysText,
-        });
+        try {
+          const stockRes = await stockService.bulkUploadKeys({
+            product_id: savedProduct.id,
+            raw_keys_text: rawKeysText,
+          });
+          savedProduct.stock_count = stockRes.current_stock;
+        } catch (stockErr) {
+          console.warn("Stock keys upload warning:", stockErr);
+        }
       }
 
-      onSuccess();
+      onSuccess(savedProduct, isNew);
       onClose();
-    } catch (err) {
-      alert("Failed to save product and stock keys.");
+    } catch (err: any) {
+      const detail =
+        err.response?.data?.detail ||
+        err.message ||
+        "Failed to save product and stock keys. Please try again.";
+      setErrorMsg(detail);
     } finally {
       setLoading(false);
     }
@@ -134,82 +183,138 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={initialProduct ? "✏️ Edit Product Details" : "➕ Add New Product Item"}
+      title={initialProduct ? `✏️ កែប្រែព័ត៌មានផលិតផល — ${initialProduct.title}` : "➕ បង្កើតផលិតផលថ្មី (Add Product)"}
     >
       <form onSubmit={handleSubmit} className="space-y-4 font-kantumruy-pro max-h-[80vh] overflow-y-auto pr-1">
+        {/* Category Picker */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">Category</label>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(Number(e.target.value))}
-            className="w-full h-10 rounded-lg border border-slate-700 bg-slate-900 px-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon || "📦"} {c.name}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-xs font-semibold text-slate-300">
+              Category <span className="text-rose-400">*</span>
+            </label>
+            {onOpenCreateCategory && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenCreateCategory();
+                }}
+                className="text-[11px] text-blue-400 hover:text-blue-300 underline"
+              >
+                + បង្កើត Category ថ្មី
+              </button>
+            )}
+          </div>
+
+          {categories.length === 0 ? (
+            <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs flex items-center justify-between">
+              <span>មិនទាន់មាន Category ណាមួយឡើយ។</span>
+              {onOpenCreateCategory && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    onClose();
+                    onOpenCreateCategory();
+                  }}
+                  className="h-7 text-xs bg-amber-600 hover:bg-amber-500 text-white font-bold"
+                >
+                  + បង្កើតឥឡូវនេះ
+                </Button>
+              )}
+            </div>
+          ) : (
+            <select
+              value={categoryId}
+              onChange={(e) => {
+                setCategoryId(Number(e.target.value));
+                setErrorMsg(null);
+              }}
+              className="w-full h-10 rounded-xl border border-slate-700 bg-slate-900 px-3 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+            >
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.icon || "📦"} {c.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
+        {/* Product Title */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">Product Title</label>
+          <label className="block text-xs font-semibold text-slate-300 mb-1">
+            ឈ្មោះផលិតផល (Product Title) <span className="text-rose-400">*</span>
+          </label>
           <Input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. CapCut Pro 1 Year Subscription"
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setErrorMsg(null);
+            }}
+            placeholder="ឧទាហរណ៍៖ CapCut Pro 1 Year Subscription"
             className="text-slate-100"
             required
+            autoFocus
           />
         </div>
 
+        {/* Price & Current Stock */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Price ($ USD)</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              តម្លៃ ($ USD) <span className="text-rose-400">*</span>
+            </label>
             <Input
               type="number"
               step="0.01"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => {
+                setPrice(e.target.value);
+                setErrorMsg(null);
+              }}
               placeholder="10.00"
-              className="text-slate-100"
+              className="text-slate-100 font-mono"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Current Stock Level</label>
-            <div className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm">
-              <span className="flex items-center gap-1.5 text-slate-400 font-medium">
-                <Key className="h-4 w-4 text-emerald-400" />
-                Available Keys:
+            <label className="block text-xs font-semibold text-slate-300 mb-1">ស្តុកបច្ចុប្បន្ន</label>
+            <div className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm">
+              <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs">
+                <Key className="h-3.5 w-3.5 text-emerald-400" />
+                Available:
               </span>
-              <span className="font-bold text-emerald-400">
-                {initialProduct ? initialProduct.stock_count : 0}
+              <span className="font-bold text-emerald-400 font-mono text-sm">
+                {initialProduct ? initialProduct.stock_count : 0} Keys
               </span>
             </div>
           </div>
         </div>
 
+        {/* Description */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+          <label className="block text-xs font-semibold text-slate-300 mb-1">
+            ការពិពណ៌នាផលិតផល (Description)
+          </label>
           <textarea
             rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Item feature description details..."
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 p-3 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="សេចក្តីលម្អិតអំពីលក្ខណៈពិសេសរបស់ផលិតផលនេះ..."
+            className="w-full rounded-xl border border-slate-700 bg-slate-900 p-3 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        {/* 🖼️ Product Thumbnail / Photo Upload (Displayed on Store Website) */}
+        {/* Product Photo Upload */}
         <div className="rounded-xl border border-slate-700/80 bg-slate-950/60 p-3.5 space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
               <ImageIcon className="h-4 w-4 text-blue-400" />
-              <span>Product Photo / Thumbnail</span>
+              <span>រូបភាពផលិតផល (Product Photo / Thumbnail)</span>
             </label>
-            <span className="text-[10px] text-blue-400 font-medium">Shows on store website</span>
+            <span className="text-[10px] text-blue-400 font-medium">បង្ហាញលើគេហទំព័រ</span>
           </div>
 
           <input
@@ -241,14 +346,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     disabled={uploadingImage}
                     className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors"
                   >
-                    Change
+                    ប្តូររូប
                   </button>
                   <button
                     type="button"
                     onClick={() => setImageUrl("")}
                     className="text-[11px] font-semibold text-rose-400 hover:text-rose-300 transition-colors"
                   >
-                    Remove
+                    លុប
                   </button>
                 </div>
               </div>
@@ -266,7 +371,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 {uploadingImage ? (
                   <div className="flex flex-col items-center justify-center py-2 space-y-2">
                     <Loader2 className="h-6 w-6 text-blue-400 animate-spin" />
-                    <span className="text-xs text-blue-400 font-medium">Uploading photo...</span>
+                    <span className="text-xs text-blue-400 font-medium">កំពុង Upload រូបភាព...</span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center space-y-1.5">
@@ -274,48 +379,45 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       <UploadCloud className="h-5 w-5" />
                     </div>
                     <div className="text-xs font-semibold text-slate-200">
-                      Click to upload photo or thumbnail
+                      ចុចទីនេះដើម្បី Upload រូបភាពផលិតផល
                     </div>
                     <div className="text-[10px] text-slate-400">
-                      PNG, JPG, WEBP (Instant automated upload)
+                      PNG, JPG, WEBP (Upload ដោយស្វ័យប្រវត្តិ)
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Direct Link toggle */}
               <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-                <span>Or use direct image URL:</span>
+                <span>ឬប្រើប្រាស់តំណភ្ជាប់រូបភាពផ្ទាល់ (Direct Link):</span>
                 <button
                   type="button"
                   onClick={() => setShowUrlInput(!showUrlInput)}
                   className="text-blue-400 hover:underline flex items-center gap-1 font-semibold"
                 >
                   <Link2 className="h-3 w-3" />
-                  {showUrlInput ? "Hide Link Input" : "Paste Image URL"}
+                  {showUrlInput ? "លាក់ Link Input" : "Paste Link រូបភាព"}
                 </button>
               </div>
 
               {showUrlInput && (
-                <div className="flex gap-2">
-                  <Input
-                    type="url"
-                    placeholder="https://example.com/image.png"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="h-8 text-xs text-slate-100"
-                  />
-                </div>
+                <Input
+                  type="url"
+                  placeholder="https://example.com/photo.png"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="h-8 text-xs text-slate-100"
+                />
               )}
             </div>
           )}
         </div>
 
-        {/* Add Digital Keys Payload directly to Stock */}
-        <div className="border-t border-slate-800 pt-3 mt-3">
+        {/* Add Digital Keys directly */}
+        <div className="border-t border-slate-800 pt-3">
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-xs font-semibold text-slate-300">
-              📥 Add Stock Keys (One key per line, Optional)
+              📥 បញ្ចូលកូដ Keys ទៅក្នុងស្តុក (១ បន្ទាត់ = ១ Key, Optional)
             </label>
             {keyCount > 0 && (
               <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
@@ -324,19 +426,20 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             )}
           </div>
           <textarea
-            rows={4}
+            rows={3}
             value={rawKeysText}
             onChange={(e) => setRawKeysText(e.target.value)}
-            placeholder={`Paste digital license keys, credentials, or codes here:\nKEY-XXXX-YYYY\nKEY-AAAA-BBBB`}
-            className="w-full rounded-lg border border-slate-700 bg-slate-950 p-3 font-mono text-xs text-emerald-400 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={`បិទភ្ជាប់កូដ Keys ឬ Account នៅទីនេះ (១ បន្ទាត់ = ១ Key):\nemail1@gmail.com:password123\nemail2@gmail.com:password456`}
+            className="w-full rounded-xl border border-slate-700 bg-slate-950 p-2.5 font-mono text-xs text-emerald-400 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <p className="text-[10px] text-slate-500 mt-1 flex items-center gap-1">
-            <Shield className="h-3 w-3 text-blue-400" /> Keys are encrypted with AES-256 upon submission.
+            <Shield className="h-3 w-3 text-blue-400" /> Keys នឹងត្រូវ Encrypt ដោយ AES-256 ដោយស្វ័យប្រវត្តិ។
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="text-xs font-semibold text-slate-300">Stock Status:</label>
+        {/* Stock Status toggle */}
+        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-900 border border-slate-800">
+          <label className="text-xs font-semibold text-slate-300">ស្ថានភាពលក់ (Status):</label>
           <button
             type="button"
             onClick={() => setIsActive(!isActive)}
@@ -351,16 +454,38 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             />
           </button>
           <span className={`text-xs font-medium ${isActive ? "text-emerald-400" : "text-rose-400"}`}>
-            {isActive ? "In-Stock" : "Out-Stock"}
+            {isActive ? "✓ ដាក់លក់ (In-Stock)" : "✕ បិទការលក់ (Out-Stock)"}
           </span>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
+        {errorMsg && (
+          <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading} className="text-xs">
+            បោះបង់ (Cancel)
           </Button>
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? "Saving..." : initialProduct ? "Update Product" : "Create Product"}
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={loading || !title.trim() || !price}
+            className="text-xs gap-1.5 font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 px-4"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>កំពុងរក្សាទុក...</span>
+              </>
+            ) : (
+              <>
+                {initialProduct ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                <span>{initialProduct ? "រក្សាទុកការកែប្រែ" : "បង្កើតផលិតផលថ្មី"}</span>
+              </>
+            )}
           </Button>
         </div>
       </form>

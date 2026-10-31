@@ -56,8 +56,7 @@ TRANSLATIONS = {
             "🏦 <b>គណនី ABA សម្រាប់ផ្ទេរ៖</b>\n"
             "• ឈ្មោះគណនី: <b>{aba_name}</b>\n"
             "• លេខគណនី: <code>{aba_number}</code>\n\n"
-            "📌 <b>ចំណាំ:</b> បន្ទាប់ពីលោកអ្នកស្កេនទូទាត់ប្រាក់រួច ទឹកប្រាក់នឹងចូលគណនីស្វ័យប្រវត្ត។ "
-            "សូមត្រឡប់ទៅទំព័រផលិតផលវិញ រួចចុច <b>'បញ្ជាក់ការទិញ'</b> ម្តងទៀតដើម្បីទទួលបានទំនិញ!"
+            "📌 <b>ចំណាំ:</b> បន្ទាប់ពីលោកអ្នកស្កេនទូទាត់ប្រាក់តាម ABA Mobile ឬ Bakong App រួចរាល់ សូមចុចប៊ូតុង <b>'🔄 ពិនិត្យការទូទាត់ (Check Payment)'</b> ខាងក្រោមដើម្បីទទួលបានទំនិញ/កូដភ្លាមៗ!"
         ),
         "account_overview": (
             "<b>👤 ព័ត៌មានគណនីរបស់អ្នក (Account Overview)</b>\n\n"
@@ -163,8 +162,7 @@ TRANSLATIONS = {
             "🏦 <b>ABA Bank Transfer Details:</b>\n"
             "• Name: <b>{aba_name}</b>\n"
             "• Account No: <code>{aba_number}</code>\n\n"
-            "📌 <b>Note:</b> After completing your scan payment, the funds will be credited automatically. "
-            "Please return to products page and click <b>'Confirm Purchase'</b> again to deliver your items!"
+            "📌 <b>Note:</b> After completing your scan payment via ABA Mobile or Bakong, tap <b>'🔄 Check Payment'</b> below to get your digital keys immediately!"
         ),
         "account_overview": (
             "<b>👤 Your Account Overview</b>\n\n"

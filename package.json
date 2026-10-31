@@ -2,12 +2,17 @@
   "name": "telegram-bot-store-workspace",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "dev": "./run-dev.sh",
     "dev:all": "./run-dev.sh",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",
     "build": "npm run build --prefix frontend",
-    "preview": "npm run preview --prefix frontend"
+    "preview": "npm run preview --prefix frontend",
+    "setup:backend": "cd backend && (which python3.11 >/dev/null 2>&1 && python3.11 -m venv .venv || python3 -m venv .venv) && ./.venv/bin/pip install -r requirements.txt",
+    "setup": "npm install && npm run setup:backend"
   }
 }

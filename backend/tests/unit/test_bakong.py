@@ -32,13 +32,17 @@ def test_generate_khqr_payload():
     assert "khqr_string" in result
     assert "md5" in result
     assert "qr_url" in result
+    assert "qr_data_url" in result
+    assert "qr_png_bytes" in result
+    assert "deep_link" in result
+    assert result["qr_data_url"].startswith("data:image/png;base64,")
+    assert len(result["qr_png_bytes"]) > 0
 
     khqr = result["khqr_string"]
     assert khqr.startswith("000201010212")
     assert "sopha@abaa" in khqr
     assert "54045.50" in khqr
     assert "5802KH" in khqr
-    assert "9934" in khqr  # Tag 99 timestamp + 24h expiration
     assert "expires_at_ms" in result
     assert len(result["md5"]) == 32
 

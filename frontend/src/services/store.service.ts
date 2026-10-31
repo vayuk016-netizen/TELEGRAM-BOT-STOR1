@@ -57,6 +57,9 @@ export interface OrderDetail {
   payment_method?: string;
   receipt_url?: string;
   created_at: string;
+  khqr_qr_data_url?: string;
+  khqr_qr_url?: string;
+  deep_link?: string;
   product: {
     id: number;
     title: string;

@@ -17,12 +17,14 @@ import {
   FolderOpen,
   Lock,
   Sparkles,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { BulkUploadModal } from "@/components/features/stock/bulk-upload-modal";
+import { InspectKeysModal } from "@/components/features/stock/inspect-keys-modal";
 import { productService } from "@/services/product.service";
 import { Product, Category } from "@/types/product.types";
 import { formatCurrency } from "@/lib/utils";
@@ -33,6 +35,7 @@ export default function StockPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState<boolean>(false);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const [inspectProduct, setInspectProduct] = useState<Product | null>(null);
 
   // Filters & Search states
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -64,6 +67,19 @@ export default function StockPage() {
   const handleOpenUpload = (productId?: number) => {
     setSelectedProductId(productId || null);
     setIsUploadModalOpen(true);
+  };
+
+  const handleOpenInspect = (product: Product) => {
+    setInspectProduct(product);
+  };
+
+  // ⚡ Live instant stock updater (0ms latency)
+  const handleStockUpdated = (productId: number, newStock: number) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, stock_count: newStock } : p))
+    );
+    // Silent background sync with server
+    productService.getProducts().then((prods) => setProducts(prods)).catch(() => {});
   };
 
   // Stats calculation
@@ -357,14 +373,21 @@ export default function StockPage() {
                           </span>
                         </div>
 
-                        {/* Live Key Badge */}
+                        {/* Live Key Badge (Clickable to inspect) */}
                         <div className="absolute top-2 right-2">
-                          <Badge
-                            variant={prod.stock_count > 5 ? "success" : prod.stock_count > 0 ? "warning" : "danger"}
-                            className="text-[10px] px-2 py-0.5 backdrop-blur-md font-bold"
+                          <button
+                            type="button"
+                            onClick={() => handleOpenInspect(prod)}
+                            title="ចុចដើម្បីពិនិត្យបញ្ជី Keys ក្នុងស្តុក"
+                            className="transition-transform hover:scale-105"
                           >
-                            {inStock ? `🟢 ${prod.stock_count} Keys` : "🔴 Out of Stock"}
-                          </Badge>
+                            <Badge
+                              variant={prod.stock_count > 5 ? "success" : prod.stock_count > 0 ? "warning" : "danger"}
+                              className="text-[10px] px-2 py-0.5 backdrop-blur-md font-bold cursor-pointer"
+                            >
+                              {inStock ? `🟢 ${prod.stock_count} Keys` : "🔴 Out of Stock"}
+                            </Badge>
+                          </button>
                         </div>
                       </div>
 
@@ -385,18 +408,25 @@ export default function StockPage() {
                       </div>
                     </div>
 
-                    {/* Card Bottom: Action Button */}
-                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                      <span className="text-[11px] text-slate-500 font-mono">
-                        {inStock ? `${prod.stock_count} Available` : "Refill needed"}
-                      </span>
+                    {/* Card Bottom: Action Buttons */}
+                    <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenInspect(prod)}
+                        className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-emerald-400 font-semibold px-2 py-1 rounded-lg hover:bg-slate-800 transition-colors"
+                        title="ពិនិត្យមើលកូដ Keys ទាំងអស់"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>Keys ({prod.stock_count})</span>
+                      </button>
+
                       <Button
                         size="sm"
                         onClick={() => handleOpenUpload(prod.id)}
-                        className="h-8 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-semibold gap-1.5 shadow-md shadow-emerald-600/20"
+                        className="h-7 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-1 shadow-md shadow-emerald-600/20"
                       >
                         <Upload className="h-3.5 w-3.5" />
-                        Upload Keys
+                        + Add Keys
                       </Button>
                     </div>
                   </div>
@@ -467,20 +497,38 @@ export default function StockPage() {
                     </TableCell>
                     <TableCell className="font-bold text-slate-300">{formatCurrency(prod.price)}</TableCell>
                     <TableCell>
-                      <Badge variant={prod.stock_count > 5 ? "success" : prod.stock_count > 0 ? "warning" : "danger"}>
-                        {prod.stock_count > 0 ? `🟢 ${prod.stock_count} Unsold Keys` : "🔴 Out of Stock"}
-                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenInspect(prod)}
+                        className="cursor-pointer"
+                        title="ចុចដើម្បីពិនិត្យមើល Keys"
+                      >
+                        <Badge variant={prod.stock_count > 5 ? "success" : prod.stock_count > 0 ? "warning" : "danger"}>
+                          {prod.stock_count > 0 ? `🟢 ${prod.stock_count} Unsold Keys` : "🔴 Out of Stock"}
+                        </Badge>
+                      </button>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenUpload(prod.id)}
-                        className="text-xs gap-1.5 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
-                      >
-                        <Upload className="h-3.5 w-3.5" />
-                        Upload Keys
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleOpenInspect(prod)}
+                          className="text-xs h-7 px-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 gap-1"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Keys
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenUpload(prod.id)}
+                          className="text-xs h-7 px-2.5 gap-1 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-medium"
+                        >
+                          <Upload className="h-3 w-3" />
+                          + Add
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -500,7 +548,28 @@ export default function StockPage() {
           }}
           products={products}
           initialProductId={selectedProductId}
-          onSuccess={fetchData}
+          onSuccess={(data) => {
+            if (data) {
+              handleStockUpdated(data.productId, data.currentStock);
+            } else {
+              fetchData();
+            }
+          }}
+          onInspectRequested={(pid) => {
+            const prod = products.find((p) => p.id === pid);
+            if (prod) setInspectProduct(prod);
+          }}
+        />
+      )}
+
+      {/* Inspect Keys Vault Modal */}
+      {inspectProduct && (
+        <InspectKeysModal
+          isOpen={!!inspectProduct}
+          onClose={() => setInspectProduct(null)}
+          product={inspectProduct}
+          onStockUpdated={handleStockUpdated}
+          onOpenAddModal={(pid) => handleOpenUpload(pid)}
         />
       )}
     </div>

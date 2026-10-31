@@ -21,16 +21,19 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
             
             # Ensure database index and store columns exist
-            try:
-                await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at);"))
-                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT 'telegram';"))
-                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'balance';"))
-                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS receipt_url VARCHAR(500);"))
-                await conn.execute(text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS khqr_md5 VARCHAR(64);"))
-                await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_orders_khqr_md5 ON orders (khqr_md5);"))
-                await conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);"))
-            except Exception:
-                pass
+            for ddl in [
+                "CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at);",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT 'telegram';",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'balance';",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS receipt_url VARCHAR(500);",
+                "ALTER TABLE orders ADD COLUMN IF NOT EXISTS khqr_md5 VARCHAR(64);",
+                "CREATE INDEX IF NOT EXISTS idx_orders_khqr_md5 ON orders (khqr_md5);",
+                "ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);",
+            ]:
+                try:
+                    await conn.execute(text(ddl))
+                except Exception:
+                    pass
         print("Database connected and schema initialized.")
     except Exception as e:
         print(f"Warning: Could not connect to database on startup: {e}")
@@ -43,9 +46,11 @@ async def lifespan(app: FastAPI):
     from app.services.broadcast_scheduler import start_scheduler, stop_scheduler
     scheduler_task = asyncio.create_task(start_scheduler())
 
-    # Start automated Bakong KHQR payment verifier
-    from app.services.payment_scheduler import start_payment_scheduler, stop_payment_scheduler
-    start_payment_scheduler()
+    # Background Bakong scheduler disabled to conserve 100 daily quota
+    # Bakong API requests now ONLY trigger on-demand when customer clicks "Check Payment"
+    # or admin clicks "Check Bakong" in dashboard
+    # from app.services.payment_scheduler import start_payment_scheduler, stop_payment_scheduler
+    # start_payment_scheduler()
 
     # If long polling or webhook mode setup
     import app.bot.bot as bot_module

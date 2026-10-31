@@ -1,3 +1,4 @@
+import logging
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +13,7 @@ from app.core.exceptions import (
 )
 from app.bot.utils.localization import get_text
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 
@@ -177,7 +179,7 @@ async def execute_purchase_handler(callback: CallbackQuery, session: AsyncSessio
 
 
 @router.callback_query(F.data.startswith("show_buy_qr:"))
-async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
+async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db_user: User):
     from decimal import Decimal
     import time
     import os
@@ -186,14 +188,35 @@ async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
     product_id = int(parts[1])
     price = Decimal(parts[2])
 
+    # 1. Provide instant loading feedback to user
+    loading_toast = (
+        "⏳ កំពុងបង្កើត Bakong KHQR... សូមរង់ចាំបន្តិច!"
+        if lang == "km"
+        else "⏳ Generating Bakong KHQR... Please wait!"
+    )
+    try:
+        await callback.answer(loading_toast)
+    except Exception:
+        pass
+
+    try:
+        loading_text = (
+            "⏳ <b>កំពុងបង្កើត Bakong KHQR Code...</b>\n\n"
+            "<i>សូមរង់ចាំមួយភ្លែត ប្រព័ន្ធកំពុងរៀបចំកូដទូទាត់សម្រាប់លោកអ្នក...</i>"
+            if lang == "km"
+            else "⏳ <b>Generating Bakong KHQR Code...</b>\n\n"
+                 "<i>Please wait a moment while we prepare your payment QR...</i>"
+        )
+        await callback.message.edit_text(loading_text)
+    except Exception:
+        pass
+
     from app.core.config import settings
     from app.services.bakong_service import BakongService
-    from app.core.database import async_session_factory
     from app.db.repositories.order_repository import OrderRepository
     from app.db.repositories.product_repository import ProductRepository
 
-    # Create pending order in database
-    async with async_session_factory() as session:
+    try:
         prod_repo = ProductRepository(session)
         product = await prod_repo.get(product_id)
         if not product:
@@ -208,6 +231,7 @@ async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
         khqr_string = khqr_info["khqr_string"]
         md5 = khqr_info["md5"]
         qr_url = khqr_info["qr_url"]
+        png_bytes = khqr_info.get("qr_png_bytes")
 
         order_repo = OrderRepository(session)
         order = await order_repo.create_order_with_item(
@@ -221,81 +245,193 @@ async def show_buy_qr_handler(callback: CallbackQuery, db_user: User):
             status="PENDING",
             khqr_md5=md5,
         )
-        await session.commit()
+        await session.flush()
         order_id = order.id
 
-    photo = qr_url
-    caption = get_text(
-        lang,
-        "direct_qr_title",
-        telegram_id=db_user.telegram_id,
-        price=price,
-        aba_name=settings.ABA_ACCOUNT_NAME,
-        aba_number=settings.ABA_ACCOUNT_NUMBER,
-    )
+        if png_bytes:
+            from aiogram.types import BufferedInputFile
+            photo = BufferedInputFile(png_bytes, filename=f"khqr_order_{order_id}.png")
+        else:
+            photo = khqr_info.get("external_qr_url") or f"https://api.qrserver.com/v1/create-qr-code/?size=350x350&data={khqr_string}"
 
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-    qr_kb = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="🔄 ពិនិត្យការទូទាត់ (Check Payment)" if lang == "km" else "🔄 Check Payment",
-                    callback_data=f"check_buy:{order_id}",
-                ),
-            ],
-            [
-                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
-            ],
-            [
-                InlineKeyboardButton(text="🔙 Back" if lang == "en" else "🔙 ត្រឡប់ក្រោយ", callback_data=f"prod:{product_id}"),
+        caption = get_text(
+            lang,
+            "direct_qr_title",
+            telegram_id=db_user.telegram_id,
+            price=price,
+            aba_name=settings.ABA_ACCOUNT_NAME,
+            aba_number=settings.ABA_ACCOUNT_NUMBER,
+        )
+
+        from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        qr_kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="🔄 ពិនិត្យការទូទាត់ (Check Payment)" if lang == "km" else "🔄 Check Payment",
+                        callback_data=f"check_buy:{order_id}",
+                    ),
+                ],
+                [
+                    InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+                ],
+                [
+                    InlineKeyboardButton(text="🔙 Back" if lang == "en" else "🔙 ត្រឡប់ក្រោយ", callback_data=f"prod:{product_id}"),
+                ]
             ]
-        ]
-    )
+        )
 
-    await callback.message.delete()
-    await callback.message.answer_photo(photo=photo, caption=caption, reply_markup=qr_kb)
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("check_buy:"))
-async def check_buy_handler(callback: CallbackQuery, db_user: User):
-    parts = callback.data.split(":")
-    order_id = int(parts[1])
-    lang = db_user.language_code or "km"
-
-    from app.core.database import async_session_factory
-    from app.services.bakong_service import BakongService
-
-    async with async_session_factory() as session:
-        fulfilled, delivered_payload = await BakongService.check_and_fulfill_order_by_id(order_id, session)
-        if fulfilled:
-            msg_alert = (
-                "🎉 ការទូទាត់ជោគជ័យ! ទំនិញត្រូវបានបញ្ជូនទៅ Telegram របស់អ្នករួចរាល់។"
-                if lang == "km"
-                else "🎉 Payment confirmed! Digital keys delivered below."
+        try:
+            await callback.bot.send_photo(
+                chat_id=callback.message.chat.id,
+                photo=photo,
+                caption=caption,
+                reply_markup=qr_kb,
             )
-            await callback.answer(msg_alert, show_alert=True)
             try:
                 await callback.message.delete()
             except Exception:
                 pass
-            msg_keys = (
-                f"✅ <b>ការបញ្ជាទិញ #{order_id} ទទួលបានជោគជ័យ!</b>\n\n"
-                f"🔑 <b>កូដទំនិញ / គណនីរបស់អ្នក៖</b>\n"
-                f"<code>{delivered_payload}</code>\n\n"
-                f"<i>សូមអរគុណសម្រាប់ការទិញ!</i>"
-                if lang == "km"
-                else f"✅ <b>Order #{order_id} Completed Successfully!</b>\n\n"
-                     f"🔑 <b>Your Account / License Key:</b>\n"
-                     f"<code>{delivered_payload}</code>\n\n"
-                     f"<i>Thank you for your purchase!</i>"
-            )
-            await callback.message.answer(msg_keys)
-        else:
-            msg_unpaid = (
-                "⏳ មិនទាន់ទទួលបានការទូទាត់ទេ។ សូមស្កេនទូទាត់តាម App ធនាគារ រួចចុចពិនិត្យម្តងទៀត!"
-                if lang == "km"
-                else "⏳ Payment not detected yet. Please complete the scan in your bank app and try again!"
-            )
-            await callback.answer(msg_unpaid, show_alert=True)
+
+            # Launch Smart Auto-Verification background task (Auto-delivers product without clicking button)
+            import asyncio
+            asyncio.create_task(auto_verify_order_loop(order_id, callback.message.chat.id, lang))
+        except Exception as photo_err:
+            logger.warning(f"send_photo with BufferedInputFile failed: {photo_err}. Trying external URL...")
+            try:
+                ext_url = khqr_info.get("external_qr_url") or f"https://api.qrserver.com/v1/create-qr-code/?size=350x350&data={khqr_string}"
+                await callback.bot.send_photo(
+                    chat_id=callback.message.chat.id,
+                    photo=ext_url,
+                    caption=caption,
+                    reply_markup=qr_kb,
+                )
+                try:
+                    await callback.message.delete()
+                except Exception:
+                    pass
+                import asyncio
+                asyncio.create_task(auto_verify_order_loop(order_id, callback.message.chat.id, lang))
+            except Exception as url_err:
+                logger.error(f"send_photo with URL also failed: {url_err}. Falling back to text.")
+                try:
+                    await callback.message.edit_text(text=caption, reply_markup=qr_kb)
+                except Exception:
+                    await callback.bot.send_message(
+                        chat_id=callback.message.chat.id,
+                        text=caption,
+                        reply_markup=qr_kb,
+                    )
+                import asyncio
+                asyncio.create_task(auto_verify_order_loop(order_id, callback.message.chat.id, lang))
+
+    except Exception as e:
+        logger.error(f"Error in show_buy_qr_handler: {e}", exc_info=True)
+        print(f"❌ [SHOW_BUY_QR_ERROR]: {e}", flush=True)
+        err_msg = (
+            "⚠️ មានបញ្ហាក្នុងការបង្កើត KHQR Code សូមព្យាយាមម្តងទៀត!"
+            if lang == "km"
+            else f"⚠️ Error generating KHQR: {e}"
+        )
+        try:
+            await callback.message.answer(err_msg)
+        except Exception:
+            pass
+
+
+async def auto_verify_order_loop(order_id: int, chat_id: int, lang: str):
+    """
+    Smart non-blocking background verification for an active order:
+    Automatically checks Bakong at 12s, 24s, and 39s while customer is scanning & paying.
+    When payment is confirmed -> automatically fulfills and delivers key to customer!
+    """
+    import asyncio
+    from app.core.database import AsyncSessionLocal
+    from app.services.bakong_service import BakongService
+
+    check_delays = [12, 12, 15]  # Interval checkpoints: 12s, 24s, 39s
+    for delay in check_delays:
+        await asyncio.sleep(delay)
+        try:
+            async with AsyncSessionLocal() as db_session:
+                fulfilled, delivered_payload = await BakongService.check_and_fulfill_order_by_id(order_id, db_session)
+                if fulfilled:
+                    logger.info(f"Smart Auto-Verification SUCCEEDED for Order #{order_id}!")
+                    msg_keys = (
+                        f"🎉 <b>ទទួលបានការទូទាត់ជោគជ័យ!</b>\n\n"
+                        f"✅ <b>ការបញ្ជាទិញ #{order_id} ត្រូវបានប្រគល់ជូនស្វ័យប្រវត្តិ៖</b>\n\n"
+                        f"🔑 <b>កូដទំនិញ / គណនីរបស់អ្នក៖</b>\n"
+                        f"<code>{delivered_payload}</code>\n\n"
+                        f"<i>សូមអរគុណសម្រាប់ការទិញ!</i>"
+                        if lang == "km"
+                        else f"🎉 <b>Payment Confirmed Automatically!</b>\n\n"
+                             f"✅ <b>Order #{order_id} Delivered:</b>\n\n"
+                             f"🔑 <b>Your Account / License Key:</b>\n"
+                             f"<code>{delivered_payload}</code>\n\n"
+                             f"<i>Thank you for your purchase!</i>"
+                    )
+                    from app.bot.bot import bot
+                    await bot.send_message(chat_id=chat_id, text=msg_keys)
+                    return
+        except Exception as e:
+            logger.debug(f"Smart auto-check for order #{order_id} checkpoint failed: {e}")
+            break
+
+
+_last_order_check_timestamps = {}
+
+
+@router.callback_query(F.data.startswith("check_buy:"))
+async def check_buy_handler(callback: CallbackQuery, session: AsyncSession, db_user: User):
+    import time
+    parts = callback.data.split(":")
+    order_id = int(parts[1])
+    lang = db_user.language_code or "km"
+
+    # Rate-limit checks per order (5-second debounce) to save 100/day API quota
+    now = time.time()
+    last_check = _last_order_check_timestamps.get(order_id, 0)
+    if now - last_check < 5.0:
+        wait_msg = (
+            "⏳ សូមរង់ចាំបន្តិច (៥ វិនាទី) មុននឹងចុចពិនិត្យម្តងទៀត!"
+            if lang == "km"
+            else "⏳ Please wait 5 seconds before checking again!"
+        )
+        await callback.answer(wait_msg)
+        return
+    _last_order_check_timestamps[order_id] = now
+
+    from app.services.bakong_service import BakongService
+
+    fulfilled, delivered_payload = await BakongService.check_and_fulfill_order_by_id(order_id, session)
+    if fulfilled:
+        msg_alert = (
+            "🎉 ការទូទាត់ជោគជ័យ! ទំនិញត្រូវបានបញ្ជូនទៅ Telegram របស់អ្នករួចរាល់។"
+            if lang == "km"
+            else "🎉 Payment confirmed! Digital keys delivered below."
+        )
+        await callback.answer(msg_alert, show_alert=True)
+        try:
+            await callback.message.delete()
+        except Exception:
+            pass
+        msg_keys = (
+            f"✅ <b>ការបញ្ជាទិញ #{order_id} ទទួលបានជោគជ័យ!</b>\n\n"
+            f"🔑 <b>កូដទំនិញ / គណនីរបស់អ្នក៖</b>\n"
+            f"<code>{delivered_payload}</code>\n\n"
+            f"<i>សូមអរគុណសម្រាប់ការទិញ!</i>"
+            if lang == "km"
+            else f"✅ <b>Order #{order_id} Completed Successfully!</b>\n\n"
+                 f"🔑 <b>Your Account / License Key:</b>\n"
+                 f"<code>{delivered_payload}</code>\n\n"
+                 f"<i>Thank you for your purchase!</i>"
+        )
+        await callback.message.answer(msg_keys)
+    else:
+        msg_unpaid = (
+            "⏳ មិនទាន់ទទួលបានការទូទាត់ទេ។ សូមស្កេនទូទាត់តាម App ធនាគារ រួចចុចពិនិត្យម្តងទៀត!"
+            if lang == "km"
+            else "⏳ Payment not detected yet. Please complete the scan in your bank app and try again!"
+        )
+        await callback.answer(msg_unpaid, show_alert=True)
 

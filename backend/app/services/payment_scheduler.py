@@ -14,62 +14,12 @@ _payment_scheduler_task = None
 
 async def run_payment_poller():
     """
-    Background worker that continuously polls Bakong API for pending KHQR orders and top-ups.
-    Auto-fulfills orders and top-ups when customer payment is confirmed.
+    Background worker disabled to conserve 100 daily quota of Bakong Open API.
+    Bakong Open API is called strictly ON-DEMAND when customer clicks 'Check Payment'
+    or admin checks in dashboard.
     """
-    logger.info("Bakong Auto-Payment Poller service started.")
-    while True:
-        try:
-            cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
-            async with AsyncSessionLocal() as db:
-                # 1. Check pending Orders (active within 24h)
-                stmt_orders = (
-                    select(Order.id)
-                    .where(
-                        (Order.status == "PENDING")
-                        & (Order.payment_method == "khqr")
-                        & (Order.khqr_md5.isnot(None))
-                        & (Order.created_at >= cutoff)
-                    )
-                    .limit(20)
-                )
-                res_orders = await db.execute(stmt_orders)
-                pending_order_ids = res_orders.scalars().all()
-
-                for order_id in pending_order_ids:
-                    try:
-                        fulfilled, _ = await BakongService.check_and_fulfill_order_by_id(order_id, db)
-                        if fulfilled:
-                            logger.info(f"Auto-fulfilled Order #{order_id} via Bakong Poller!")
-                    except Exception as e:
-                        logger.error(f"Error auto-verifying Order #{order_id}: {e}")
-
-                # 2. Check pending Top-up Transactions (active within 24h)
-                stmt_tx = (
-                    select(Transaction.khqr_md5)
-                    .where(
-                        (Transaction.status == "PENDING")
-                        & (Transaction.payment_method == "KHQR")
-                        & (Transaction.khqr_md5.isnot(None))
-                        & (Transaction.created_at >= cutoff)
-                    )
-                    .limit(20)
-                )
-                res_tx = await db.execute(stmt_tx)
-                pending_md5s = res_tx.scalars().all()
-
-                for md5 in pending_md5s:
-                    try:
-                        success, bal = await BakongService.check_and_credit_topup_by_md5(md5, db)
-                        if success:
-                            logger.info(f"Auto-credited Top-up for MD5 {md5} (${bal}) via Bakong Poller!")
-                    except Exception as e:
-                        logger.error(f"Error auto-verifying Top-up MD5 {md5}: {e}")
-
-        except Exception as e:
-            logger.error(f"Error in Bakong payment poller loop: {e}")
-
-        await asyncio.sleep(8)  # Check every 8 seconds
+    logger.info("Bakong Background Auto-Poller is DISABLED (preserving 100/day API quota for customer on-demand payments).")
+    return
 
 
 def start_payment_scheduler():

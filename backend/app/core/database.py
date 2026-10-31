@@ -33,6 +33,9 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
+# Alias for compatibility with bot handlers
+async_session_factory = AsyncSessionLocal
+
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency provider for FastAPI API routes and Bot Middlewares."""

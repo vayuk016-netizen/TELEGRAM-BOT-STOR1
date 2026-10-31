@@ -18,6 +18,7 @@ import {
   Send,
   Loader2,
   ExternalLink,
+  Download,
 } from "lucide-react";
 import { storeService, StoreProduct, OrderDetail } from "@/services/store.service";
 import { useCustomerStore } from "@/store/use-customer-store";
@@ -308,13 +309,13 @@ export const StoreCheckoutPage: React.FC = () => {
 
           {/* Option A: Bakong KHQR QR Code Screen */}
           {activeOrder.payment_method === "khqr" && (
-            <div className="max-w-md mx-auto space-y-6 text-center">
+            <div className="max-w-md mx-auto space-y-5 text-center">
               <div className="p-4 sm:p-6 rounded-3xl bg-white text-slate-900 shadow-2xl border border-slate-200 inline-block mx-auto">
-                {activeOrder.khqr_qr_url ? (
+                {activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url ? (
                   <img
-                    src={activeOrder.khqr_qr_url}
+                    src={activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url}
                     alt="Bakong KHQR"
-                    className="w-64 h-64 mx-auto rounded-xl object-contain"
+                    className="w-64 h-64 mx-auto rounded-xl object-contain shadow-sm"
                   />
                 ) : (
                   <div className="w-64 h-64 flex items-center justify-center bg-slate-100 rounded-xl">
@@ -325,6 +326,38 @@ export const StoreCheckoutPage: React.FC = () => {
                   <span>Bakong KHQR</span>
                   <span className="text-blue-600 font-mono">${activeOrder.total_amount?.toFixed(2)}</span>
                 </div>
+              </div>
+
+              {/* Quick Action Buttons: Download & Copy & DeepLink */}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {(activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url) && (
+                  <a
+                    href={activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url}
+                    download={`KHQR_Order_${activeOrder.order_id}.png`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Download QR</span>
+                  </a>
+                )}
+                {activeOrder.khqr_string && (
+                  <button
+                    onClick={() => handleCopy(activeOrder.khqr_string)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>{copyStatus ? "Copied!" : "Copy KHQR"}</span>
+                  </button>
+                )}
+                {activeOrder.deep_link && (
+                  <a
+                    href={activeOrder.deep_link}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-semibold transition-colors border border-blue-500/30"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    <span>Open in Bakong</span>
+                  </a>
+                )}
               </div>
 
               <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">

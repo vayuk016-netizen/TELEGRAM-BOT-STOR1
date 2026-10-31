@@ -75,6 +75,24 @@ async def notify_admin_telegram(message_html: str):
 # -------------------------------------------------------------
 # 1. Store Info & Configuration
 # -------------------------------------------------------------
+@router.get("/qr")
+async def get_qr_image(text: str = Query(..., description="Data string to encode in QR code")):
+    """
+    Renders dynamic QR Code image natively in PNG format with zero external network dependency.
+    """
+    from app.services.bakong_service import render_qr_image_bytes
+    from fastapi.responses import Response
+
+    png_bytes = render_qr_image_bytes(text, size=350)
+    if not png_bytes:
+        raise HTTPException(status_code=500, detail="Could not generate QR code image")
+    return Response(
+        content=png_bytes,
+        media_type="image/png",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
 @router.get("/store-info")
 async def get_store_info():
     bot_user = settings.TELEGRAM_BOT_USERNAME or "sopha9926"
@@ -344,9 +362,9 @@ async def create_website_order(
 
     total_amount = product.price * payload.quantity
 
-    # A) PAYMENT VIA ACCOUNT BALANCE
-    if payload.payment_method == "balance":
-        if user.balance < total_amount:
+    # A) FREE PRODUCT OR PAYMENT VIA ACCOUNT BALANCE
+    if total_amount <= Decimal("0.00") or payload.payment_method == "balance":
+        if total_amount > 0 and user.balance < total_amount:
             raise HTTPException(
                 status_code=400,
                 detail=f"Insufficient balance! Required: ${total_amount:.2f}, Balance: ${user.balance:.2f}.",
@@ -357,8 +375,9 @@ async def create_website_order(
         if len(digital_keys) < payload.quantity:
             raise HTTPException(status_code=400, detail="Stock changed. Insufficient items available.")
 
-        # Deduct balance
-        user.balance -= total_amount
+        # Deduct balance if paid
+        if total_amount > 0:
+            user.balance -= total_amount
 
         # Decrypt keys
         decrypted_keys = [decrypt_key_content(k.encrypted_content) for k in digital_keys]
@@ -375,7 +394,7 @@ async def create_website_order(
             delivered_payload=delivered_payload,
             total_amount=total_amount,
             source="website",
-            payment_method="balance",
+            payment_method="free" if total_amount <= 0 else "balance",
             status="COMPLETED",
         )
 
@@ -401,7 +420,7 @@ async def create_website_order(
             f"👤 Customer: {user.first_name} (ID: <code>{user.telegram_id}</code>)\n"
             f"📦 Product: {product.title} (x{payload.quantity})\n"
             f"💵 Amount: ${total_amount:.2f}\n"
-            f"💳 Method: Balance"
+            f"💳 Method: {'Free' if total_amount <= 0 else 'Balance'}"
         )
         await notify_admin_telegram(msg_admin)
 
@@ -409,7 +428,7 @@ async def create_website_order(
             "order_id": order.id,
             "status": "COMPLETED",
             "total_amount": float(total_amount),
-            "payment_method": "balance",
+            "payment_method": "free" if total_amount <= 0 else "balance",
             "delivered_payload": delivered_payload,
             "message": "Payment successful and product delivered!",
         }
@@ -424,6 +443,8 @@ async def create_website_order(
     khqr_string = khqr_info["khqr_string"]
     khqr_md5 = khqr_info["md5"]
     khqr_qr_url = khqr_info["qr_url"]
+    khqr_qr_data_url = khqr_info.get("qr_data_url", "")
+    deep_link = khqr_info.get("deep_link", "")
 
     # Create PENDING order
     order = await order_repo.create_order_with_item(
@@ -458,6 +479,8 @@ async def create_website_order(
         "payment_method": payload.payment_method,
         "khqr_string": khqr_string,
         "khqr_qr_url": khqr_qr_url,
+        "khqr_qr_data_url": khqr_qr_data_url,
+        "deep_link": deep_link,
         "khqr_md5": khqr_md5,
         "aba": {
             "account_name": settings.ABA_ACCOUNT_NAME,
@@ -504,6 +527,20 @@ async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
     if order.status in ["COMPLETED", "PAID", "DELIVERED"]:
         delivered = item.delivered_payload if item else None
 
+    # For pending KHQR orders, provide QR render data
+    khqr_qr_data_url = None
+    khqr_qr_url = None
+    deep_link = None
+    if order.status == "PENDING" and order.payment_method == "khqr" and order.total_amount > 0:
+        khqr_info = BakongService.generate_khqr(
+            amount=order.total_amount,
+            bill_number=f"ORD_{order.id}",
+            currency="USD",
+        )
+        khqr_qr_data_url = khqr_info.get("qr_data_url")
+        khqr_qr_url = khqr_info.get("qr_url")
+        deep_link = khqr_info.get("deep_link")
+
     return {
         "order_id": order.id,
         "status": order.status,
@@ -512,6 +549,9 @@ async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
         "payment_method": order.payment_method,
         "receipt_url": order.receipt_url,
         "created_at": order.created_at.isoformat(),
+        "khqr_qr_data_url": khqr_qr_data_url,
+        "khqr_qr_url": khqr_qr_url,
+        "deep_link": deep_link,
         "product": {
             "id": product.id if product else 0,
             "title": product.title if product else "Digital Item",

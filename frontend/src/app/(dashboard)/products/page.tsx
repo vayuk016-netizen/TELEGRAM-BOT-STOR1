@@ -29,10 +29,12 @@ import { CategoryFormModal } from "@/components/features/products/category-form"
 import { productService } from "@/services/product.service";
 import { Category, Product } from "@/types/product.types";
 import { formatCurrency } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 type TabKey = "products" | "categories";
 
 export default function ProductsPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -41,6 +43,7 @@ export default function ProductsPage() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [successBanner, setSuccessBanner] = useState<string | null>(null);
 
   // Filters & Search states
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -69,6 +72,37 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // ⚡ Live instant product creation & update
+  const handleProductSaved = (savedProd: Product, isNew: boolean) => {
+    setActiveTab("products");
+    resetFilters();
+    if (isNew) {
+      setProducts((prev) => [savedProd, ...prev.filter((p) => p.id !== savedProd.id)]);
+      setSuccessBanner(`🎉 បានបង្កើតផលិតផល "${savedProd.title}" ជោគជ័យ!`);
+    } else {
+      setProducts((prev) => prev.map((p) => (p.id === savedProd.id ? savedProd : p)));
+      setSuccessBanner(`✏️ បានកែប្រែផលិតផល "${savedProd.title}" ជោគជ័យ!`);
+    }
+    // Background sync
+    productService.getProducts().then((prods) => setProducts(prods)).catch(() => {});
+    setTimeout(() => setSuccessBanner(null), 5000);
+  };
+
+  // ⚡ Live instant category creation & update
+  const handleCategorySaved = (savedCat: Category, isNew: boolean) => {
+    setActiveTab("categories"); // 🎯 Auto-switch to Categories tab so user sees it immediately!
+    if (isNew) {
+      setCategories((prev) => [...prev.filter((c) => c.id !== savedCat.id), savedCat]);
+      setSuccessBanner(`🎉 បានបង្កើត Category "${savedCat.name}" ជោគជ័យ!`);
+    } else {
+      setCategories((prev) => prev.map((c) => (c.id === savedCat.id ? savedCat : c)));
+      setSuccessBanner(`✏️ បានកែប្រែ Category "${savedCat.name}" ជោគជ័យ!`);
+    }
+    // Background sync
+    productService.getCategories().then((cats) => setCategories(cats)).catch(() => {});
+    setTimeout(() => setSuccessBanner(null), 5000);
+  };
 
   const handleEditProduct = (prod: Product) => {
     setSelectedProduct(prod);
@@ -205,6 +239,15 @@ export default function ProductsPage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => navigate("/admin/stock")}
+            className="gap-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-bold"
+          >
+            <Key className="h-4 w-4 text-emerald-400" />
+            + Add / Manage Stock
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleAddNewCategory}
             className="gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
           >
@@ -217,6 +260,23 @@ export default function ProductsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Success Notification Alert */}
+      {successBanner && (
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold shadow-lg shadow-emerald-500/10">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+            <span>{successBanner}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setSuccessBanner(null)}
+            className="text-emerald-400 hover:text-emerald-200 text-xs font-bold px-1"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* 📊 Summary Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
@@ -709,7 +769,8 @@ export default function ProductsPage() {
           onClose={() => setIsModalOpen(false)}
           categories={categories}
           initialProduct={selectedProduct}
-          onSuccess={fetchData}
+          onSuccess={handleProductSaved}
+          onOpenCreateCategory={handleAddNewCategory}
         />
       )}
 
@@ -721,7 +782,7 @@ export default function ProductsPage() {
             setIsCategoryModalOpen(false);
             setSelectedCategory(null);
           }}
-          onSuccess={fetchData}
+          onSuccess={handleCategorySaved}
           editCategory={selectedCategory}
         />
       )}

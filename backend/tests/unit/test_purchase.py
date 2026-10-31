@@ -34,7 +34,7 @@ async def test_bulk_stock_upload_and_purchase_flow(db_session):
     # Upload 2 keys using StockService
     stock_service = StockService(db_session)
     keys_text = "account1:pass1\naccount2:pass2"
-    uploaded_count = await stock_service.bulk_upload_keys(prod.id, keys_text)
+    uploaded_count, _, _ = await stock_service.bulk_upload_keys(prod.id, keys_text)
     assert uploaded_count == 2
 
     # Create user with sufficient balance ($15.00)

@@ -14,6 +14,7 @@ export interface OrderItem {
   id: number;
   product_id: number;
   unit_price: number;
+  delivered_payload?: string;
   product?: {
     title: string;
   };
@@ -27,6 +28,7 @@ export interface Order {
   source?: string;
   payment_method?: string;
   receipt_url?: string;
+  khqr_md5?: string;
   created_at: string;
   user?: CustomerUser;
   items: OrderItem[];
