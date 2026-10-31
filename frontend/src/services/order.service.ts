@@ -2,8 +2,10 @@ import { apiClient } from "@/lib/api-client";
 import { Order, AnalyticsOverview } from "@/types/order.types";
 
 export const orderService = {
-  async getAnalytics(): Promise<AnalyticsOverview> {
-    const res = await apiClient.get<AnalyticsOverview>("/analytics/overview");
+  async getAnalytics(skipLoader: boolean = false): Promise<AnalyticsOverview> {
+    const res = await apiClient.get<AnalyticsOverview>("/analytics/overview", {
+      headers: skipLoader ? { "x-skip-loader": "true" } : undefined,
+    });
     return res.data;
   },
 

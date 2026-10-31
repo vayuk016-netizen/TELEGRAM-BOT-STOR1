@@ -10,6 +10,7 @@ from app.api.v1.endpoints import (
     broadcast,
     settings,
     public,
+    payments,
 )
 
 api_v1_router = APIRouter(prefix="/api/v1")
@@ -24,3 +25,4 @@ api_v1_router.include_router(users.router)
 api_v1_router.include_router(webhooks.router)
 api_v1_router.include_router(broadcast.router)
 api_v1_router.include_router(settings.router)
+api_v1_router.include_router(payments.router)

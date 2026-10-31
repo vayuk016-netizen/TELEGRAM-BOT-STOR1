@@ -109,8 +109,10 @@ export const storeService = {
     return res.data;
   },
 
-  async getOrderStatus(orderId: number): Promise<OrderDetail> {
-    const res = await apiClient.get<OrderDetail>(`/public/orders/${orderId}`);
+  async getOrderStatus(orderId: number, skipLoader: boolean = false): Promise<OrderDetail> {
+    const res = await apiClient.get<OrderDetail>(`/public/orders/${orderId}`, {
+      headers: skipLoader ? { "x-skip-loader": "true" } : undefined,
+    });
     return res.data;
   },
 

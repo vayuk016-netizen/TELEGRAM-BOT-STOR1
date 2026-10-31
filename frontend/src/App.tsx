@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { TopLoader } from "@/components/ui/top-loader";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { DashboardWrapper } from "@/components/layout/dashboard-wrapper";
 import AuthLayout from "@/app/(auth)/layout";
@@ -11,6 +12,7 @@ import OrdersPage from "@/app/(dashboard)/orders/page";
 import UsersPage from "@/app/(dashboard)/users/page";
 import BroadcastPage from "@/app/(dashboard)/broadcast/page";
 import SettingsPage from "@/app/(dashboard)/settings/page";
+import PaymentsPage from "@/app/(dashboard)/payments/page";
 
 // Customer Storefront Components
 import { StoreLayout } from "@/components/storefront/StoreLayout";
@@ -24,6 +26,8 @@ import { StoreContactPage } from "@/pages/store/Contact";
 export default function App() {
   return (
     <BrowserRouter>
+      {/* 🚀 Ultra-Smooth Top Loading Bar (Sleek & Thin 2px) */}
+      <TopLoader color="#ef4444" height={2} />
       <Routes>
         {/* ======================================================== */}
         {/* 🛍️ Customer-Facing Storefront Routes (Public)           */}
@@ -59,6 +63,7 @@ export default function App() {
             <Route path="/admin/products" element={<ProductsPage />} />
             <Route path="/admin/stock" element={<StockPage />} />
             <Route path="/admin/orders" element={<OrdersPage />} />
+            <Route path="/admin/payments" element={<PaymentsPage />} />
             <Route path="/admin/users" element={<UsersPage />} />
             <Route path="/admin/broadcast" element={<BroadcastPage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
@@ -68,6 +73,7 @@ export default function App() {
             <Route path="/dashboard/products" element={<Navigate to="/admin/products" replace />} />
             <Route path="/dashboard/stock" element={<Navigate to="/admin/stock" replace />} />
             <Route path="/dashboard/orders" element={<Navigate to="/admin/orders" replace />} />
+            <Route path="/dashboard/payments" element={<Navigate to="/admin/payments" replace />} />
             <Route path="/dashboard/users" element={<Navigate to="/admin/users" replace />} />
             <Route path="/dashboard/broadcast" element={<Navigate to="/admin/broadcast" replace />} />
             <Route path="/dashboard/settings" element={<Navigate to="/admin/settings" replace />} />

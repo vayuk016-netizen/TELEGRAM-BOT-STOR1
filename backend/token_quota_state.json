@@ -1,0 +1,17 @@
+{
+  "2026-10-31": {
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmJiNjZhYzJhOWIzNGNiNCJ9LCJpYXQiOjE3OTMyNjc4MDMsImV4cCI6MTgwMTA0MzgwM30.KJBslDbpo0H-tsgnpj5-lpRyvHVEsldQPBjKIE2pPMY": {
+      "exhausted": true,
+      "used": 100,
+      "errorCode": 17,
+      "message": "Daily request limit of 100 exceeded. Please try again tomorrow.",
+      "updated_at": 1793440265.259386
+    },
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmY1Yzc2MzFlZmRmNDhlOSJ9LCJpYXQiOjE3OTIyMDYzMTIsImV4cCI6MTc5OTk4MjMxMn0.ReDvXISnWH42Tm8U7y3XIuht6eczTQEBiFGZHROoT2s": {
+      "exhausted": true,
+      "used": 100,
+      "errorCode": 19,
+      "message": "Daily request limit of 100 exceeded for this source. Please try again tomorrow."
+    }
+  }
+}

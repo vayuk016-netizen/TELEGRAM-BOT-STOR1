@@ -95,7 +95,7 @@ export const StoreCheckoutPage: React.FC = () => {
 
     const pollStatus = async () => {
       try {
-        const detail = await storeService.getOrderStatus(activeOrder.order_id);
+        const detail = await storeService.getOrderStatus(activeOrder.order_id, true);
         setOrderDetail(detail);
         if (detail.status === "COMPLETED" || detail.status === "PAID") {
           setIsPolling(false);

@@ -9,9 +9,9 @@ export function useLiveAnalytics(intervalMs: number = 5000) {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchAnalytics = async () => {
+    const fetchAnalytics = async (skipLoader: boolean = false) => {
       try {
-        const overview = await orderService.getAnalytics();
+        const overview = await orderService.getAnalytics(skipLoader);
         if (isMounted) {
           setData(overview);
           setLoading(false);
@@ -21,8 +21,8 @@ export function useLiveAnalytics(intervalMs: number = 5000) {
       }
     };
 
-    fetchAnalytics();
-    const interval = setInterval(fetchAnalytics, intervalMs);
+    fetchAnalytics(false);
+    const interval = setInterval(() => fetchAnalytics(true), intervalMs);
 
     return () => {
       isMounted = false;

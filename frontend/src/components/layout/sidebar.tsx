@@ -12,6 +12,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/use-sidebar-store";
@@ -25,6 +26,7 @@ const iconMap: Record<string, React.ElementType> = {
   Package,
   Key,
   ShoppingCart,
+  CreditCard,
   Users,
   Megaphone,
   Settings,
@@ -35,6 +37,7 @@ const navItems = [
   { titleKey: "products", href: "/admin/products", icon: "Package" },
   { titleKey: "stock_keys", href: "/admin/stock", icon: "Key" },
   { titleKey: "orders", href: "/admin/orders", icon: "ShoppingCart" },
+  { titleKey: "payments", href: "/admin/payments", icon: "CreditCard" },
   { titleKey: "users", href: "/admin/users", icon: "Users" },
   { titleKey: "broadcast", href: "/admin/broadcast", icon: "Megaphone" },
   { titleKey: "settings", href: "/admin/settings", icon: "Settings" },

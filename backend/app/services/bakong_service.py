@@ -4,6 +4,8 @@ import io
 import json
 import logging
 import time
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple
 import urllib.parse
@@ -70,12 +72,81 @@ def render_qr_image_bytes(data: str, size: int = 350) -> bytes:
 class BakongTokenPool:
     """
     Manages a pool of Bakong Open API tokens with automatic rotation & failover.
-    When a token reaches its daily quota of 100 requests (errorCode: 17),
-    it automatically rotates to the next available token in the pool!
+    Persists daily request quota & exhausted status in token_quota_state.json.
+    Bakong daily quota resets at 00:00:00 Cambodia Time (GMT+7).
     """
     def __init__(self):
-        self._exhausted_tokens: Dict[str, float] = {}  # token -> exhausted_until
         self._current_index: int = 0
+        self._state_file = Path(__file__).resolve().parents[2] / "token_quota_state.json"
+
+    def _get_cambodia_today(self) -> str:
+        return datetime.now(timezone(timedelta(hours=7))).strftime("%Y-%m-%d")
+
+    def _load_persisted_state(self) -> dict:
+        if self._state_file.exists():
+            try:
+                with open(self._state_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                logger.warning(f"Failed to load token quota state: {e}")
+        return {}
+
+    def _save_persisted_state(self, state: dict):
+        try:
+            with open(self._state_file, "w", encoding="utf-8") as f:
+                json.dump(state, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.warning(f"Failed to save token quota state: {e}")
+
+    def get_token_info(self, token: str) -> dict:
+        t_clean = token.strip()
+        today = self._get_cambodia_today()
+        state = self._load_persisted_state()
+        today_data = state.get(today, {})
+        tok_data = today_data.get(t_clean)
+        if tok_data:
+            return tok_data
+        return {
+            "exhausted": False,
+            "used": 0,
+            "errorCode": 0,
+            "message": "Active & Ready",
+        }
+
+    def record_request(self, token: str):
+        t_clean = token.strip()
+        today = self._get_cambodia_today()
+        state = self._load_persisted_state()
+        if today not in state:
+            state[today] = {}
+        curr = state[today].get(t_clean, {"exhausted": False, "used": 0, "errorCode": 0, "message": "Active & Ready"})
+        if not curr.get("exhausted", False):
+            curr["used"] = min(100, curr.get("used", 0) + 1)
+        state[today][t_clean] = curr
+        self._save_persisted_state(state)
+
+    def mark_exhausted(self, token: str, error_code: int = 17, message: str = ""):
+        t_clean = token.strip()
+        today = self._get_cambodia_today()
+        state = self._load_persisted_state()
+        if today not in state:
+            state[today] = {}
+        state[today][t_clean] = {
+            "exhausted": True,
+            "used": 100,
+            "errorCode": error_code,
+            "message": message or "Daily request limit of 100 exceeded. Please try again tomorrow.",
+            "updated_at": time.time(),
+        }
+        self._save_persisted_state(state)
+
+        tokens = self.get_tokens()
+        logger.warning(
+            f"Bakong Token [...{t_clean[-8:] if len(t_clean) > 8 else t_clean}] daily quota reached ({message}). "
+            f"Rotating to next available token in pool ({len(tokens)} tokens configured)."
+        )
+        if tokens:
+            self._current_index = (self._current_index + 1) % len(tokens)
 
     def get_tokens(self) -> list:
         return settings.bakong_token_list
@@ -84,36 +155,43 @@ class BakongTokenPool:
         tokens = self.get_tokens()
         if not tokens:
             return None
-        now = time.time()
         for i in range(len(tokens)):
             idx = (self._current_index + i) % len(tokens)
             tok = tokens[idx]
-            if now >= self._exhausted_tokens.get(tok, 0):
+            info = self.get_token_info(tok)
+            if not info.get("exhausted", False):
                 self._current_index = idx
                 return tok
         # If all exhausted, fallback to first token
         return tokens[0]
 
-    def mark_exhausted(self, token: str, duration_seconds: int = 3600 * 8):
-        """Marks token exhausted for 8 hours (or until daily reset)."""
-        self._exhausted_tokens[token] = time.time() + duration_seconds
-        tokens = self.get_tokens()
-        logger.warning(
-            f"Bakong Token [...{token[-8:] if len(token) > 8 else token}] daily quota reached. "
-            f"Rotating to next available token in pool ({len(tokens)} tokens configured)."
-        )
-        if tokens:
-            self._current_index = (self._current_index + 1) % len(tokens)
-
     def get_status(self) -> Dict[str, Any]:
         tokens = self.get_tokens()
-        now = time.time()
-        active = [f"...{t[-8:]}" for t in tokens if now >= self._exhausted_tokens.get(t, 0)]
-        exhausted = [f"...{t[-8:]}" for t in tokens if now < self._exhausted_tokens.get(t, 0)]
+        active = []
+        exhausted = []
+        total_used = 0
+        total_quota = len(tokens) * 100
+
+        for t in tokens:
+            info = self.get_token_info(t)
+            is_ex = info.get("exhausted", False)
+            used = 100 if is_ex else info.get("used", 0)
+            total_used += used
+            preview = f"...{t[-8:]}" if len(t) > 8 else t
+            if is_ex:
+                exhausted.append(preview)
+            else:
+                active.append(preview)
+
+        remaining = max(0, total_quota - total_used)
         return {
             "total_tokens": len(tokens),
             "active_tokens_count": len(active),
             "exhausted_tokens_count": len(exhausted),
+            "total_daily_quota": total_quota,
+            "used_requests": total_used,
+            "remaining_quota": remaining,
+            "quota_display": f"{remaining}/{total_quota}",
             "active_tokens": active,
             "exhausted_tokens": exhausted,
         }
@@ -273,6 +351,7 @@ class BakongService:
             }
 
             try:
+                token_pool.record_request(token)
                 async with httpx.AsyncClient(timeout=10.0) as client:
                     res = await client.post(url, json=payload, headers=headers)
                     if res.status_code == 200:
@@ -281,20 +360,26 @@ class BakongService:
                         if data.get("responseCode") == 0:
                             logger.info(f"Bakong payment CONFIRMED for MD5 {md5}: {data.get('data')}")
                             return data.get("data")
-                        elif data.get("errorCode") == 17:
+                        is_limit_exceeded = (
+                            data.get("errorCode") in [17, 18, 19]
+                            or "limit" in (data.get("responseMessage") or "").lower()
+                            or "exceeded" in (data.get("responseMessage") or "").lower()
+                        )
+                        if is_limit_exceeded:
                             # 100 requests limit exceeded on this token! Rotate!
+                            err_msg = data.get("responseMessage") or "Daily request limit of 100 exceeded"
                             logger.warning(
                                 f"Bakong Token [...{token[-8:] if len(token) > 8 else token}] "
-                                f"daily quota (100) exceeded. Auto-rotating to next token in pool..."
+                                f"daily quota exceeded ({err_msg}). Auto-rotating to next token..."
                             )
-                            token_pool.mark_exhausted(token)
+                            token_pool.mark_exhausted(token, error_code=data.get("errorCode", 17), message=err_msg)
                             continue  # Retry with next token in pool!
                         else:
                             # Pending or not found
                             logger.debug(f"Bakong check MD5 {md5}: {data.get('responseMessage')}")
                             return None
                     elif res.status_code in [401, 429]:
-                        token_pool.mark_exhausted(token)
+                        token_pool.mark_exhausted(token, error_code=res.status_code, message=f"HTTP {res.status_code} Error")
                         continue
                     else:
                         logger.warning(f"Bakong API check HTTP {res.status_code}: {res.text}")

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { topLoaderManager } from "@/components/ui/top-loader";
 
 const getApiBaseUrl = () => {
   const metaEnv = typeof import.meta !== "undefined" ? (import.meta as any).env : null;
@@ -30,23 +31,49 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const isPublic = config.url?.startsWith("/public");
-    const adminToken = localStorage.getItem("access_token");
-    const customerToken = localStorage.getItem("customer_token");
+apiClient.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const skip =
+        Boolean((config as any)?.skipTopLoader) ||
+        Boolean(config.headers?.["x-skip-loader"]);
 
-    const token = isPublic ? (customerToken || adminToken) : (adminToken || customerToken);
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (!skip) {
+        (config as any).__hasTopLoader = true;
+        topLoaderManager.start();
+      }
+
+      const isPublic = config.url?.startsWith("/public");
+      const adminToken = localStorage.getItem("access_token");
+      const customerToken = localStorage.getItem("customer_token");
+
+      const token = isPublic ? (customerToken || adminToken) : (adminToken || customerToken);
+      if (token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+    return config;
+  },
+  (error) => {
+    if (typeof window !== "undefined") {
+      topLoaderManager.done();
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (typeof window !== "undefined" && (response.config as any)?.__hasTopLoader) {
+      topLoaderManager.done();
+    }
+    return response;
+  },
   (error) => {
+    if (typeof window !== "undefined" && (error.config as any)?.__hasTopLoader) {
+      topLoaderManager.done();
+    }
+
     if (error.response?.status === 401 && typeof window !== "undefined") {
       const isPublic = error.config?.url?.startsWith("/public");
       const isAdminRoute = window.location.pathname.startsWith("/admin") || window.location.pathname === "/";
