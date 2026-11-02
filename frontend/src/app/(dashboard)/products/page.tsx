@@ -500,8 +500,20 @@ export default function ProductsPage() {
                       >
                         <div className="space-y-3">
                           
-                          {/* Card Thumbnail Image (or Icon fallback) */}
-                          <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
+                          {/* Top Header: Category & Live Key Badge */}
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800">
+                              <span>{cat?.icon || "📁"}</span>
+                              <span className="truncate max-w-[110px]">{cat?.name || "General"}</span>
+                            </span>
+
+                            <Badge variant={inStock ? "success" : "danger"} className="text-[10px] px-2.5 py-0.5 backdrop-blur-md">
+                              {inStock ? `${prod.stock_count} Keys` : "Out of Stock"}
+                            </Badge>
+                          </div>
+
+                          {/* Card Thumbnail Image (Fits Image Perfectly) */}
+                          <div className="relative w-full aspect-square sm:aspect-[4/3] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
                             {prod.image_url ? (
                               <>
                                 <img
@@ -513,29 +525,15 @@ export default function ProductsPage() {
                                 <img
                                   src={prod.image_url}
                                   alt={prod.title}
-                                  className="relative z-10 w-full h-full object-contain p-1 group-hover:scale-[1.03] transition-transform duration-300"
+                                  className="relative z-10 w-full h-full object-contain p-1.5 group-hover:scale-[1.03] transition-transform duration-300 drop-shadow-md"
                                 />
                               </>
                             ) : (
-                              <div className="text-4xl text-slate-600 flex flex-col items-center justify-center gap-1">
+                              <div className="text-4xl text-slate-600 flex flex-col items-center justify-center gap-1.5 py-8">
                                 <span>{cat?.icon || "📦"}</span>
-                                <span className="text-[10px] text-slate-500">No Photo</span>
+                                <span className="text-[10px] text-slate-500 font-semibold">No Photo</span>
                               </div>
                             )}
-
-                            {/* Badge overlays */}
-                            <div className="absolute top-2 left-2">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-900/85 backdrop-blur-md text-slate-200 border border-slate-700/60">
-                                <span>{cat?.icon || "📁"}</span>
-                                <span className="truncate max-w-[90px]">{cat?.name || "General"}</span>
-                              </span>
-                            </div>
-
-                            <div className="absolute top-2 right-2">
-                              <Badge variant={inStock ? "success" : "danger"} className="text-[10px] px-2 py-0.5 backdrop-blur-md">
-                                {inStock ? `${prod.stock_count} Keys` : "Out of Stock"}
-                              </Badge>
-                            </div>
                           </div>
 
                           {/* Product Info */}
