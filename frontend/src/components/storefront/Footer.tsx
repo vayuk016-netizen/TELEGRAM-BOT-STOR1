@@ -72,7 +72,7 @@ export const StoreFooter: React.FC = () => {
               href="https://t.me/sopha9926"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 transition-all active:scale-95 btn-line-rolling btn-rolling-gradient"
             >
               <MessageCircle className="h-4 w-4" />
               <span>@sopha9926</span>

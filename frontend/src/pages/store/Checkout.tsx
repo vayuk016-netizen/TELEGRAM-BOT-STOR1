@@ -280,7 +280,7 @@ export const StoreCheckoutPage: React.FC = () => {
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/products">
-              <Button className="text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white filter hover:brightness-110 shadow-md shadow-blue-500/20">
+              <Button className="text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white filter hover:brightness-110 shadow-md shadow-blue-500/20 btn-line-rolling btn-rolling-gradient">
                 Continue Shopping
               </Button>
             </Link>
@@ -373,7 +373,7 @@ export const StoreCheckoutPage: React.FC = () => {
               <Button
                 onClick={handleVerifyPayment}
                 disabled={isSubmitting}
-                className="w-full h-11 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 transition-all"
+                className="w-full h-11 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 transition-all btn-line-rolling btn-rolling-gradient"
               >
                 <span>{t("verify_now")}</span>
               </Button>
@@ -422,7 +422,7 @@ export const StoreCheckoutPage: React.FC = () => {
                   <Button
                     onClick={handleUploadReceipt}
                     disabled={!receiptFile || uploadingReceipt}
-                    className="h-11 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/25 filter hover:brightness-110 flex-shrink-0 transition-all border border-white/10"
+                    className="h-11 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/25 filter hover:brightness-110 flex-shrink-0 transition-all border border-white/10 btn-line-rolling btn-rolling-gradient"
                   >
                     <Upload className="h-4 w-4 mr-1.5" />
                     <span>{uploadingReceipt ? "Uploading..." : "Upload"}</span>
@@ -661,7 +661,7 @@ export const StoreCheckoutPage: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting || product.stock_count < quantity}
-                className="w-full h-12 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-xl shadow-blue-500/25 hover:shadow-rose-500/35 filter hover:brightness-110 border border-white/10 transition-all active:scale-95"
+                className="w-full h-12 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-xl shadow-blue-500/25 hover:shadow-rose-500/35 filter hover:brightness-110 border border-white/10 transition-all active:scale-95 btn-line-rolling btn-rolling-gradient"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

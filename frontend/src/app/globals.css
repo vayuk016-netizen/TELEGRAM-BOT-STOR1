@@ -137,3 +137,74 @@ body {
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
+
+/* 💫 Smooth Line Rolling & Shimmer Beam on Buttons */
+@keyframes line-rolling {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  45% {
+    transform: translateX(250%) skewX(-25deg);
+    opacity: 0.9;
+  }
+  46%, 100% {
+    transform: translateX(250%) skewX(-25deg);
+    opacity: 0;
+  }
+}
+
+@keyframes rolling-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-line-rolling {
+  animation: line-rolling 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.btn-rolling-gradient {
+  background-size: 200% 200% !important;
+  animation: rolling-gradient 4s ease infinite !important;
+}
+
+/* Rolling light line effect on buttons */
+.btn-line-rolling {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.btn-line-rolling::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 15%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0.05) 85%,
+    transparent 100%
+  );
+  transform: translateX(-150%) skewX(-25deg);
+  animation: line-rolling 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.btn-line-rolling:hover::after {
+  animation-duration: 1.6s;
+}

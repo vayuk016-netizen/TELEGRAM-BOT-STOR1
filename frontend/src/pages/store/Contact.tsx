@@ -45,7 +45,7 @@ export const StoreContactPage: React.FC = () => {
             href="https://t.me/sopha9926"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-rose-500/35 filter hover:brightness-110 border border-white/10 transition-all active:scale-95"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-rose-500/35 filter hover:brightness-110 border border-white/10 transition-all active:scale-95 btn-line-rolling btn-rolling-gradient"
           >
             <Send className="h-4 w-4" />
             <span>Chat With Support: @sopha9926</span>
