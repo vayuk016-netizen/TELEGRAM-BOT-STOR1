@@ -104,10 +104,10 @@ export const StoreProductsPage: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-slate-800/60 pb-1 scrollbar-none">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border filter ${
               selectedCategory === null
-                ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20"
-                : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
+                ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white border-transparent shadow-sm shadow-blue-500/25 brightness-105"
+                : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-gradient-to-r hover:from-blue-600/15 hover:to-rose-600/15 hover:brightness-110"
             }`}
           >
             {t("all_categories")}
@@ -116,10 +116,10 @@ export const StoreProductsPage: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 filter ${
                 selectedCategory === cat.id
-                  ? "bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20"
-                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
+                  ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white border-transparent shadow-sm shadow-blue-500/25 brightness-105"
+                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-gradient-to-r hover:from-blue-600/15 hover:to-rose-600/15 hover:brightness-110"
               }`}
             >
               <span>{cat.icon || "📦"}</span>

@@ -266,7 +266,7 @@ export const StoreCheckoutPage: React.FC = () => {
               </span>
               <button
                 onClick={() => handleCopy(orderDetail?.delivered_payload || "")}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-500 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white font-bold filter hover:brightness-110 shadow-sm shadow-blue-500/20 transition-all"
               >
                 <Copy className="h-3.5 w-3.5" />
                 <span>{copyStatus ? t("key_copied") : t("copy_key")}</span>
@@ -280,7 +280,7 @@ export const StoreCheckoutPage: React.FC = () => {
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/products">
-              <Button className="text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white">
+              <Button className="text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white filter hover:brightness-110 shadow-md shadow-blue-500/20">
                 Continue Shopping
               </Button>
             </Link>
@@ -334,7 +334,7 @@ export const StoreCheckoutPage: React.FC = () => {
                   <a
                     href={activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url}
                     download={`KHQR_Order_${activeOrder.order_id}.png`}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 flex-1 sm:flex-initial min-w-[120px]"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 hover:border-transparent hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-rose-600/20 text-slate-200 text-xs font-semibold transition-all border border-slate-700 flex-1 sm:flex-initial min-w-[120px] filter hover:brightness-110"
                   >
                     <Download className="h-3.5 w-3.5" />
                     <span>Download QR</span>
@@ -343,7 +343,7 @@ export const StoreCheckoutPage: React.FC = () => {
                 {activeOrder.khqr_string && (
                   <button
                     onClick={() => handleCopy(activeOrder.khqr_string)}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 flex-1 sm:flex-initial min-w-[120px]"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 hover:border-transparent hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-rose-600/20 text-slate-200 text-xs font-semibold transition-all border border-slate-700 flex-1 sm:flex-initial min-w-[120px] filter hover:brightness-110"
                   >
                     <Copy className="h-3.5 w-3.5" />
                     <span>{copyStatus ? "Copied!" : "Copy KHQR"}</span>
@@ -352,7 +352,7 @@ export const StoreCheckoutPage: React.FC = () => {
                 {activeOrder.deep_link && (
                   <a
                     href={activeOrder.deep_link}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-semibold transition-colors border border-blue-500/30 w-full sm:w-auto"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-600/20 to-rose-600/20 hover:from-blue-600/30 hover:to-rose-600/30 text-blue-400 hover:text-white text-xs font-semibold transition-all border border-blue-500/30 w-full sm:w-auto filter hover:brightness-110"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     <span>Open in Bakong</span>
@@ -373,7 +373,7 @@ export const StoreCheckoutPage: React.FC = () => {
               <Button
                 onClick={handleVerifyPayment}
                 disabled={isSubmitting}
-                className="w-full h-11 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 gap-2"
+                className="w-full h-11 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 transition-all"
               >
                 <span>{t("verify_now")}</span>
               </Button>
@@ -422,7 +422,7 @@ export const StoreCheckoutPage: React.FC = () => {
                   <Button
                     onClick={handleUploadReceipt}
                     disabled={!receiptFile || uploadingReceipt}
-                    className="h-11 px-4 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white flex-shrink-0"
+                    className="h-11 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/25 filter hover:brightness-110 flex-shrink-0 transition-all border border-white/10"
                   >
                     <Upload className="h-4 w-4 mr-1.5" />
                     <span>{uploadingReceipt ? "Uploading..." : "Upload"}</span>
@@ -661,7 +661,7 @@ export const StoreCheckoutPage: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting || product.stock_count < quantity}
-                className="w-full h-12 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 transition-all active:scale-95"
+                className="w-full h-12 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-xl shadow-blue-500/25 hover:shadow-rose-500/35 filter hover:brightness-110 border border-white/10 transition-all active:scale-95"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

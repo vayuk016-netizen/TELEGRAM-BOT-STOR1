@@ -148,7 +148,7 @@ export const StoreMyOrdersPage: React.FC = () => {
           <Button
             onClick={() => handleLookupOrder()}
             disabled={!orderSearchId}
-            className="h-11 px-6 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white gap-2 flex-shrink-0"
+            className="h-11 px-6 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/25 filter hover:brightness-110 border border-white/10 gap-2 flex-shrink-0 transition-all"
           >
             <Search className="h-4 w-4" />
             <span>Search Order</span>
@@ -197,7 +197,7 @@ export const StoreMyOrdersPage: React.FC = () => {
                 </span>
                 <button
                   onClick={() => handleCopy(searchedOrder.delivered_payload || "")}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-600 text-white font-bold text-xs hover:bg-blue-500 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white font-bold text-xs filter hover:brightness-110 shadow-sm shadow-blue-500/20 transition-all"
                 >
                   <Copy className="h-3.5 w-3.5" />
                   <span>{copiedKey === searchedOrder.delivered_payload ? t("key_copied") : t("copy_key")}</span>

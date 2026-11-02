@@ -341,7 +341,7 @@ export default function PaymentsPage() {
           <Button
             size="sm"
             onClick={() => setIsTokenModalOpen(true)}
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex-1 sm:flex-initial text-xs"
+            className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 flex-1 sm:flex-initial text-xs transition-all"
           >
             <Layers className="h-4 w-4" />
             {isKh ? "កែប្រែ Token Pool" : "Manage Tokens"}
@@ -1058,7 +1058,7 @@ export default function PaymentsPage() {
                   size="sm"
                   onClick={handleSaveTokens}
                   disabled={savingTokens}
-                  className="bg-blue-600 hover:bg-blue-700 text-white gap-1"
+                  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-1 transition-all"
                 >
                   <Save className="h-4 w-4" />
                   {savingTokens ? (isKh ? "កំពុងរក្សាទុក..." : "Saving...") : (isKh ? "រក្សាទុក Token Pool" : "Save Token Pool")}

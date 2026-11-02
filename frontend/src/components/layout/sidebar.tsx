@@ -79,7 +79,7 @@ export const Sidebar: React.FC = () => {
             className={cn(
               "group relative flex items-center gap-3.5 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-300 ease-out transform active:scale-[0.98] border",
               isActive
-                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20 border-blue-500 scale-[1.01]"
+                ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/25 border-white/20 filter brightness-105 scale-[1.01]"
                 : isDark
                   ? "bg-white/5 text-white/70 hover:bg-white/10 border-white/5 hover:border-blue-500/40 hover:scale-[1.01]"
                   : "bg-black/[0.03] text-slate-300 hover:bg-black/[0.07] border-black/5 hover:border-blue-500/40 hover:scale-[1.01]"

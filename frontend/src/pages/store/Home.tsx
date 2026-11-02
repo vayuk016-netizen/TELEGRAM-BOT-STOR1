@@ -70,7 +70,7 @@ export const HomePage: React.FC = () => {
             <Button
               size="lg"
               onClick={() => navigate("/products")}
-              className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 gap-2 active:scale-95 transition-all"
+              className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 active:scale-95 transition-all"
             >
               <ShoppingBag className="h-4 w-4" />
               <span>{t("browse_catalog")}</span>
@@ -104,10 +104,10 @@ export const HomePage: React.FC = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border filter ${
               selectedCategory === null
-                ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
-                : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
+                ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white border-transparent shadow-md shadow-blue-500/25 brightness-105"
+                : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-gradient-to-r hover:from-blue-600/15 hover:to-rose-600/15 hover:brightness-110"
             }`}
           >
             {t("all_categories")}
@@ -116,10 +116,10 @@ export const HomePage: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border flex items-center gap-1.5 filter ${
                 selectedCategory === cat.id
-                  ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
-                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700"
+                  ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white border-transparent shadow-md shadow-blue-500/25 brightness-105"
+                  : "bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-gradient-to-r hover:from-blue-600/15 hover:to-rose-600/15 hover:brightness-110"
               }`}
             >
               <span>{cat.icon || "📦"}</span>

@@ -322,7 +322,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
             type="submit"
             variant="primary"
             disabled={loading || effectiveCount === 0}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold gap-2 text-xs shadow-lg shadow-emerald-600/20 px-4"
+            className="bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-bold gap-2 text-xs shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 px-4 transition-all"
           >
             {loading ? (
               <>

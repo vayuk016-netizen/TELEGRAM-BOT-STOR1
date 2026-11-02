@@ -167,7 +167,7 @@ export const InspectKeysModal: React.FC<InspectKeysModalProps> = ({
                   onClose();
                   onOpenAddModal(product.id);
                 }}
-                className="h-7 text-xs px-2.5 gap-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md shadow-emerald-600/20"
+                className="h-7 text-xs px-2.5 gap-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-bold shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 transition-all"
               >
                 <Plus className="h-3 w-3" />
                 <span>+ បន្ថែម Keys</span>

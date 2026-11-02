@@ -408,7 +408,7 @@ export default function BroadcastPage() {
             <Button
               onClick={handleSendNow}
               disabled={loading || uploadingImage}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-[#dc2626] hover:bg-[#b91c1c] text-white disabled:opacity-50 transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 disabled:opacity-50 transition-all"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               Send Now

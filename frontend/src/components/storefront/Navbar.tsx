@@ -72,7 +72,7 @@ export const StoreNavbar: React.FC = () => {
                 to={link.href}
                 className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-blue-600/15 text-blue-400 font-bold border border-blue-500/30"
+                    ? "bg-gradient-to-r from-blue-600/20 to-rose-600/20 text-blue-400 font-bold border border-blue-500/40 shadow-sm shadow-blue-500/10 filter brightness-105"
                     : "text-slate-400 hover:text-slate-100 hover:bg-slate-900/60"
                 }`}
               >
@@ -200,9 +200,9 @@ export const StoreNavbar: React.FC = () => {
                 key={link.href}
                 to={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold min-h-[44px] transition-colors ${
+                className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold min-h-[44px] transition-all filter ${
                   pathname === link.href
-                    ? "bg-blue-600 text-white font-bold"
+                    ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white font-bold shadow-md shadow-blue-500/20 brightness-105"
                     : "text-slate-300 hover:bg-slate-900"
                 }`}
               >

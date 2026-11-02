@@ -444,10 +444,10 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewMode("cards")}
                 title="Card Grid View"
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1.5 rounded-lg transition-all filter ${
                   viewMode === "cards"
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white shadow-sm shadow-blue-500/20 brightness-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                 }`}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -455,10 +455,10 @@ export default function ProductsPage() {
               <button
                 onClick={() => setViewMode("table")}
                 title="Table View"
-                className={`p-1.5 rounded-lg transition-colors ${
+                className={`p-1.5 rounded-lg transition-all filter ${
                   viewMode === "table"
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white shadow-sm shadow-blue-500/20 brightness-105"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                 }`}
               >
                 <List className="h-4 w-4" />

@@ -129,7 +129,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 mt-2 text-sm font-bold gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-600/25 rounded-xl transition-all transform active:scale-[0.99]"
+              className="w-full h-11 mt-2 text-sm font-bold gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-xl shadow-blue-600/25 hover:shadow-rose-600/35 filter hover:brightness-110 border border-white/10 rounded-xl transition-all transform active:scale-[0.98]"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

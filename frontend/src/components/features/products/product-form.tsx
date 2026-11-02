@@ -473,7 +473,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             type="submit"
             variant="primary"
             disabled={loading || !title.trim() || !price}
-            className="text-xs gap-1.5 font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 px-4"
+            className="text-xs gap-1.5 font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-600/20 hover:shadow-rose-600/30 filter hover:brightness-110 border border-white/10 px-4 transition-all"
           >
             {loading ? (
               <>

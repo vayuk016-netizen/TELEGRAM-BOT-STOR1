@@ -200,10 +200,10 @@ export const StoreProductDetailPage: React.FC = () => {
                     key={q}
                     type="button"
                     onClick={() => setQuantity(q)}
-                    className={`h-10 w-11 rounded-xl text-xs font-bold transition-all border font-mono ${
+                    className={`h-10 w-11 rounded-xl text-xs font-bold transition-all border font-mono filter ${
                       quantity === q
-                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20 scale-105"
-                        : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-700"
+                        ? "bg-gradient-to-r from-blue-600 to-rose-600 text-white border-transparent shadow-md shadow-blue-500/25 scale-105 brightness-105"
+                        : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-100 hover:border-slate-700 hover:bg-gradient-to-r hover:from-blue-600/15 hover:to-rose-600/15 hover:brightness-110"
                     }`}
                   >
                     {q}
@@ -227,7 +227,7 @@ export const StoreProductDetailPage: React.FC = () => {
               <Button
                 size="lg"
                 onClick={() => navigate(`/checkout/${product.id}?qty=${quantity}`)}
-                className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 gap-2 active:scale-95 transition-all justify-center"
+                className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 active:scale-95 transition-all justify-center"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span>{t("buy_now")}</span>

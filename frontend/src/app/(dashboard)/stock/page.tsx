@@ -147,7 +147,7 @@ export default function StockPage() {
             size="sm"
             onClick={() => handleOpenUpload()}
             disabled={products.length === 0}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-500 focus:ring-emerald-500 text-white shadow-lg shadow-emerald-500/20 text-xs flex-1 sm:flex-initial whitespace-nowrap"
+            className="gap-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 text-xs flex-1 sm:flex-initial whitespace-nowrap transition-all"
           >
             <Upload className="h-3.5 w-3.5" />
             Bulk Key Upload
