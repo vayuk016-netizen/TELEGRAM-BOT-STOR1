@@ -131,7 +131,7 @@ export const StoreMyOrdersPage: React.FC = () => {
       {/* 🔍 Search / Lookup Order by ID Box */}
       <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 space-y-4 shadow-sm backdrop-blur-md">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-          Instant Order Lookup (By Order ID)
+          {t("instant_order_lookup")}
         </h3>
         
         <div className="flex flex-col sm:flex-row gap-3">
@@ -141,7 +141,7 @@ export const StoreMyOrdersPage: React.FC = () => {
               type="text"
               value={orderSearchId}
               onChange={(e) => setOrderSearchId(e.target.value)}
-              placeholder="Enter your Order ID (e.g. 101)..."
+              placeholder={t("enter_order_id_placeholder")}
               className="pl-10 h-11 bg-slate-950 border-slate-800 text-xs rounded-xl"
             />
           </div>
@@ -151,7 +151,7 @@ export const StoreMyOrdersPage: React.FC = () => {
             className="h-11 px-6 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20 hover:shadow-rose-500/25 filter hover:brightness-110 border border-white/10 gap-2 flex-shrink-0 transition-all"
           >
             <Search className="h-4 w-4" />
-            <span>Search Order</span>
+            <span>{t("search_order")}</span>
           </Button>
         </div>
 
@@ -165,7 +165,7 @@ export const StoreMyOrdersPage: React.FC = () => {
         <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 sm:p-8 space-y-6 shadow-md animate-in fade-in">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
-              <span className="text-xs font-mono font-bold text-slate-400">ORDER RECORD</span>
+              <span className="text-xs font-mono font-bold text-slate-400">{t("order_record")}</span>
               <h2 className="text-xl font-black text-slate-100 flex items-center gap-2">
                 <span>#{searchedOrder.order_id}</span>
                 <span className="text-slate-400 font-normal">|</span>
@@ -210,7 +210,7 @@ export const StoreMyOrdersPage: React.FC = () => {
             </div>
           ) : (
             <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-500 font-medium">
-              Payment is awaiting confirmation. License keys will appear here automatically as soon as payment is confirmed.
+              {t("order_awaiting_payment_note")}
             </div>
           )}
         </div>
@@ -221,7 +221,7 @@ export const StoreMyOrdersPage: React.FC = () => {
         <div className="space-y-4">
           <h3 className="text-base font-extrabold text-slate-100 flex items-center gap-2">
             <Clock className="h-4 w-4 text-blue-500" />
-            <span>Order History for @{customer.username || customer.first_name}</span>
+            <span>{t("order_history_for")} @{customer.username || customer.first_name}</span>
           </h3>
 
           {loadingOrders ? (
@@ -256,13 +256,13 @@ export const StoreMyOrdersPage: React.FC = () => {
                   {ord.delivered_payload && (
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-slate-400">Delivered Key:</span>
+                        <span className="font-bold text-slate-400">{t("delivered_key_label")}</span>
                         <button
                           onClick={() => handleCopy(ord.delivered_payload)}
                           className="text-blue-500 hover:underline flex items-center gap-1 font-bold"
                         >
                           <Copy className="h-3 w-3" />
-                          <span>{copiedKey === ord.delivered_payload ? "Copied" : "Copy"}</span>
+                          <span>{copiedKey === ord.delivered_payload ? t("key_copied") : t("copy_key")}</span>
                         </button>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-950 font-mono text-xs text-emerald-400 break-all select-all border border-slate-800">

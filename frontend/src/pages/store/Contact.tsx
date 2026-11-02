@@ -14,14 +14,13 @@ export const StoreContactPage: React.FC = () => {
       {/* Title */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
         <span className="text-xs font-bold uppercase tracking-wider text-blue-500">
-          24/7 CUSTOMER CARE
+          {t("contact_badge")}
         </span>
         <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-slate-100">
           {t("nav_contact")}
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-          Need help with your subscription or have questions about automated Bakong KHQR delivery?
-          Our customer support team is available 24/7 on Telegram.
+          {t("contact_subtitle")}
         </p>
       </div>
 
@@ -33,10 +32,10 @@ export const StoreContactPage: React.FC = () => {
 
         <div className="space-y-2">
           <h2 className="text-2xl font-black text-slate-100">
-            Official Telegram Support
+            {t("contact_card_title")}
           </h2>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Click below to start a direct chat with our support manager on Telegram:
+            {t("contact_card_desc")}
           </p>
         </div>
 
@@ -48,7 +47,7 @@ export const StoreContactPage: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-rose-500/35 filter hover:brightness-110 border border-white/10 transition-all active:scale-95 btn-line-rolling btn-rolling-gradient"
           >
             <Send className="h-4 w-4" />
-            <span>Chat With Support: @sopha9926</span>
+            <span>{t("contact_chat_btn")}</span>
             <ExternalLink className="h-4 w-4 ml-1 opacity-70" />
           </a>
         </div>
@@ -58,20 +57,20 @@ export const StoreContactPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
         <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2 text-center">
           <Clock className="h-6 w-6 text-blue-500 mx-auto" />
-          <h4 className="font-bold text-sm text-slate-100">24/7 Availability</h4>
-          <p className="text-xs text-slate-400">Our Telegram Bot and automated fulfillment run non-stop 365 days a year.</p>
+          <h4 className="font-bold text-sm text-slate-100">{t("contact_feat1_title")}</h4>
+          <p className="text-xs text-slate-400">{t("contact_feat1_desc")}</p>
         </div>
 
         <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2 text-center">
           <ShieldCheck className="h-6 w-6 text-emerald-500 mx-auto" />
-          <h4 className="font-bold text-sm text-slate-100">Guaranteed Warranty</h4>
-          <p className="text-xs text-slate-400">All CapCut, Canva and digital subscription accounts come with full period replacement warranty.</p>
+          <h4 className="font-bold text-sm text-slate-100">{t("contact_feat2_title")}</h4>
+          <p className="text-xs text-slate-400">{t("contact_feat2_desc")}</p>
         </div>
 
         <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-2 text-center">
           <Sparkles className="h-6 w-6 text-purple-500 mx-auto" />
-          <h4 className="font-bold text-sm text-slate-100">Fast Response</h4>
-          <p className="text-xs text-slate-400">Average response time under 5 minutes for payment slips or custom team licenses.</p>
+          <h4 className="font-bold text-sm text-slate-100">{t("contact_feat3_title")}</h4>
+          <p className="text-xs text-slate-400">{t("contact_feat3_desc")}</p>
         </div>
       </div>
     </div>

@@ -87,7 +87,7 @@ export const HomePage: React.FC = () => {
               {t("featured_products")}
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Select your category or choose from our best-selling subscriptions below:
+              {t("home_category_subtitle")}
             </p>
           </div>
 
@@ -138,8 +138,8 @@ export const HomePage: React.FC = () => {
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-16 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
             <Sparkles className="h-8 w-8 text-slate-400 mx-auto" />
-            <h4 className="font-bold text-slate-100">No products available in this category</h4>
-            <p className="text-xs text-slate-400">Please check back soon or browse other categories.</p>
+            <h4 className="font-bold text-slate-100">{t("no_products_category")}</h4>
+            <p className="text-xs text-slate-400">{t("no_products_category_desc")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

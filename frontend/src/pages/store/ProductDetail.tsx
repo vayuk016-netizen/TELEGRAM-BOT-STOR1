@@ -68,9 +68,9 @@ export const StoreProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-xl font-bold">Product Not Found</h2>
-        <p className="text-xs text-slate-500">The product you are looking for is currently unavailable.</p>
-        <Button onClick={() => navigate("/products")}>Back to Catalog</Button>
+        <h2 className="text-xl font-bold">{t("product_not_found")}</h2>
+        <p className="text-xs text-slate-500">{t("product_not_found_desc")}</p>
+        <Button onClick={() => navigate("/products")}>{t("back_to_catalog")}</Button>
       </div>
     );
   }
@@ -124,18 +124,18 @@ export const StoreProductDetailPage: React.FC = () => {
           <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
               <Zap className="h-4 w-4 text-blue-500 mx-auto mb-1" />
-              <span className="font-bold text-[11px] block text-slate-100">Instant</span>
-              <span className="text-[10px] text-slate-400">Automated Delivery</span>
+              <span className="font-bold text-[11px] block text-slate-100">{t("instant_delivery_title")}</span>
+              <span className="text-[10px] text-slate-400">{t("instant_delivery_desc")}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
               <ShieldCheck className="h-4 w-4 text-emerald-500 mx-auto mb-1" />
-              <span className="font-bold text-[11px] block text-slate-100">Verified</span>
-              <span className="text-[10px] text-slate-400">100% Genuine</span>
+              <span className="font-bold text-[11px] block text-slate-100">{t("verified_title")}</span>
+              <span className="text-[10px] text-slate-400">{t("verified_desc")}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
               <Clock className="h-4 w-4 text-purple-500 mx-auto mb-1" />
-              <span className="font-bold text-[11px] block text-slate-100">24/7 Bot</span>
-              <span className="text-[10px] text-slate-400">Telegram Sync</span>
+              <span className="font-bold text-[11px] block text-slate-100">{t("telegram_sync_title")}</span>
+              <span className="text-[10px] text-slate-400">{t("telegram_sync_desc")}</span>
             </div>
           </div>
         </div>
@@ -155,7 +155,7 @@ export const StoreProductDetailPage: React.FC = () => {
               className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-900 border border-slate-800 text-xs font-bold flex items-center gap-1 transition-all"
             >
               <Share2 className="h-3.5 w-3.5" />
-              <span>{copiedLink ? "Copied!" : "Share"}</span>
+              <span>{copiedLink ? t("copied") : t("share")}</span>
             </button>
           </div>
 
@@ -167,7 +167,7 @@ export const StoreProductDetailPage: React.FC = () => {
           {/* Price & Stock Badge */}
           <div className="flex items-baseline gap-4 py-2 border-y border-slate-800">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">Unit Price</span>
+              <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">{t("unit_price")}</span>
               <span className="text-3xl font-black text-blue-500 font-mono">
                 ${product.price.toFixed(2)}
               </span>
@@ -238,7 +238,7 @@ export const StoreProductDetailPage: React.FC = () => {
           {/* Description & Feature list */}
           <div className="space-y-3 pt-4 border-t border-slate-800">
             <h3 className="text-sm font-bold text-slate-100">
-              Description & Subscription Details
+              {t("desc_sub_details")}
             </h3>
             <div className="text-xs text-slate-400 leading-relaxed whitespace-pre-line bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
               {product.description || "100% genuine private subscription with automated instant key delivery upon payment."}

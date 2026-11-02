@@ -206,8 +206,8 @@ export const StoreCheckoutPage: React.FC = () => {
   if (!product) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-xl font-bold text-slate-100">Product Not Found</h2>
-        <Button onClick={() => navigate("/products")}>Back to Products</Button>
+        <h2 className="text-xl font-bold text-slate-100">{t("product_not_found")}</h2>
+        <Button onClick={() => navigate("/products")}>{t("back_to_products")}</Button>
       </div>
     );
   }
@@ -225,10 +225,10 @@ export const StoreCheckoutPage: React.FC = () => {
           className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-100 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Product</span>
+          <span>{t("back_to_products")}</span>
         </Link>
         <div className="text-xs font-mono font-bold text-slate-400">
-          SECURE CHECKOUT
+          {t("secure_checkout")}
         </div>
       </div>
 
@@ -300,10 +300,10 @@ export const StoreCheckoutPage: React.FC = () => {
               <span>{t("status_pending")}</span>
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-slate-100">
-              Order #{activeOrder.order_id} Created
+              {t("order_created")} #{activeOrder.order_id}
             </h2>
             <p className="text-xs text-slate-400">
-              Total Due: <span className="font-bold text-blue-500 font-mono text-base">${activeOrder.total_amount?.toFixed(2)}</span>
+              {t("total_due")} <span className="font-bold text-blue-500 font-mono text-base">${activeOrder.total_amount?.toFixed(2)}</span>
             </p>
           </div>
 
@@ -337,7 +337,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 hover:border-transparent hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-rose-600/20 text-slate-200 text-xs font-semibold transition-all border border-slate-700 flex-1 sm:flex-initial min-w-[120px] filter hover:brightness-110"
                   >
                     <Download className="h-3.5 w-3.5" />
-                    <span>Download QR</span>
+                    <span>{t("download_qr")}</span>
                   </a>
                 )}
                 {activeOrder.khqr_string && (
@@ -346,7 +346,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 hover:border-transparent hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-rose-600/20 text-slate-200 text-xs font-semibold transition-all border border-slate-700 flex-1 sm:flex-initial min-w-[120px] filter hover:brightness-110"
                   >
                     <Copy className="h-3.5 w-3.5" />
-                    <span>{copyStatus ? "Copied!" : "Copy KHQR"}</span>
+                    <span>{copyStatus ? t("key_copied") : t("copy_khqr")}</span>
                   </button>
                 )}
                 {activeOrder.deep_link && (
@@ -355,7 +355,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-blue-600/20 to-rose-600/20 hover:from-blue-600/30 hover:to-rose-600/30 text-blue-400 hover:text-white text-xs font-semibold transition-all border border-blue-500/30 w-full sm:w-auto filter hover:brightness-110"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
-                    <span>Open in Bakong</span>
+                    <span>{t("open_in_bakong")}</span>
                   </a>
                 )}
               </div>
@@ -454,7 +454,7 @@ export const StoreCheckoutPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                   <Send className="h-4 w-4 text-blue-500" />
-                  <span>Telegram Delivery Details</span>
+                  <span>{t("telegram_delivery_details")}</span>
                 </h3>
                 {customer ? (
                   <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
@@ -470,7 +470,7 @@ export const StoreCheckoutPage: React.FC = () => {
               <div className="space-y-3">
                 <div>
                   <label className="text-xs font-semibold text-slate-400 block mb-1">
-                    Telegram User ID / Username (Optional)
+                    {t("telegram_id_label")}
                   </label>
                   <Input
                     type="text"
@@ -480,7 +480,7 @@ export const StoreCheckoutPage: React.FC = () => {
                     className="h-10 bg-slate-950 border-slate-800 text-xs rounded-xl"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
-                    Enter your Telegram ID so our bot sends your purchased keys directly to your Telegram chat.
+                    {t("telegram_id_desc")}
                   </p>
                 </div>
               </div>
@@ -666,10 +666,10 @@ export const StoreCheckoutPage: React.FC = () => {
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Processing Order...</span>
+                    <span>{t("processing_order")}</span>
                   </span>
                 ) : (
-                  <span>Confirm & Proceed to Payment (${totalPrice.toFixed(2)})</span>
+                  <span>{t("confirm_payment")} (${totalPrice.toFixed(2)})</span>
                 )}
               </Button>
             </div>

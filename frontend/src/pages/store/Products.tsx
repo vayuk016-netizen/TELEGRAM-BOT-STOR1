@@ -62,7 +62,7 @@ export const StoreProductsPage: React.FC = () => {
           {t("nav_products")}
         </h1>
         <p className="text-xs sm:text-sm text-slate-400">
-          Browse all available instant-delivery digital tools, subscriptions, and activation keys.
+          {t("products_subtitle")}
         </p>
       </div>
 
@@ -142,8 +142,8 @@ export const StoreProductsPage: React.FC = () => {
       ) : products.length === 0 ? (
         <div className="text-center py-20 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
           <ShoppingBag className="h-10 w-10 text-slate-400 mx-auto" />
-          <h4 className="font-bold text-base text-slate-100">No products found</h4>
-          <p className="text-xs text-slate-400">Try adjusting your search query or switching categories.</p>
+          <h4 className="font-bold text-base text-slate-100">{t("no_products_found")}</h4>
+          <p className="text-xs text-slate-400">{t("no_products_desc")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

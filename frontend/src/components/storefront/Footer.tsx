@@ -28,10 +28,10 @@ export const StoreFooter: React.FC = () => {
             </p>
             <div className="flex flex-wrap items-center gap-2 pt-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                <Zap className="h-3 w-3" /> 24/7 Automated Delivery
+                <Zap className="h-3 w-3" /> {t("footer_automated_delivery")}
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <ShieldCheck className="h-3 w-3" /> 100% Genuine Licenses
+                <ShieldCheck className="h-3 w-3" /> {t("footer_genuine_licenses")}
               </span>
             </div>
           </div>
@@ -66,7 +66,7 @@ export const StoreFooter: React.FC = () => {
               {t("nav_contact")}
             </h4>
             <p className="text-xs text-slate-400">
-              Need assistance or custom account setup? Contact our 24/7 support team directly on Telegram:
+              {t("footer_need_help")}
             </p>
             <a
               href="https://t.me/sopha9926"
@@ -84,7 +84,7 @@ export const StoreFooter: React.FC = () => {
         <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>© {new Date().getFullYear()} {t("copyright")}</p>
           <div className="flex items-center gap-2">
-            <span>Powered by Telegram Bot & Bakong KHQR</span>
+            <span>{t("footer_powered_by")}</span>
           </div>
         </div>
       </div>
