@@ -399,7 +399,7 @@ export default function BroadcastPage() {
             <Button
               onClick={handleSaveSchedule}
               disabled={loading || uploadingImage}
-              className="flex items-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-800 text-gray-900 dark:text-slate-100 disabled:opacity-50 transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-800 text-gray-900 dark:text-slate-100 disabled:opacity-50 transition-all"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Save Schedule
@@ -408,7 +408,7 @@ export default function BroadcastPage() {
             <Button
               onClick={handleSendNow}
               disabled={loading || uploadingImage}
-              className="flex items-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-[#dc2626] hover:bg-[#b91c1c] text-white disabled:opacity-50 transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-[#dc2626] hover:bg-[#b91c1c] text-white disabled:opacity-50 transition-all"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               Send Now

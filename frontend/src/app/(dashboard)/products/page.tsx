@@ -231,32 +231,35 @@ export default function ProductsPage() {
             Manage store product categories, prices, descriptions, and active stock levels.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 text-xs flex-1 sm:flex-initial">
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate("/admin/stock")}
-            className="gap-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-bold"
+            className="gap-2 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-bold text-xs flex-1 sm:flex-initial"
           >
-            <Key className="h-4 w-4 text-emerald-400" />
-            + Add / Manage Stock
+            <Key className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="hidden xs:inline">+ Add / Manage Stock</span>
+            <span className="xs:hidden">Stock</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={handleAddNewCategory}
-            className="gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+            className="gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10 text-xs flex-1 sm:flex-initial"
           >
-            <Plus className="h-4 w-4" />
-            Add Category
+            <Plus className="h-3.5 w-3.5" />
+            <span className="hidden xs:inline">Add Category</span>
+            <span className="xs:hidden">Category</span>
           </Button>
-          <Button variant="primary" size="sm" onClick={handleAddNewProduct} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add Product
+          <Button variant="primary" size="sm" onClick={handleAddNewProduct} className="gap-2 text-xs flex-1 sm:flex-initial">
+            <Plus className="h-3.5 w-3.5" />
+            <span className="hidden xs:inline">Add Product</span>
+            <span className="xs:hidden">Product</span>
           </Button>
         </div>
       </div>

@@ -327,13 +327,13 @@ export default function PaymentsPage() {
               : "Track customer payment history via Data Table with multi-filters and monitor Bakong token quotas"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={handleRefreshAll}
             disabled={refreshing || historyLoading}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 flex-1 sm:flex-initial text-xs"
           >
             <RefreshCw className={`h-4 w-4 ${refreshing || historyLoading ? "animate-spin" : ""}`} />
             {isKh ? "Refresh ឡើងវិញ" : "Refresh All"}
@@ -341,7 +341,7 @@ export default function PaymentsPage() {
           <Button
             size="sm"
             onClick={() => setIsTokenModalOpen(true)}
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white shadow-sm flex-1 sm:flex-initial text-xs"
           >
             <Layers className="h-4 w-4" />
             {isKh ? "កែប្រែ Token Pool" : "Manage Tokens"}

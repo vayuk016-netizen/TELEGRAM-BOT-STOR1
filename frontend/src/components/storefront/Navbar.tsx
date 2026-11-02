@@ -114,9 +114,9 @@ export const StoreNavbar: React.FC = () => {
             )}
           </button>
 
-          {/* Customer Auth / User Info */}
+          {/* Customer Auth / User Info (Desktop / Tablet) */}
           {customer && (
-            <div className="flex items-center gap-2 pl-1 border-l border-slate-800">
+            <div className="hidden sm:flex items-center gap-2 pl-1 border-l border-slate-800">
               <Link
                 to="/my-orders"
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500/40 transition-all text-xs"
@@ -146,7 +146,8 @@ export const StoreNavbar: React.FC = () => {
           {/* Mobile Hamburger Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl border border-slate-800 text-slate-300 hover:bg-slate-900"
+            aria-label="Toggle navigation menu"
+            className="md:hidden p-2 rounded-xl border border-slate-800 text-slate-300 hover:bg-slate-900 active:scale-95 transition-transform"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -155,22 +156,62 @@ export const StoreNavbar: React.FC = () => {
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-2xl px-4 py-4 space-y-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              to={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2.5 rounded-xl text-sm font-semibold ${
-                pathname === link.href
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-300 hover:bg-slate-900"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="pt-2 border-t border-slate-800 flex justify-end items-center">
+        <div className="md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-2xl px-4 py-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+          {/* Customer Profile & Balance (Mobile) */}
+          {customer && (
+            <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between shadow-sm">
+              <Link
+                to="/my-orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5 min-w-0"
+              >
+                {customer.photo_url ? (
+                  <img src={customer.photo_url} alt="" className="h-9 w-9 rounded-full object-cover border border-slate-700" />
+                ) : (
+                  <div className="h-9 w-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                    <User className="h-5 w-5" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <span className="block font-bold text-sm text-slate-100 truncate">
+                    {customer.first_name}
+                  </span>
+                  <span className="block text-xs font-mono text-emerald-400 font-bold">
+                    Balance: ${customer.balance?.toFixed(2)}
+                  </span>
+                </div>
+              </Link>
+              <button
+                onClick={() => {
+                  logout();
+                  setMobileMenuOpen(false);
+                }}
+                className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center px-4 py-3 rounded-xl text-sm font-semibold min-h-[44px] transition-colors ${
+                  pathname === link.href
+                    ? "bg-blue-600 text-white font-bold"
+                    : "text-slate-300 hover:bg-slate-900"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className="pt-2 border-t border-slate-800/80 flex justify-between items-center px-1">
             <Link
               to="/contact"
               onClick={() => setMobileMenuOpen(false)}
@@ -179,6 +220,9 @@ export const StoreNavbar: React.FC = () => {
               <MessageCircle className="h-4 w-4" />
               <span>Telegram Support</span>
             </Link>
+            <span className="text-[10px] text-slate-500 font-mono">
+              v1.0.0
+            </span>
           </div>
         </div>
       )}

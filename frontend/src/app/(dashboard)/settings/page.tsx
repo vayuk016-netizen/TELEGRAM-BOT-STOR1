@@ -118,7 +118,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Bot & Payment Configuration Form */}
-      <div className="rounded-2xl border border-slate-850 bg-slate-900/60 p-6 md:p-8 shadow-xl backdrop-blur-md space-y-6">
+      <div className="rounded-2xl border border-slate-850 bg-slate-900/60 p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-md space-y-6">
         {error && (
           <div className="flex items-start gap-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 p-4 text-xs text-rose-400">
             <AlertCircle className="h-4.5 w-4.5 flex-shrink-0 mt-0.5" />
@@ -279,7 +279,7 @@ export default function SettingsPage() {
             <Button
               type="submit"
               disabled={saving}
-              className="h-11 px-8 text-xs font-semibold gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-600/10 rounded-lg transition-all"
+              className="w-full sm:w-auto h-11 px-8 text-xs font-semibold gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-600/10 rounded-lg transition-all"
             >
               {saving ? (
                 <>
@@ -298,7 +298,7 @@ export default function SettingsPage() {
       </div>
 
       {/* 🎨 Section 2: Sidebar & Header Color Settings */}
-      <div className="rounded-2xl border border-slate-850 bg-slate-900/60 p-6 md:p-8 shadow-xl backdrop-blur-md space-y-6">
+      <div className="rounded-2xl border border-slate-850 bg-slate-900/60 p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-md space-y-6">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">

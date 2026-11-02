@@ -52,7 +52,7 @@ export default function LoginPage() {
     <div className="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl backdrop-blur-2xl grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
       
       {/* LEFT COLUMN: Clean Light Panel with Sharp Dark Black Text */}
-      <div className="lg:col-span-6 p-8 sm:p-12 flex flex-col justify-between bg-white text-[#0f172a] relative z-10">
+      <div className="lg:col-span-6 p-5 sm:p-8 md:p-12 flex flex-col justify-between bg-white text-[#0f172a] relative z-10">
         <div>
           {/* Brand Header */}
           <div className="flex items-center gap-3 mb-8">

@@ -215,7 +215,7 @@ export const StoreProductDetailPage: React.FC = () => {
 
           {/* Total Price preview */}
           {!isOutOfStock && (
-            <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/15 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/15 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div>
                 <span className="text-xs text-slate-400 block font-medium">
                   {t("total_price")} ({quantity} item{quantity > 1 ? "s" : ""})
@@ -227,7 +227,7 @@ export const StoreProductDetailPage: React.FC = () => {
               <Button
                 size="lg"
                 onClick={() => navigate(`/checkout/${product.id}?qty=${quantity}`)}
-                className="h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 gap-2 active:scale-95 transition-all"
+                className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 gap-2 active:scale-95 transition-all justify-center"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span>{t("buy_now")}</span>

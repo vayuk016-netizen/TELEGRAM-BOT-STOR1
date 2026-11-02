@@ -137,9 +137,9 @@ export default function StockPage() {
             AES-256 Encrypted stock repository with instant bulk multi-line text ingestion.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2">
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 text-xs flex-1 sm:flex-initial">
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
@@ -147,9 +147,9 @@ export default function StockPage() {
             size="sm"
             onClick={() => handleOpenUpload()}
             disabled={products.length === 0}
-            className="gap-2 bg-emerald-600 hover:bg-emerald-500 focus:ring-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+            className="gap-2 bg-emerald-600 hover:bg-emerald-500 focus:ring-emerald-500 text-white shadow-lg shadow-emerald-500/20 text-xs flex-1 sm:flex-initial whitespace-nowrap"
           >
-            <Upload className="h-4 w-4" />
+            <Upload className="h-3.5 w-3.5" />
             Bulk Key Upload
           </Button>
         </div>

@@ -9,12 +9,14 @@ import { cn } from "@/lib/utils";
 
 interface UserNavProps {
   isDark?: boolean;
+  showDetails?: boolean;
 }
 
-export const UserNav: React.FC<UserNavProps> = ({ isDark = true }) => {
+export const UserNav: React.FC<UserNavProps> = ({ isDark = true, showDetails }) => {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const { isOpen } = useSidebarStore();
+  const shouldShowDetails = showDetails !== undefined ? showDetails : isOpen;
 
   const handleLogout = async () => {
     try {
@@ -36,7 +38,7 @@ export const UserNav: React.FC<UserNavProps> = ({ isDark = true }) => {
           isDark 
             ? "bg-white/5 hover:bg-white/10 border-white/10 hover:border-blue-500/40 hover:shadow-[0_0_12px_rgba(255,255,255,0.05)]" 
             : "bg-black/5 hover:bg-black/10 border-black/5 hover:border-blue-500/40 hover:shadow-[0_0_12px_rgba(0,0,0,0.05)]",
-          !isOpen && "justify-center px-2"
+          !shouldShowDetails && "justify-center px-2"
         )}
       >
         <div className={cn(
@@ -47,7 +49,7 @@ export const UserNav: React.FC<UserNavProps> = ({ isDark = true }) => {
         )}>
           <User className="h-4 w-4" />
         </div>
-        {isOpen && (
+        {shouldShowDetails && (
           <div className="flex flex-col text-left overflow-hidden">
             <span className={cn(
               "text-xs font-bold transition-colors truncate",
@@ -73,7 +75,7 @@ export const UserNav: React.FC<UserNavProps> = ({ isDark = true }) => {
             isDark 
               ? "border-slate-800 bg-slate-950/95 text-slate-200" 
               : "border-slate-200 bg-white/95 text-slate-100",
-            isOpen ? "w-full" : "w-44"
+            shouldShowDetails ? "w-full" : "w-44"
           )}>
             <div className={cn(
               "px-3 py-2 border-b text-xs flex items-center gap-2 font-semibold",

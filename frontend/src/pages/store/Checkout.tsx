@@ -292,7 +292,7 @@ export const StoreCheckoutPage: React.FC = () => {
       {/* PAYMENT IN PROGRESS: KHQR or Manual ABA Slip Screen      */}
       {/* ======================================================== */}
       {!isDelivered && activeOrder && (
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 sm:p-8 shadow-xl backdrop-blur-md space-y-8">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-4 sm:p-6 md:p-8 shadow-xl backdrop-blur-md space-y-6 sm:space-y-8">
           
           <div className="text-center space-y-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">
@@ -310,16 +310,16 @@ export const StoreCheckoutPage: React.FC = () => {
           {/* Option A: Bakong KHQR QR Code Screen */}
           {activeOrder.payment_method === "khqr" && (
             <div className="max-w-md mx-auto space-y-5 text-center">
-              <div className="p-4 sm:p-6 rounded-3xl bg-white text-slate-900 shadow-2xl border border-slate-200 inline-block mx-auto">
+              <div className="p-3 sm:p-5 rounded-3xl bg-white text-slate-900 shadow-2xl border border-slate-200 inline-block mx-auto max-w-full">
                 {activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url ? (
                   <img
                     src={activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url}
                     alt="Bakong KHQR"
-                    className="w-64 h-64 mx-auto rounded-xl object-contain shadow-sm"
+                    className="w-56 h-56 sm:w-64 sm:h-64 mx-auto rounded-xl object-contain shadow-sm max-w-[70vw] max-h-[70vw]"
                   />
                 ) : (
-                  <div className="w-64 h-64 flex items-center justify-center bg-slate-100 rounded-xl">
-                    <QrCode className="h-16 w-16 text-slate-400" />
+                  <div className="w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center bg-slate-100 rounded-xl max-w-[70vw]">
+                    <QrCode className="h-14 w-14 text-slate-400" />
                   </div>
                 )}
                 <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-bold text-slate-800 px-2">
@@ -329,12 +329,12 @@ export const StoreCheckoutPage: React.FC = () => {
               </div>
 
               {/* Quick Action Buttons: Download & Copy & DeepLink */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 w-full">
                 {(activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url) && (
                   <a
                     href={activeOrder.khqr_qr_data_url || activeOrder.khqr_qr_url}
                     download={`KHQR_Order_${activeOrder.order_id}.png`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 flex-1 sm:flex-initial min-w-[120px]"
                   >
                     <Download className="h-3.5 w-3.5" />
                     <span>Download QR</span>
@@ -343,7 +343,7 @@ export const StoreCheckoutPage: React.FC = () => {
                 {activeOrder.khqr_string && (
                   <button
                     onClick={() => handleCopy(activeOrder.khqr_string)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 flex-1 sm:flex-initial min-w-[120px]"
                   >
                     <Copy className="h-3.5 w-3.5" />
                     <span>{copyStatus ? "Copied!" : "Copy KHQR"}</span>
@@ -352,7 +352,7 @@ export const StoreCheckoutPage: React.FC = () => {
                 {activeOrder.deep_link && (
                   <a
                     href={activeOrder.deep_link}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-semibold transition-colors border border-blue-500/30"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-semibold transition-colors border border-blue-500/30 w-full sm:w-auto"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
                     <span>Open in Bakong</span>

@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, ChevronDown, Sun, Moon } from "lucide-react";
+import { Bell, ChevronDown, Sun, Moon, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguageStore } from "@/store/use-language-store";
 import { useThemeStore } from "@/store/use-theme-store";
 import { useCustomColorStore } from "@/store/use-custom-color-store";
+import { useSidebarStore } from "@/store/use-sidebar-store";
 
 function isColorDark(colorHex: string) {
   if (!colorHex) return true;
@@ -22,6 +23,7 @@ export const Topbar: React.FC = () => {
   const { language, setLanguage, t } = useLanguageStore();
   const { theme, toggleTheme, initTheme } = useThemeStore();
   const { headerBg } = useCustomColorStore();
+  const { toggleMobile } = useSidebarStore();
   const [langOpen, setLangOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -35,13 +37,37 @@ export const Topbar: React.FC = () => {
   return (
     <header
       className={cn(
-        "sticky top-0 z-20 flex h-20 w-full items-center justify-between border-b px-6 backdrop-blur-md transition-all duration-300",
+        "sticky top-0 z-20 flex h-20 w-full items-center justify-between border-b px-4 sm:px-6 backdrop-blur-md transition-all duration-300",
         isDark ? "border-slate-800 bg-slate-950/85 text-slate-100" : "border-slate-200 bg-white/85 text-slate-100"
       )}
       style={headerBg ? { backgroundColor: headerBg } : undefined}
     >
+      {/* Mobile / Tablet Hamburger Toggle & Brand (< lg) */}
+      <div className="flex items-center gap-2.5 sm:gap-3 lg:hidden">
+        <button
+          onClick={toggleMobile}
+          aria-label="Open navigation menu"
+          className={cn(
+            "rounded-xl p-2 border transition-all cursor-pointer active:scale-95 flex items-center justify-center",
+            isDark
+              ? "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+              : "border-black/5 bg-black/5 text-slate-800 hover:bg-black/10"
+          )}
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg overflow-hidden bg-white p-0.5 border border-blue-400/20 flex-shrink-0">
+            <img src="/logo.png" alt="SP Store" className="h-full w-full object-contain" />
+          </div>
+          <span className="font-extrabold text-xs sm:text-sm tracking-wider uppercase text-slate-100 hidden sm:inline-block">
+            SP STORE
+          </span>
+        </div>
+      </div>
+
       {/* Action Controls */}
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex items-center gap-2 sm:gap-3 ml-auto">
         {/* Theme Toggle Icon Switcher */}
         <button
           onClick={toggleTheme}

@@ -81,7 +81,7 @@ export default function DashboardPage() {
       {/* Main Analytics Grid: Chart + Live Feed */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Revenue & Sales Chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/50 p-6 shadow-sm dark:shadow-lg backdrop-blur-xl flex flex-col justify-between">
+        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/50 p-4 sm:p-6 shadow-sm dark:shadow-lg backdrop-blur-xl flex flex-col justify-between">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4 font-sans">
             <div>
               <h3 className="text-sm font-bold text-slate-100">{t("revenue_sales_analytics")}</h3>
