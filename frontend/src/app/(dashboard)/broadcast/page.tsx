@@ -337,7 +337,7 @@ export default function BroadcastPage() {
             ) : (
               (() => {
                 const isAttachedVideo = imagePath && [".mp4", ".mov", ".avi", ".webm", ".mkv", ".3gp"].some(ext => imagePath.toLowerCase().endsWith(ext));
-                const fullMediaUrl = localPreviewUrl || (imagePath.startsWith("http") ? imagePath : `https://telegram-bot-stor1.onrender.com${imagePath}`);
+                const fullMediaUrl = localPreviewUrl || (imagePath.startsWith("http") ? imagePath : (typeof window !== "undefined" ? `${window.location.origin}${imagePath}` : imagePath));
 
                 return (
                   <div className="relative rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3 shadow-xl">
