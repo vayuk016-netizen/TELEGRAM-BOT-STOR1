@@ -13,6 +13,7 @@
     "build": "npm run build --prefix frontend",
     "preview": "npm run preview --prefix frontend",
     "setup:backend": "cd backend && (which python3.11 >/dev/null 2>&1 && python3.11 -m venv .venv || python3 -m venv .venv) && ./.venv/bin/pip install -r requirements.txt",
-    "setup": "npm install && npm run setup:backend"
+    "setup": "npm install && npm run setup:backend",
+    "deploy": "./deploy.sh"
   }
 }
