@@ -96,26 +96,19 @@ export const StoreProductDetailPage: React.FC = () => {
         {/* Left Column: Product Image / Visual Showcase */}
         <div className="md:col-span-6 rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/60 p-6 space-y-4 shadow-sm">
           {product.image_url ? (
-            <div className="w-full h-80 sm:h-96 rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 relative flex items-center justify-center">
-              {/* Ambient blurred backdrop for seamless edge matching */}
-              <img
-                src={product.image_url}
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 scale-110 pointer-events-none"
-              />
+            <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 relative flex items-center justify-center">
               <img
                 src={product.image_url}
                 alt={product.title}
-                className="relative z-10 max-w-full max-h-full object-contain p-2"
+                className="w-full h-full object-cover"
               />
-              <div className="absolute top-3 right-3 z-20 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-xs text-white font-bold flex items-center gap-1.5 shadow">
+              <div className="absolute top-3 right-3 z-20 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md text-xs text-white font-bold flex items-center gap-1.5 shadow border border-white/10">
                 <Zap className="h-3.5 w-3.5 text-amber-400" />
                 <span>{t("instant_badge")}</span>
               </div>
             </div>
           ) : (
-            <div className="w-full h-80 sm:h-96 rounded-2xl bg-gradient-to-br from-blue-600/10 via-indigo-600/5 to-purple-600/10 border border-blue-500/10 flex items-center justify-center text-7xl">
+            <div className="w-full aspect-[16/9] rounded-2xl bg-gradient-to-br from-blue-600/10 via-indigo-600/5 to-purple-600/10 border border-blue-500/10 flex items-center justify-center text-7xl">
               {product.category?.icon || "⚡"}
             </div>
           )}

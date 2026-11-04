@@ -18,24 +18,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isOutOfStock = product.stock_count <= 0;
 
   return (
-    <div className="group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-sm hover:shadow-xl hover:border-blue-500/50 transition-all duration-300 flex flex-col justify-between backdrop-blur-sm">
+    <div className="group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/50 transition-all duration-300 flex flex-col justify-between backdrop-blur-sm">
       
       {/* Top Banner: Category & Stock Status */}
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800">
-            <span>{product.category?.icon || "📦"}</span>
-            <span>{product.category?.name || "General"}</span>
+        <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800 min-w-0 max-w-[62%] flex-shrink">
+            <span className="flex-shrink-0">{product.category?.icon || "📦"}</span>
+            <span className="truncate whitespace-nowrap">{product.category?.name || "General"}</span>
           </span>
 
           {isOutOfStock ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-              <AlertTriangle className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 whitespace-nowrap flex-shrink-0">
+              <AlertTriangle className="h-3 w-3 flex-shrink-0" />
               <span>{t("out_of_stock")}</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <CheckCircle2 className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap flex-shrink-0">
+              <CheckCircle2 className="h-3 w-3 flex-shrink-0" />
               <span>{product.stock_count} {t("in_stock")}</span>
             </span>
           )}
@@ -43,27 +43,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Product Image / Icon placeholder */}
         {product.image_url ? (
-          <div className="w-full aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-slate-950 border border-slate-800 relative flex items-center justify-center">
-            {/* Ambient blurred backdrop for seamless edge matching */}
-            <img
-              src={product.image_url}
-              alt=""
-              aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-110 pointer-events-none"
-            />
-            {/* Main image fits completely without cropping */}
+          <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 bg-slate-950 border border-slate-800/80 relative flex items-center justify-center group/img">
             <img
               src={product.image_url}
               alt={product.title}
-              className="relative z-10 w-full h-full object-contain p-1 group-hover:scale-[1.03] transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             />
-            <div className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-md text-[10px] text-white font-bold flex items-center gap-1 shadow">
+            <div className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] text-white font-bold flex items-center gap-1 shadow border border-white/10">
               <Zap className="h-3 w-3 text-amber-400" />
               <span>{t("instant_badge")}</span>
             </div>
           </div>
         ) : (
-          <div className="w-full aspect-[16/10] sm:aspect-[4/3] rounded-2xl mb-4 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 border border-blue-500/10 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
+          <div className="w-full aspect-[16/9] rounded-xl mb-4 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 border border-blue-500/10 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
             {product.category?.icon || "⚡"}
           </div>
         )}

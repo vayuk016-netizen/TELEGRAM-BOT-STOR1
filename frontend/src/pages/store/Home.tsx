@@ -11,6 +11,7 @@ import {
 import { storeService, StoreProduct, StoreCategory } from "@/services/store.service";
 import { useLanguageStore } from "@/store/use-language-store";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { BrandTicker } from "@/components/storefront/BrandTicker";
 import { Button } from "@/components/ui/button";
 
 export const HomePage: React.FC = () => {
@@ -76,6 +77,11 @@ export const HomePage: React.FC = () => {
               <span>{t("browse_catalog")}</span>
             </Button>
           </div>
+        </div>
+
+        {/* 🎡 Brand Icons Rolling Animation (Only logos, no text) */}
+        <div className="w-full max-w-7xl mx-auto px-0 sm:px-6 lg:px-8 mt-5 sm:mt-8 relative z-10 overflow-hidden">
+          <BrandTicker />
         </div>
       </section>
 

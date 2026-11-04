@@ -343,21 +343,21 @@ export default function StockPage() {
                     <div className="space-y-3">
                       
                       {/* Top Header: Category & Live Key Badge */}
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800">
-                          <span>{cat?.icon || "📁"}</span>
-                          <span className="truncate max-w-[110px]">{cat?.name || "General"}</span>
+                      <div className="flex items-center justify-between gap-2 min-w-0">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800 min-w-0 max-w-[62%] flex-shrink">
+                          <span className="flex-shrink-0">{cat?.icon || "📁"}</span>
+                          <span className="truncate whitespace-nowrap">{cat?.name || "General"}</span>
                         </span>
 
                         <button
                           type="button"
                           onClick={() => handleOpenInspect(prod)}
                           title="ចុចដើម្បីពិនិត្យបញ្ជី Keys ក្នុងស្តុក"
-                          className="transition-transform hover:scale-105 active:scale-95"
+                          className="transition-transform hover:scale-105 active:scale-95 flex-shrink-0"
                         >
                           <Badge
                             variant={prod.stock_count > 5 ? "success" : prod.stock_count > 0 ? "warning" : "danger"}
-                            className="text-[10px] px-2.5 py-0.5 backdrop-blur-md font-bold cursor-pointer"
+                            className="text-[10px] px-2.5 py-0.5 backdrop-blur-md font-bold cursor-pointer whitespace-nowrap"
                           >
                             {inStock ? `🟢 ${prod.stock_count} Keys` : "🔴 Out of Stock"}
                           </Badge>
@@ -365,21 +365,13 @@ export default function StockPage() {
                       </div>
 
                       {/* Card Thumbnail Image (Fits Image Perfectly) */}
-                      <div className="relative w-full aspect-square sm:aspect-[4/3] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
+                      <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
                         {prod.image_url ? (
-                          <>
-                            <img
-                              src={prod.image_url}
-                              alt=""
-                              aria-hidden="true"
-                              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-110 pointer-events-none"
-                            />
-                            <img
-                              src={prod.image_url}
-                              alt={prod.title}
-                              className="relative z-10 w-full h-full object-contain p-1.5 group-hover:scale-[1.03] transition-transform duration-300 drop-shadow-md"
-                            />
-                          </>
+                          <img
+                            src={prod.image_url}
+                            alt={prod.title}
+                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                          />
                         ) : (
                           <div className="text-4xl text-slate-600 flex flex-col items-center justify-center gap-1.5 py-8">
                             <span>{cat?.icon || "🔑"}</span>

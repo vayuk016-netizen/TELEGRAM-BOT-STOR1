@@ -208,3 +208,61 @@ body {
 .btn-line-rolling:hover::after {
   animation-duration: 1.6s;
 }
+
+/* 🎡 Infinite Rolling Ticker for Brand Showcase */
+@keyframes rolling-ticker {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes rolling-ticker-reverse {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-rolling-ticker {
+  display: flex;
+  width: max-content;
+  animation: rolling-ticker 30s linear infinite;
+  will-change: transform;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Only pause on hover on desktop devices with actual mouse pointer, avoiding stuck state on mobile touch */
+@media (hover: hover) and (pointer: fine) {
+  .animate-rolling-ticker:hover {
+    animation-play-state: paused;
+  }
+}
+
+.animate-rolling-ticker-reverse {
+  display: flex;
+  width: max-content;
+  animation: rolling-ticker-reverse 34s linear infinite;
+  will-change: transform;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .animate-rolling-ticker-reverse:hover {
+    animation-play-state: paused;
+  }
+}
+
+.ticker-fade-mask {
+  mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+}
+
