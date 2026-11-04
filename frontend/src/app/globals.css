@@ -48,6 +48,13 @@
   --slate-950: 2 6 23;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -233,6 +240,11 @@ body {
   width: max-content;
   animation: rolling-ticker 30s linear infinite;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
@@ -250,6 +262,11 @@ body {
   width: max-content;
   animation: rolling-ticker-reverse 34s linear infinite;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
@@ -264,5 +281,7 @@ body {
 .ticker-fade-mask {
   mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+  contain: layout paint;
+  transform: translateZ(0);
 }
 

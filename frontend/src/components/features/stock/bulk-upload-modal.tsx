@@ -157,6 +157,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
       isOpen={isOpen}
       onClose={resetAllAndClose}
       title="🔑 បន្ថែមស្តុកទំនិញថ្មី (Add Digital Keys Vault)"
+      className="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Product Selector */}
@@ -218,7 +219,7 @@ export const BulkUploadModal: React.FC<BulkUploadModalProps> = ({
           />
 
           {/* Real-time Counter Pills */}
-          <div className="flex items-center justify-between mt-1 text-xs">
+          <div className="flex items-center justify-between mt-1 text-xs flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[11px] font-mono">
                 <span>រកឃើញ:</span>

@@ -88,14 +88,8 @@ export const BrandTicker: React.FC = () => {
     },
   ];
 
-  // Repeat sequence twice to create a rich 20-badge carousel
-  const brands = [
-    ...baseBrands,
-    ...baseBrands,
-  ];
-
-  // Duplicate for seamless 50% infinite keyframe loop
-  const infiniteBrands = [...brands, ...brands];
+  // Duplicate once for seamless 50% infinite keyframe loop (20 badges total)
+  const infiniteBrands = [...baseBrands, ...baseBrands];
 
   const handleBrandClick = (query: string) => {
     navigate(`/products?search=${encodeURIComponent(query)}`);
@@ -103,7 +97,7 @@ export const BrandTicker: React.FC = () => {
 
   return (
     <div className="w-full py-2 sm:py-4 relative z-10 overflow-hidden">
-      {/* 🎡 Infinite Rolling Carousel Container with 3D Crown Icons */}
+      {/* 🎡 Infinite Rolling Carousel Container with Hardware-Accelerated 3D Crown Icons */}
       <div className="w-full overflow-hidden ticker-fade-mask py-3 relative">
         <div className="animate-rolling-ticker gap-3.5 sm:gap-5 md:gap-6 px-2">
           {infiniteBrands.map((brand, idx) => (
@@ -113,13 +107,17 @@ export const BrandTicker: React.FC = () => {
               onClick={() => handleBrandClick(brand.query)}
               title={brand.name}
               aria-label={brand.name}
-              className="group relative h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 flex items-center justify-center p-0.5 sm:p-1 bg-transparent hover:bg-slate-200/20 dark:hover:bg-slate-800/20 rounded-2xl sm:rounded-3xl transition-all duration-300 cursor-pointer flex-shrink-0 active:scale-95 hover:scale-110 hover:-translate-y-1.5 focus:outline-none"
+              className="group relative h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 flex items-center justify-center p-0.5 sm:p-1 bg-transparent hover:bg-slate-200/20 dark:hover:bg-slate-800/20 rounded-2xl sm:rounded-3xl transition-transform duration-300 cursor-pointer flex-shrink-0 active:scale-95 hover:scale-110 hover:-translate-y-1.5 focus:outline-none"
+              style={{ contain: "layout paint" }}
             >
               <img
                 src={brand.image}
                 alt={brand.name}
                 loading="eager"
-                className={`h-full w-full object-contain transition-all duration-300 group-hover:scale-105 pointer-events-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)] ${brand.glowColor}`}
+                decoding="async"
+                width={88}
+                height={80}
+                className={`h-full w-full object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)] ${brand.glowColor}`}
               />
             </button>
           ))}

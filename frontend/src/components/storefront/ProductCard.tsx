@@ -47,6 +47,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <img
               src={product.image_url}
               alt={product.title}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
             />
             <div className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] text-white font-bold flex items-center gap-1 shadow border border-white/10">
