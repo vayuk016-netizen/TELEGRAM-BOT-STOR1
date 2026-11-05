@@ -455,6 +455,22 @@ class BakongService:
         from app.bot.bot import bot
         if order.user and order.user.telegram_id:
             try:
+                from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+                user_lang = getattr(order.user, "language_code", None) or "km"
+                success_kb = InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [
+                            InlineKeyboardButton(
+                                text="🧾 វិក្កយបត្រ (Invoice)" if user_lang == "km" else "🧾 View Invoice",
+                                callback_data=f"invoice:{order.id}",
+                            )
+                        ],
+                        [
+                            InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+                            InlineKeyboardButton(text="🛍️ ទិញបន្ថែម" if user_lang == "km" else "🛍️ Shop More", callback_data="cmd_products"),
+                        ],
+                    ]
+                )
                 msg_user = (
                     f"🎉 <b>KHQR Payment Received! Product Delivered</b>\n\n"
                     f"🧾 <b>Order ID:</b> <code>#{order.id}</code>\n"
@@ -464,7 +480,7 @@ class BakongService:
                     f"<code>{delivered_payload}</code>\n\n"
                     f"<i>Thank you for purchasing!</i>"
                 )
-                await bot.send_message(chat_id=order.user.telegram_id, text=msg_user)
+                await bot.send_message(chat_id=order.user.telegram_id, text=msg_user, reply_markup=success_kb)
             except Exception as e:
                 logger.warning(f"Could not notify customer telegram: {e}")
 

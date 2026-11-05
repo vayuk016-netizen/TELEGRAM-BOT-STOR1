@@ -339,6 +339,26 @@ async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db
             pass
 
 
+def make_order_success_keyboard(order_id: int, lang: str = "km") -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🧾 វិក្កយបត្រ (Invoice)" if lang == "km" else "🧾 View Invoice",
+                    callback_data=f"invoice:{order_id}",
+                )
+            ],
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+                InlineKeyboardButton(
+                    text="🛍️ ទិញបន្ថែម" if lang == "km" else "🛍️ Shop More",
+                    callback_data="cmd_products",
+                ),
+            ],
+        ]
+    )
+
+
 async def auto_verify_order_loop(order_id: int, chat_id: int, lang: str):
     """
     Smart non-blocking background verification for an active order:
@@ -371,7 +391,11 @@ async def auto_verify_order_loop(order_id: int, chat_id: int, lang: str):
                              f"<i>Thank you for your purchase!</i>"
                     )
                     from app.bot.bot import bot
-                    await bot.send_message(chat_id=chat_id, text=msg_keys)
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=msg_keys,
+                        reply_markup=make_order_success_keyboard(order_id, lang),
+                    )
                     return
         except Exception as e:
             logger.debug(f"Smart auto-check for order #{order_id} checkpoint failed: {e}")
@@ -426,7 +450,10 @@ async def check_buy_handler(callback: CallbackQuery, session: AsyncSession, db_u
                  f"<code>{delivered_payload}</code>\n\n"
                  f"<i>Thank you for your purchase!</i>"
         )
-        await callback.message.answer(msg_keys)
+        await callback.message.answer(
+            msg_keys,
+            reply_markup=make_order_success_keyboard(order_id, lang),
+        )
     else:
         msg_unpaid = (
             "⏳ មិនទាន់ទទួលបានការទូទាត់ទេ។ សូមស្កេនទូទាត់តាម App ធនាគារ រួចចុចពិនិត្យម្តងទៀត!"
@@ -434,4 +461,113 @@ async def check_buy_handler(callback: CallbackQuery, session: AsyncSession, db_u
             else "⏳ Payment not detected yet. Please complete the scan in your bank app and try again!"
         )
         await callback.answer(msg_unpaid, show_alert=True)
+
+
+@router.callback_query(F.data.startswith("invoice:"))
+async def show_order_invoice_handler(callback: CallbackQuery, session: AsyncSession, db_user: User):
+    """
+    Renders and sends the official formatted SP Shop invoice with the SP Shop 3D logo.
+    """
+    parts = callback.data.split(":")
+    order_id = int(parts[1])
+    lang = db_user.language_code or "km"
+
+    stmt = (
+        select(Order)
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product),
+            selectinload(Order.user),
+        )
+        .where(Order.id == order_id)
+    )
+    res = await session.execute(stmt)
+    order = res.scalar_one_or_none()
+    if not order:
+        await callback.answer("⚠️ មិនអាចស្វែងរកវិក្កយបត្របានទេ (Order not found).", show_alert=True)
+        return
+
+    # Check ownership
+    if order.user_id != db_user.id and getattr(db_user, "role", "") != "admin":
+        await callback.answer("⚠️ គ្មានសិទ្ធិមើលវិក្កយបត្រនេះទេ (Unauthorized).", show_alert=True)
+        return
+
+    item = order.items[0] if order.items else None
+    product_title = item.product.title if item and item.product else "Digital License"
+    unit_price = float(item.unit_price) if item else float(order.total_amount)
+    delivered_payload = item.delivered_payload if item and item.delivered_payload else "Delivered to your account"
+    quantity = len(order.items) if order.items else 1
+
+    # Date formatting in Cambodia Time (UTC+7)
+    from datetime import timezone, timedelta
+    cambodia_tz = timezone(timedelta(hours=7))
+    created_at = order.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    local_time = created_at.astimezone(cambodia_tz)
+    date_str = local_time.strftime("%d/%m/%Y, %I:%M:%S %p")
+
+    cust_name = db_user.first_name or db_user.username or "Customer"
+    cust_id = db_user.telegram_id
+
+    invoice_caption = (
+        f"🧾 <b>វិក្កយបត្រទូទាត់ប្រាក់ / OFFICIAL INVOICE</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🏬 <b>ហាង / STORE:</b> <b>SP Shop</b> (Official Store)\n"
+        f"🆔 <b>លេខវិក្កយបត្រ (Invoice No):</b> <code>#INV-{order.id:06d}</code>\n"
+        f"📅 <b>កាលបរិច្ឆេទ (Date):</b> {date_str}\n"
+        f"👤 <b>អតិថិជន (Customer):</b> {cust_name} (ID: <code>{cust_id}</code>)\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📦 <b>ព័ត៌មានទំនិញ / ORDER ITEM:</b>\n"
+        f"• <b>{product_title}</b>\n"
+        f"  ចំនួន (Qty): {quantity}  |  តម្លៃឯកតា: ${unit_price:.2f}\n\n"
+        f"💵 <b>ទឹកប្រាក់សរុប (Total Paid):</b> <b>${float(order.total_amount):.2f}</b>\n"
+        f"💳 <b>ការទូទាត់ (Payment):</b> KHQR / ABA Mobile (Instant)\n"
+        f"📌 <b>ស្ថានភាព (Status):</b> <b>PAID / បង់ប្រាក់ជោគជ័យ ✅</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🔑 <b>កូដទំនិញទទួលបាន / DELIVERED ITEM:</b>\n"
+        f"<code>{delivered_payload}</code>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🙏 <i>សូមអរគុណសម្រាប់ការគាំទ្រ SP Shop!</i>\n"
+        f"💬 <i>សេវាកម្មអតិថិជន / Support: @sopha9926</i>"
+    )
+
+    inv_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+                InlineKeyboardButton(text="🌐 Website Store", url="https://sophasok.store"),
+            ],
+            [
+                InlineKeyboardButton(text="🔙 ត្រឡប់ក្រោយ" if lang == "km" else "🔙 Back", callback_data="cmd_products"),
+            ]
+        ]
+    )
+
+    await callback.answer()
+
+    from pathlib import Path
+    from aiogram.types import FSInputFile
+    logo_candidates = [
+        Path("app/static/sp-shop-logo.jpg"),
+        Path("backend/app/static/sp-shop-logo.jpg"),
+        Path("/Users/sp/Desktop/TELEGRAM-BOT-STOR1/backend/app/static/sp-shop-logo.jpg"),
+    ]
+    logo_file = None
+    for cand in logo_candidates:
+        if cand.exists():
+            logo_file = cand
+            break
+
+    if logo_file:
+        try:
+            await callback.message.answer_photo(
+                photo=FSInputFile(str(logo_file)),
+                caption=invoice_caption,
+                reply_markup=inv_kb,
+            )
+            return
+        except Exception as photo_err:
+            logger.warning(f"Failed to send invoice photo: {photo_err}")
+
+    await callback.message.answer(text=invoice_caption, reply_markup=inv_kb)
 

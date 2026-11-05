@@ -19,12 +19,14 @@ import {
   Loader2,
   ExternalLink,
   Download,
+  FileText,
 } from "lucide-react";
 import { storeService, StoreProduct, OrderDetail } from "@/services/store.service";
 import { useCustomerStore } from "@/store/use-customer-store";
 import { useLanguageStore } from "@/store/use-language-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InvoiceModal } from "@/components/storefront/InvoiceModal";
 
 export const StoreCheckoutPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +63,7 @@ export const StoreCheckoutPage: React.FC = () => {
 
   // Polling state
   const [isPolling, setIsPolling] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   // 1. Load product
   useEffect(() => {
@@ -279,6 +282,14 @@ export const StoreCheckoutPage: React.FC = () => {
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button
+              type="button"
+              onClick={() => setShowInvoice(true)}
+              className="text-xs font-bold rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 gap-2 px-4 py-2.5 shadow-sm transition-all"
+            >
+              <FileText className="h-4 w-4" />
+              <span>🧾 វិក្កយបត្រ (Invoice)</span>
+            </Button>
             <Link to="/products">
               <Button className="text-xs font-bold rounded-xl bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white filter hover:brightness-110 shadow-md shadow-blue-500/20 btn-line-rolling btn-rolling-gradient">
                 Continue Shopping
@@ -676,6 +687,29 @@ export const StoreCheckoutPage: React.FC = () => {
           </div>
         </form>
       )}
+
+      {/* Official SP Shop Invoice Modal */}
+      <InvoiceModal
+        isOpen={showInvoice}
+        onClose={() => setShowInvoice(false)}
+        order={
+          orderDetail
+            ? {
+                order_id: orderDetail.order_id,
+                created_at: orderDetail.created_at,
+                total_amount: orderDetail.total_amount,
+                payment_method: orderDetail.payment_method || activeOrder?.payment_method,
+                product: {
+                  title: orderDetail.product?.title || product.title,
+                  price: orderDetail.product?.price || product.price,
+                },
+                delivered_payload: orderDetail.delivered_payload,
+                customer_name: customerNameInput || customer?.first_name,
+                telegram_id: telegramIdInput || customer?.telegram_id,
+              }
+            : null
+        }
+      />
     </div>
   );
 };

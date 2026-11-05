@@ -14,12 +14,14 @@ import {
   User,
   ShieldCheck,
   Zap,
+  FileText,
 } from "lucide-react";
 import { storeService, OrderDetail } from "@/services/store.service";
 import { useCustomerStore } from "@/store/use-customer-store";
 import { useLanguageStore } from "@/store/use-language-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InvoiceModal } from "@/components/storefront/InvoiceModal";
 
 export const StoreMyOrdersPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +34,7 @@ export const StoreMyOrdersPage: React.FC = () => {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [searchError, setSearchError] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<any | null>(null);
 
   // If customer is logged in, fetch their order history
   useEffect(() => {
@@ -173,7 +176,28 @@ export const StoreMyOrdersPage: React.FC = () => {
               </h2>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  setSelectedInvoiceOrder({
+                    order_id: searchedOrder.order_id,
+                    created_at: searchedOrder.created_at,
+                    total_amount: searchedOrder.total_amount,
+                    payment_method: searchedOrder.payment_method,
+                    product: searchedOrder.product,
+                    delivered_payload: searchedOrder.delivered_payload,
+                    customer_name: customer?.first_name,
+                    telegram_id: customer?.telegram_id,
+                  })
+                }
+                className="h-8 text-xs gap-1.5 border-blue-500/30 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 font-bold"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                <span>🧾 វិក្កយបត្រ (Invoice)</span>
+              </Button>
               <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
                 searchedOrder.status === "COMPLETED" || searchedOrder.status === "PAID"
                   ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
@@ -243,7 +267,33 @@ export const StoreMyOrdersPage: React.FC = () => {
                       <span className="font-mono text-xs font-bold text-slate-400">#{ord.order_id}</span>
                       <span className="font-bold text-sm text-slate-100">{ord.product_title}</span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {ord.status === "COMPLETED" && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            setSelectedInvoiceOrder({
+                              order_id: ord.order_id,
+                              created_at: ord.created_at,
+                              total_amount: ord.total_amount,
+                              payment_method: ord.payment_method,
+                              product: {
+                                title: ord.product_title,
+                                price: ord.total_amount,
+                              },
+                              delivered_payload: ord.delivered_payload,
+                              customer_name: customer.first_name,
+                              telegram_id: customer.telegram_id,
+                            })
+                          }
+                          className="h-7 text-[11px] gap-1 px-2.5 border-blue-500/30 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 font-bold"
+                        >
+                          <FileText className="h-3 w-3" />
+                          <span>🧾 វិក្កយបត្រ</span>
+                        </Button>
+                      )}
                       <span className="font-mono font-bold text-blue-500 text-sm">${ord.total_amount?.toFixed(2)}</span>
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                         ord.status === "COMPLETED" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
@@ -276,6 +326,13 @@ export const StoreMyOrdersPage: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Official SP Shop Invoice Modal */}
+      <InvoiceModal
+        isOpen={Boolean(selectedInvoiceOrder)}
+        onClose={() => setSelectedInvoiceOrder(null)}
+        order={selectedInvoiceOrder}
+      />
     </div>
   );
 };
