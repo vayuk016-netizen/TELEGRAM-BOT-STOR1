@@ -457,17 +457,31 @@ class BakongService:
             try:
                 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
                 user_lang = getattr(order.user, "language_code", None) or "km"
+                invoice_text = "🧾 វិក្កយបត្រ (Invoice)" if user_lang == "km" else "🧾 View Invoice"
+                shop_more_text = "🛍️ ទិញបន្ថែម" if user_lang == "km" else "🛍️ Shop More"
                 success_kb = InlineKeyboardMarkup(
                     inline_keyboard=[
                         [
                             InlineKeyboardButton(
-                                text="🧾 វិក្កយបត្រ (Invoice)" if user_lang == "km" else "🧾 View Invoice",
+                                text=invoice_text,
                                 callback_data=f"invoice:{order.id}",
                             )
                         ],
                         [
-                            InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
-                            InlineKeyboardButton(text="🛍️ ទិញបន្ថែម" if user_lang == "km" else "🛍️ Shop More", callback_data="cmd_products"),
+                            InlineKeyboardButton(
+                                text="💬 Supporters : @sopha9926",
+                                url="https://t.me/sopha9926",
+                            )
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                text=shop_more_text,
+                                callback_data="cmd_products",
+                            ),
+                            InlineKeyboardButton(
+                                text="🌐 Website Store",
+                                url="https://sophasok.store",
+                            ),
                         ],
                     ]
                 )

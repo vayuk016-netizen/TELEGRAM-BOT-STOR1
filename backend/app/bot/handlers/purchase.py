@@ -1,8 +1,13 @@
 import logging
+from pathlib import Path
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.user import User
+from app.db.models.order import Order, OrderItem
 from app.db.repositories.product_repository import ProductRepository
 from app.services.purchase_service import PurchaseService
 from app.bot.keyboards.inline import get_buy_confirm_keyboard
@@ -147,7 +152,10 @@ async def execute_purchase_handler(callback: CallbackQuery, session: AsyncSessio
             payload=plain_key_content,
         )
 
-        await callback.message.edit_text(delivery_text)
+        await callback.message.edit_text(
+            delivery_text,
+            reply_markup=make_order_success_keyboard(order.id, lang),
+        )
         alert_msg = "Purchase successful!" if lang == "en" else "ប្រគល់ទំនិញជោគជ័យ!"
         await callback.answer(f"🎉 {alert_msg}", show_alert=True)
 
@@ -340,19 +348,30 @@ async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db
 
 
 def make_order_success_keyboard(order_id: int, lang: str = "km") -> InlineKeyboardMarkup:
+    invoice_text = "🧾 វិក្កយបត្រ (Invoice)" if lang == "km" else "🧾 View Invoice"
+    shop_more_text = "🛍️ ទិញបន្ថែម" if lang == "km" else "🛍️ Shop More"
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🧾 វិក្កយបត្រ (Invoice)" if lang == "km" else "🧾 View Invoice",
+                    text=invoice_text,
                     callback_data=f"invoice:{order_id}",
                 )
             ],
             [
-                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
                 InlineKeyboardButton(
-                    text="🛍️ ទិញបន្ថែម" if lang == "km" else "🛍️ Shop More",
+                    text="💬 Supporters : @sopha9926",
+                    url="https://t.me/sopha9926",
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text=shop_more_text,
                     callback_data="cmd_products",
+                ),
+                InlineKeyboardButton(
+                    text="🌐 Website Store",
+                    url="https://sophasok.store",
                 ),
             ],
         ]
@@ -545,9 +564,8 @@ async def show_order_invoice_handler(callback: CallbackQuery, session: AsyncSess
 
     await callback.answer()
 
-    from pathlib import Path
-    from aiogram.types import FSInputFile
     logo_candidates = [
+        Path(__file__).resolve().parent.parent.parent / "static" / "sp-shop-logo.jpg",
         Path("app/static/sp-shop-logo.jpg"),
         Path("backend/app/static/sp-shop-logo.jpg"),
         Path("/Users/sp/Desktop/TELEGRAM-BOT-STOR1/backend/app/static/sp-shop-logo.jpg"),
@@ -570,4 +588,119 @@ async def show_order_invoice_handler(callback: CallbackQuery, session: AsyncSess
             logger.warning(f"Failed to send invoice photo: {photo_err}")
 
     await callback.message.answer(text=invoice_caption, reply_markup=inv_kb)
+
+
+@router.message(Command("invoice"))
+async def command_invoice_handler(message: Message, session: AsyncSession, db_user: User):
+    """
+    Allows user to type `/invoice [id]` or `/invoice` to view their latest or specific invoice.
+    """
+    lang = db_user.language_code or "km"
+    args = (message.text or "").split()
+    target_order_id = None
+    if len(args) > 1 and args[1].isdigit():
+        target_order_id = int(args[1])
+
+    if target_order_id:
+        stmt = (
+            select(Order)
+            .options(
+                selectinload(Order.items).selectinload(OrderItem.product),
+                selectinload(Order.user),
+            )
+            .where(Order.id == target_order_id)
+        )
+    else:
+        # Default to latest completed order
+        stmt = (
+            select(Order)
+            .options(
+                selectinload(Order.items).selectinload(OrderItem.product),
+                selectinload(Order.user),
+            )
+            .where(Order.user_id == db_user.id)
+            .order_by(Order.id.desc())
+            .limit(1)
+        )
+
+    res = await session.execute(stmt)
+    order = res.scalar_one_or_none()
+    if not order:
+        not_found_msg = (
+            "⚠️ មិនទាន់មានវិក្កយបត្រនៅឡើយទេ!"
+            if lang == "km"
+            else "⚠️ No invoice found!"
+        )
+        await message.answer(not_found_msg)
+        return
+
+    # Check ownership
+    if order.user_id != db_user.id and getattr(db_user, "role", "") != "admin":
+        await message.answer("⚠️ គ្មានសិទ្ធិមើលវិក្កយបត្រនេះទេ (Unauthorized).")
+        return
+
+    item = order.items[0] if order.items else None
+    product_title = item.product.title if item and item.product else "Digital License"
+    unit_price = float(item.unit_price) if item else float(order.total_amount)
+    delivered_payload = item.delivered_payload if item and item.delivered_payload else "Delivered"
+    quantity = len(order.items) if order.items else 1
+
+    from datetime import timezone, timedelta
+    cambodia_tz = timezone(timedelta(hours=7))
+    created_at = order.created_at
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    local_time = created_at.astimezone(cambodia_tz)
+    date_str = local_time.strftime("%d/%m/%Y, %I:%M:%S %p")
+
+    cust_name = db_user.first_name or db_user.username or "Customer"
+    cust_id = db_user.telegram_id
+
+    invoice_caption = (
+        f"🧾 <b>វិក្កយបត្រទូទាត់ប្រាក់ / OFFICIAL INVOICE</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🏬 <b>ហាង / STORE:</b> <b>SP Shop</b> (Official Store)\n"
+        f"🆔 <b>លេខវិក្កយបត្រ (Invoice No):</b> <code>#INV-{order.id:06d}</code>\n"
+        f"📅 <b>កាលបរិច្ឆេទ (Date):</b> {date_str}\n"
+        f"👤 <b>អតិថិជន (Customer):</b> {cust_name} (ID: <code>{cust_id}</code>)\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📦 <b>ព័ត៌មានទំនិញ / ORDER ITEM:</b>\n"
+        f"• <b>{product_title}</b>\n"
+        f"  ចំនួន (Qty): {quantity}  |  តម្លៃឯកតា: ${unit_price:.2f}\n\n"
+        f"💵 <b>ទឹកប្រាក់សរុប (Total Paid):</b> <b>${float(order.total_amount):.2f}</b>\n"
+        f"💳 <b>ការទូទាត់ (Payment):</b> KHQR / ABA Mobile (Instant)\n"
+        f"📌 <b>ស្ថានភាព (Status):</b> <b>PAID / បង់ប្រាក់ជោគជ័យ ✅</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🔑 <b>កូដទំនិញទទួលបាន / DELIVERED ITEM:</b>\n"
+        f"<code>{delivered_payload}</code>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🙏 <i>សូមអរគុណសម្រាប់ការគាំទ្រ SP Shop!</i>\n"
+        f"💬 <i>សេវាកម្មអតិថិជន / Support: @sopha9926</i>"
+    )
+
+    inv_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+                InlineKeyboardButton(text="🌐 Website Store", url="https://sophasok.store"),
+            ],
+            [
+                InlineKeyboardButton(text="🔙 ត្រឡប់ក្រោយ" if lang == "km" else "🔙 Back", callback_data="cmd_products"),
+            ]
+        ]
+    )
+
+    logo_path = Path(__file__).resolve().parent.parent.parent / "static" / "sp-shop-logo.jpg"
+    if logo_path.exists():
+        try:
+            await message.answer_photo(
+                photo=FSInputFile(str(logo_path)),
+                caption=invoice_caption,
+                reply_markup=inv_kb,
+            )
+            return
+        except Exception as e:
+            logger.warning(f"Failed to send invoice photo: {e}")
+
+    await message.answer(text=invoice_caption, reply_markup=inv_kb)
 

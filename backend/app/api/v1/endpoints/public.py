@@ -55,10 +55,10 @@ class CreateOrderRequest(BaseModel):
 # -------------------------------------------------------------
 # Helper: Send Telegram notification
 # -------------------------------------------------------------
-async def notify_customer_telegram(telegram_id: int, message_html: str):
+async def notify_customer_telegram(telegram_id: int, message_html: str, reply_markup=None):
     try:
         if telegram_id and telegram_id > 0:
-            await bot.send_message(chat_id=telegram_id, text=message_html, parse_mode="HTML")
+            await bot.send_message(chat_id=telegram_id, text=message_html, parse_mode="HTML", reply_markup=reply_markup)
     except Exception as e:
         print(f"Warning: Could not send Telegram message to user {telegram_id}: {e}")
 
@@ -403,6 +403,23 @@ async def create_website_order(
         await db.commit()
 
         # Send Telegram notification to user
+        from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+        user_kb = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="🧾 វិក្កយបត្រ (Invoice)",
+                        callback_data=f"invoice:{order.id}",
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="💬 Supporters : @sopha9926",
+                        url="https://t.me/sopha9926",
+                    )
+                ],
+            ]
+        )
         msg_user = (
             f"🎉 <b>Website Order Successful!</b>\n\n"
             f"🧾 <b>Order ID:</b> <code>#{order.id}</code>\n"
@@ -412,7 +429,7 @@ async def create_website_order(
             f"<code>{delivered_payload}</code>\n\n"
             f"<i>Thank you for purchasing on our website!</i>"
         )
-        await notify_customer_telegram(user.telegram_id, msg_user)
+        await notify_customer_telegram(user.telegram_id, msg_user, reply_markup=user_kb)
 
         # Send Telegram notification to admin
         msg_admin = (

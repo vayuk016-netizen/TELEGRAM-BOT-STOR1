@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.user import User
 from app.db.repositories.order_repository import OrderRepository
@@ -21,10 +21,18 @@ async def user_account_handler(message: Message, db_user: User):
         balance=db_user.balance,
         joined_date=db_user.created_at.strftime('%Y-%m-%d'),
     )
-    await message.answer(text)
+    account_kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),
+                InlineKeyboardButton(text="🌐 Website Store", url="https://sophasok.store"),
+            ]
+        ]
+    )
+    await message.answer(text, reply_markup=account_kb)
 
 
-@router.message(F.text.in_({"📜 ប្រវត្តិទិញ", "🌀 ប្រវត្តិការបញ្ជាទិញ", "🌀 Order History"}))
+@router.message(F.text.in_({"📜 ប្រវត្តិទិញ", "🌀 ប្រវត្តិការទិញ", "🌀 ប្រវត្តិការបញ្ជាទិញ", "🌀 Order History"}))
 async def purchase_history_handler(message: Message, session: AsyncSession, db_user: User):
     lang = db_user.language_code or "km"
     order_repo = OrderRepository(session)
@@ -51,7 +59,17 @@ async def purchase_history_handler(message: Message, session: AsyncSession, db_u
             f"{delivered_str}\n"
         )
 
-    await message.answer("\n".join(history_lines))
+    # Attach Invoice button for the latest order & Supporters
+    kb_rows = []
+    if orders:
+        latest = orders[0]
+        inv_label = f"🧾 មើលវិក្កយបត្រ (Invoice #{latest.id})" if lang == "km" else f"🧾 View Invoice #{latest.id}"
+        kb_rows.append([InlineKeyboardButton(text=inv_label, callback_data=f"invoice:{latest.id}")])
+
+    kb_rows.append([InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926")])
+    history_kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
+
+    await message.answer("\n".join(history_lines), reply_markup=history_kb)
 
 
 @router.message(F.text.in_({"💸 កម្មវិធីណែនាំ", "💸 Referral Program"}))
