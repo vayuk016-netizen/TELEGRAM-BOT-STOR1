@@ -564,6 +564,31 @@ async def show_order_invoice_handler(callback: CallbackQuery, session: AsyncSess
 
     await callback.answer()
 
+    # 1. Try sending the official custom SP Shop Invoice PNG (generated from user template)
+    try:
+        from app.services.invoice_generator import InvoiceGenerator
+        inv_img_path = InvoiceGenerator.generate_order_invoice_image(
+            order_id=order.id,
+            customer_name=cust_name,
+            customer_id=cust_id,
+            product_title=product_title,
+            quantity=quantity,
+            unit_price=unit_price,
+            total_amount=float(order.total_amount),
+            delivered_payload=delivered_payload,
+            created_at=order.created_at,
+        )
+        if inv_img_path and inv_img_path.exists():
+            await callback.message.answer_photo(
+                photo=FSInputFile(str(inv_img_path)),
+                caption=invoice_caption,
+                reply_markup=inv_kb,
+            )
+            return
+    except Exception as inv_err:
+        logger.warning(f"Failed to generate custom invoice photo: {inv_err}")
+
+    # 2. Fallback to SP Shop 3D logo photo
     logo_candidates = [
         Path(__file__).resolve().parent.parent.parent / "static" / "sp-shop-logo.jpg",
         Path("app/static/sp-shop-logo.jpg"),
@@ -690,6 +715,31 @@ async def command_invoice_handler(message: Message, session: AsyncSession, db_us
         ]
     )
 
+    # 1. Try sending the official custom SP Shop Invoice PNG (generated from user template)
+    try:
+        from app.services.invoice_generator import InvoiceGenerator
+        inv_img_path = InvoiceGenerator.generate_order_invoice_image(
+            order_id=order.id,
+            customer_name=cust_name,
+            customer_id=cust_id,
+            product_title=product_title,
+            quantity=quantity,
+            unit_price=unit_price,
+            total_amount=float(order.total_amount),
+            delivered_payload=delivered_payload,
+            created_at=order.created_at,
+        )
+        if inv_img_path and inv_img_path.exists():
+            await message.answer_photo(
+                photo=FSInputFile(str(inv_img_path)),
+                caption=invoice_caption,
+                reply_markup=inv_kb,
+            )
+            return
+    except Exception as inv_err:
+        logger.warning(f"Failed to generate custom invoice photo: {inv_err}")
+
+    # 2. Fallback to SP Shop 3D logo photo
     logo_path = Path(__file__).resolve().parent.parent.parent / "static" / "sp-shop-logo.jpg"
     if logo_path.exists():
         try:

@@ -93,6 +93,57 @@ async def get_qr_image(text: str = Query(..., description="Data string to encode
     )
 
 
+@router.get("/invoice/{order_id}")
+async def get_public_order_invoice_image(order_id: int, db: AsyncSession = Depends(get_db)):
+    """
+    Renders and serves the official SP Shop Invoice PNG image for the specified order.
+    """
+    from app.services.invoice_generator import InvoiceGenerator
+    from app.db.models.order import Order, OrderItem
+    from sqlalchemy.orm import selectinload
+    from fastapi.responses import FileResponse
+
+    stmt = (
+        select(Order)
+        .options(
+            selectinload(Order.items).selectinload(OrderItem.product),
+            selectinload(Order.user),
+        )
+        .where(Order.id == order_id)
+    )
+    res = await db.execute(stmt)
+    order = res.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    item = order.items[0] if order.items else None
+    product_title = item.product.title if item and item.product else "Digital Item"
+    unit_price = float(item.unit_price) if item else float(order.total_amount)
+    quantity = len(order.items) if order.items else 1
+    delivered_payload = item.delivered_payload if item and item.delivered_payload else ""
+    cust_name = order.user.first_name if order.user else "Customer"
+    cust_id = order.user.telegram_id if order.user else ""
+
+    invoice_path = InvoiceGenerator.generate_order_invoice_image(
+        order_id=order.id,
+        customer_name=cust_name,
+        customer_id=cust_id,
+        product_title=product_title,
+        quantity=quantity,
+        unit_price=unit_price,
+        total_amount=float(order.total_amount),
+        delivered_payload=delivered_payload,
+        created_at=order.created_at,
+    )
+
+    return FileResponse(
+        path=str(invoice_path),
+        media_type="image/png",
+        filename=f"SP_Shop_Invoice_{order.id:05d}.png",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
 @router.get("/store-info")
 async def get_store_info():
     bot_user = settings.TELEGRAM_BOT_USERNAME or "sopha9926"

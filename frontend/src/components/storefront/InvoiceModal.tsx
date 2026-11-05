@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   ExternalLink,
   ShoppingBag,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -246,25 +247,39 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
         </div>
 
         {/* Bottom Actions (Hidden when printing) */}
-        <div className="p-3.5 border-t border-slate-800 bg-slate-950/50 flex items-center justify-between gap-3 print:hidden flex-shrink-0">
+        <div className="p-3.5 border-t border-slate-800 bg-slate-950/50 flex items-center justify-between gap-2.5 print:hidden flex-shrink-0 flex-wrap">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="text-xs px-4"
+            className="text-xs px-3"
           >
             បិទ (Close)
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={handlePrint}
-            className="text-xs font-bold gap-1.5 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20"
-          >
-            <Printer className="h-3.5 w-3.5" />
-            <span>បោះពុម្ពវិក្កយបត្រ (Print Invoice)</span>
-          </Button>
+
+          <div className="flex items-center gap-2">
+            <a
+              href={`/api/v1/public/invoice/${order.order_id}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 h-8 text-xs font-semibold px-3 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+              title="Download Official Invoice Image"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>រូបភាពវិក្កយបត្រ (PNG)</span>
+            </a>
+
+            <Button
+              type="button"
+              size="sm"
+              onClick={handlePrint}
+              className="text-xs font-bold gap-1.5 px-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-md shadow-blue-500/20"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span>បោះពុម្ព (Print)</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

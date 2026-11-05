@@ -27,3 +27,4 @@ frontend/dist/
 .vercel
 .env*
 backend/token_quota_state.json
+backend/app/static/invoices/*.png
