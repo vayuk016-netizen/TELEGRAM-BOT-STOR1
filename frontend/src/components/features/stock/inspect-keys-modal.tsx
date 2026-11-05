@@ -131,10 +131,10 @@ export const InspectKeysModal: React.FC<InspectKeysModalProps> = ({
                   onClose();
                   onOpenAddModal(product.id);
                 }}
-                className="h-8 text-xs px-3 gap-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-bold shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 transition-all whitespace-nowrap flex-shrink-0"
+                className="h-8 text-xs px-3.5 gap-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white font-bold shadow-md shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 transition-all whitespace-nowrap flex-shrink-0 inline-flex items-center"
               >
                 <Plus className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>+ បន្ថែម Keys</span>
+                <span className="whitespace-nowrap">បន្ថែម Keys</span>
               </Button>
             )}
           </div>

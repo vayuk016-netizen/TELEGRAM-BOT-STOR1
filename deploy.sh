@@ -116,6 +116,7 @@ npm install --prefer-offline --no-audit --loglevel=error
 npm run build
 
 echo "🔄 4/5 Restarting Telegram Bot & FastAPI backend service..."
+sudo systemctl daemon-reload
 sudo systemctl restart telegram-store
 
 echo "🌐 5/5 Reloading Nginx server..."

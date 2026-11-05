@@ -1,6 +1,6 @@
 import logging
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.user import User
 from app.db.repositories.product_repository import ProductRepository
