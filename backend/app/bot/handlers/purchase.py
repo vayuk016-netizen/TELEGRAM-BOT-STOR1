@@ -581,7 +581,6 @@ async def show_order_invoice_handler(callback: CallbackQuery, session: AsyncSess
         if inv_img_path and inv_img_path.exists():
             await callback.message.answer_photo(
                 photo=FSInputFile(str(inv_img_path)),
-                caption=invoice_caption,
                 reply_markup=inv_kb,
             )
             return
@@ -732,7 +731,6 @@ async def command_invoice_handler(message: Message, session: AsyncSession, db_us
         if inv_img_path and inv_img_path.exists():
             await message.answer_photo(
                 photo=FSInputFile(str(inv_img_path)),
-                caption=invoice_caption,
                 reply_markup=inv_kb,
             )
             return
