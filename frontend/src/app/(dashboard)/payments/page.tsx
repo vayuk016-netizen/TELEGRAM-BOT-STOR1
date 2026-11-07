@@ -317,7 +317,7 @@ export default function PaymentsPage() {
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-[#0f172a] dark:text-white">
             <CreditCard className="h-7 w-7 text-blue-600 dark:text-blue-400" />
             {isKh ? "គ្រប់គ្រងការទូទាត់ និង Bakong KHQR" : "Customer Payment Management & KHQR"}
           </h1>
@@ -377,9 +377,9 @@ export default function PaymentsPage() {
       {/* Top 4 KPI Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Stat 1: Total Payment Volume */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               {isKh ? "ចំណូលទូទាត់ជោគជ័យ" : "Successful Volume"}
             </span>
             <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
@@ -387,20 +387,20 @@ export default function PaymentsPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            <span className="text-3xl font-extrabold tracking-tight text-[#0f172a] dark:text-white">
               ${(historySummary.total_volume_usd || 0).toFixed(2)}
             </span>
-            <span className="text-sm text-slate-500">USD</span>
+            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">USD</span>
           </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">
             {historySummary.completed_count} {isKh ? "ប្រតិបត្តិការបានជោគជ័យ" : "completed transactions"}
           </p>
         </div>
 
         {/* Stat 2: Completed Payments Count */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               {isKh ? "ការទូទាត់ជោគជ័យ" : "Completed Orders"}
             </span>
             <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
@@ -408,20 +408,20 @@ export default function PaymentsPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
+            <span className="text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">
               {historySummary.completed_count}
             </span>
-            <span className="text-sm text-slate-500">{isKh ? "លើក" : "payments"}</span>
+            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{isKh ? "លើក" : "payments"}</span>
           </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">
             {isKh ? "ទំនិញត្រូវបានបញ្ជូនដោយស្វ័យប្រវត្ត" : "Digital goods delivered automatically"}
           </p>
         </div>
 
         {/* Stat 3: Pending Payments */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               {isKh ? "រង់ចាំការទូទាត់ (Pending)" : "Pending Payments"}
             </span>
             <div className="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
@@ -429,20 +429,20 @@ export default function PaymentsPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-amber-600 dark:text-amber-400">
+            <span className="text-3xl font-extrabold tracking-tight text-amber-600 dark:text-amber-400">
               {historySummary.pending_count}
             </span>
-            <span className="text-sm text-slate-500">{isKh ? "លើក" : "pending"}</span>
+            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">{isKh ? "លើក" : "pending"}</span>
           </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-xs font-medium text-slate-600 dark:text-slate-400">
             {isKh ? "អាចចុច Verify លើតារាងដើម្បីឆែកផ្ទាល់" : "Can be verified manually from table"}
           </p>
         </div>
 
         {/* Stat 4: Bakong Token Pool & Daily Limit */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               {isKh ? "Bakong Quota ប្រចាំថ្ងៃ" : "Bakong Token Quota"}
             </span>
             <div className="rounded-lg bg-purple-50 p-2 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400">
@@ -451,23 +451,23 @@ export default function PaymentsPage() {
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span
-              className={`text-3xl font-bold tracking-tight font-mono ${
+              className={`text-3xl font-extrabold tracking-tight font-mono ${
                 (token_pool.remaining_quota ?? 0) === 0
                   ? "text-rose-600 dark:text-rose-400"
                   : (token_pool.remaining_quota ?? 0) < token_pool.total_daily_quota
                   ? "text-amber-600 dark:text-amber-400"
-                  : "text-slate-900 dark:text-slate-100"
+                  : "text-[#0f172a] dark:text-white"
               }`}
             >
               {token_pool.quota_display || `${token_pool.remaining_quota ?? token_pool.total_daily_quota}/${token_pool.total_daily_quota}`}
             </span>
-            <span className="text-sm text-slate-500">Req/Day</span>
+            <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Req/Day</span>
           </div>
           <div className="mt-2 flex items-center justify-between">
             <span
-              className={`text-xs font-medium ${
+              className={`text-xs font-semibold ${
                 token_pool.active_count === 0
-                  ? "text-rose-600 dark:text-rose-400 font-semibold"
+                  ? "text-rose-600 dark:text-rose-400 font-bold"
                   : "text-emerald-600 dark:text-emerald-400"
               }`}
             >
@@ -480,7 +480,7 @@ export default function PaymentsPage() {
             </span>
             <button
               onClick={() => setShowTokenPool(!showTokenPool)}
-              className="text-xs text-blue-600 hover:underline flex items-center gap-0.5"
+              className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-0.5"
             >
               {showTokenPool ? (isKh ? "បិទ Monitor" : "Hide") : (isKh ? "មើល Monitor" : "View")}
               {showTokenPool ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -494,7 +494,7 @@ export default function PaymentsPage() {
         <div className="rounded-xl border border-blue-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-all">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
             <div>
-              <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-[#0f172a] dark:text-white">
                 <Layers className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 {isKh ? "Bakong API Multi-Token Pool Monitor" : "Bakong API Multi-Token Pool"}
               </h2>
@@ -673,12 +673,12 @@ export default function PaymentsPage() {
                   setStatusFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-[#0f172a] font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
               >
-                <option value="ALL">{isKh ? "📌 គ្រប់ស្ថានភាព (All Statuses)" : "📌 All Statuses"}</option>
-                <option value="COMPLETED">{isKh ? "✅ ជោគជ័យ (Completed / Success)" : "✅ Completed / Success"}</option>
-                <option value="PENDING">{isKh ? "⏳ កំពុងរង់ចាំ (Pending)" : "⏳ Pending"}</option>
-                <option value="FAILED">{isKh ? "❌ បរាជ័យ / បោះបង់ (Failed / Cancelled)" : "❌ Failed / Cancelled"}</option>
+                <option value="ALL" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "📌 គ្រប់ស្ថានភាព (All Statuses)" : "📌 All Statuses"}</option>
+                <option value="COMPLETED" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "✅ ជោគជ័យ (Completed / Success)" : "✅ Completed / Success"}</option>
+                <option value="PENDING" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "⏳ កំពុងរង់ចាំ (Pending)" : "⏳ Pending"}</option>
+                <option value="FAILED" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "❌ បរាជ័យ / បោះបង់ (Failed / Cancelled)" : "❌ Failed / Cancelled"}</option>
               </select>
             </div>
 
@@ -690,13 +690,13 @@ export default function PaymentsPage() {
                   setTypeFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-[#0f172a] font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
               >
-                <option value="ALL">{isKh ? "💳 គ្រប់ប្រភេទ (All Payment Types)" : "💳 All Types"}</option>
-                <option value="KHQR">{isKh ? "🇰🇭 KHQR ទាំងអស់ (All KHQR)" : "🇰🇭 All KHQR"}</option>
-                <option value="KHQR_ORDER">{isKh ? "📦 KHQR Direct Order (ទិញទំនិញ)" : "📦 KHQR Direct Order"}</option>
-                <option value="KHQR_TOPUP">{isKh ? "💰 KHQR Top-up (បញ្ចូលលុយ)" : "💰 KHQR Top-up"}</option>
-                <option value="BALANCE">{isKh ? "👛 កាបូបលុយ Balance Order" : "👛 Balance Order"}</option>
+                <option value="ALL" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "💳 គ្រប់ប្រភេទ (All Payment Types)" : "💳 All Types"}</option>
+                <option value="KHQR" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "🇰🇭 KHQR ទាំងអស់ (All KHQR)" : "🇰🇭 All KHQR"}</option>
+                <option value="KHQR_ORDER" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "📦 KHQR Direct Order (ទិញទំនិញ)" : "📦 KHQR Direct Order"}</option>
+                <option value="KHQR_TOPUP" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "💰 KHQR Top-up (បញ្ចូលលុយ)" : "💰 KHQR Top-up"}</option>
+                <option value="BALANCE" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "👛 កាបូបលុយ Balance Order" : "👛 Balance Order"}</option>
               </select>
             </div>
 
@@ -708,12 +708,12 @@ export default function PaymentsPage() {
                   setDateFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-[#0f172a] font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
               >
-                <option value="all">{isKh ? "📅 គ្រប់ពេលវេលា (All Time)" : "📅 All Time"}</option>
-                <option value="today">{isKh ? "☀️ ថ្ងៃនេះ (Today)" : "☀️ Today"}</option>
-                <option value="7days">{isKh ? "🗓️ ៧ ថ្ងៃចុងក្រោយ (Last 7 Days)" : "🗓️ Last 7 Days"}</option>
-                <option value="month">{isKh ? "🗓️ ៣០ ថ្ងៃចុងក្រោយ (Last 30 Days)" : "🗓️ Last 30 Days"}</option>
+                <option value="all" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "📅 គ្រប់ពេលវេលា (All Time)" : "📅 All Time"}</option>
+                <option value="today" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "☀️ ថ្ងៃនេះ (Today)" : "☀️ Today"}</option>
+                <option value="7days" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "🗓️ ៧ ថ្ងៃចុងក្រោយ (Last 7 Days)" : "🗓️ Last 7 Days"}</option>
+                <option value="month" className="text-[#0f172a] dark:text-slate-100 bg-white dark:bg-slate-900">{isKh ? "🗓️ ៣០ ថ្ងៃចុងក្រោយ (Last 30 Days)" : "🗓️ Last 30 Days"}</option>
               </select>
             </div>
           </div>
@@ -723,13 +723,13 @@ export default function PaymentsPage() {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-50/75 dark:bg-slate-950/50">
-                <TableHead className="font-semibold">{isKh ? "អតិថិជន (Customer)" : "Customer"}</TableHead>
-                <TableHead className="font-semibold">{isKh ? "ចំនួនទឹកប្រាក់" : "Amount"}</TableHead>
-                <TableHead className="font-semibold">{isKh ? "វិធីទូទាត់" : "Method"}</TableHead>
-                <TableHead className="font-semibold">{isKh ? "ស្ថានភាព" : "Status"}</TableHead>
-                <TableHead className="font-semibold">{isKh ? "កាលបរិច្ឆេទ" : "Date & Time"}</TableHead>
-                <TableHead className="text-right font-semibold">{isKh ? "សកម្មភាព" : "Actions"}</TableHead>
+              <TableRow className="bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-100/90 dark:hover:bg-slate-900/90 hover:shadow-none">
+                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "អតិថិជន (Customer)" : "Customer"}</TableHead>
+                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "ចំនួនទឹកប្រាក់" : "Amount"}</TableHead>
+                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "វិធីទូទាត់" : "Method"}</TableHead>
+                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "ស្ថានភាព" : "Status"}</TableHead>
+                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "កាលបរិច្ឆេទ" : "Date & Time"}</TableHead>
+                <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300">{isKh ? "សកម្មភាព" : "Actions"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -766,22 +766,29 @@ export default function PaymentsPage() {
                   const isVerifying = verifyingId === item.id;
 
                   return (
-                    <TableRow key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                    <TableRow
+                      key={item.id}
+                      onClick={() => setSelectedPayment(item)}
+                      className="group cursor-pointer transition-all duration-150 hover:bg-blue-50/80 active:bg-blue-100/90 dark:hover:bg-blue-950/40 dark:active:bg-blue-900/50 hover:shadow-[inset_4px_0_0_0_#2563eb] dark:hover:shadow-[inset_4px_0_0_0_#38bdf8] active:shadow-[inset_4px_0_0_0_#2563eb] dark:active:shadow-[inset_4px_0_0_0_#38bdf8]"
+                    >
                       {/* Customer */}
                       <TableCell className="align-middle">
                         <div className="flex items-center gap-2.5">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-900/60 dark:group-hover:text-blue-300 transition-colors">
                             <User className="h-4 w-4" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-xs font-medium text-slate-900 dark:text-slate-100">
+                            <span className="text-xs font-semibold text-[#0f172a] dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300">
                               {item.customer.name}
                             </span>
-                            <div className="flex items-center gap-1 text-[11px] text-slate-500">
+                            <div className="flex items-center gap-1 text-[11px] text-slate-500 group-hover:text-blue-600/80">
                               {item.customer.username && <span>@{item.customer.username}</span>}
                               {item.customer.telegram_id && (
                                 <button
-                                  onClick={() => copyToClipboard(String(item.customer.telegram_id), "Telegram ID")}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyToClipboard(String(item.customer.telegram_id), "Telegram ID");
+                                  }}
                                   className="hover:text-blue-600 flex items-center gap-0.5 ml-1"
                                   title="Copy Telegram ID"
                                 >
@@ -835,7 +842,7 @@ export default function PaymentsPage() {
                       </TableCell>
 
                       {/* Date & Time */}
-                      <TableCell className="align-middle text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      <TableCell className="align-middle text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap font-medium group-hover:text-slate-800 dark:group-hover:text-slate-100">
                         {formatDate(item.created_at)}
                       </TableCell>
 
@@ -846,7 +853,10 @@ export default function PaymentsPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleVerifyPayment(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleVerifyPayment(item);
+                              }}
                               disabled={isVerifying}
                               className="h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300"
                             >
@@ -863,7 +873,10 @@ export default function PaymentsPage() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => setSelectedPayment(item)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPayment(item);
+                            }}
                             className="h-7 px-2 text-xs text-slate-600 hover:text-blue-600 dark:text-slate-300"
                             title="View Details"
                           >
@@ -912,7 +925,7 @@ export default function PaymentsPage() {
                   className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     currentPage <= 1 || historyLoading
                       ? "cursor-not-allowed text-slate-300 dark:text-slate-600"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-[#0f172a] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
                   }`}
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
@@ -941,7 +954,7 @@ export default function PaymentsPage() {
                         className={`flex h-8 min-w-[32px] items-center justify-center rounded-md px-2.5 text-xs font-semibold transition-all ${
                           isActive
                             ? "bg-red-600 text-white shadow-sm hover:bg-red-700"
-                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
+                            : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-[#0f172a] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
                         }`}
                       >
                         {pageNum}
@@ -957,7 +970,7 @@ export default function PaymentsPage() {
                   className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     currentPage >= totalPages || historyLoading
                       ? "cursor-not-allowed text-slate-300 dark:text-slate-600"
-                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-[#0f172a] dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
                   }`}
                 >
                   <span>{isKh ? "Next" : "Next"}</span>
@@ -992,7 +1005,7 @@ export default function PaymentsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-[#0f172a] dark:text-white flex items-center gap-2">
                 <Layers className="h-5 w-5 text-blue-600" />
                 {isKh ? "គ្រប់គ្រង Bakong API Tokens (Multi-Token Pool)" : "Manage Bakong API Tokens"}
               </h3>
@@ -1079,7 +1092,7 @@ export default function PaymentsPage() {
                   <CreditCard className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <h3 className="text-base font-semibold text-[#0f172a] dark:text-white">
                     {isKh ? "ព័ត៌មានលម្អិតការទូទាត់" : "Payment Details"} #{selectedPayment.id}
                   </h3>
                   <p className="text-xs text-slate-500">{formatDate(selectedPayment.created_at)}</p>
