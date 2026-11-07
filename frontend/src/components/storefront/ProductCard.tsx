@@ -18,7 +18,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isOutOfStock = product.stock_count <= 0;
 
   return (
-    <div className="group relative rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-5 shadow-sm hover:shadow-xl hover:border-blue-500/50 transition-all duration-300 flex flex-col justify-between backdrop-blur-sm">
+    <div className="group relative rounded-2xl border border-slate-800/80 bg-slate-900/60 hover:bg-slate-900/90 p-4 sm:p-5 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-500/50 transition-all duration-300 flex flex-col justify-between backdrop-blur-md">
       
       {/* Top Banner: Category & Stock Status */}
       <div>

@@ -107,7 +107,7 @@ export const BrandTicker: React.FC = () => {
               onClick={() => handleBrandClick(brand.query)}
               title={brand.name}
               aria-label={brand.name}
-              className="group relative h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 flex items-center justify-center p-0.5 sm:p-1 bg-transparent hover:bg-slate-200/20 dark:hover:bg-slate-800/20 rounded-2xl sm:rounded-3xl transition-transform duration-300 cursor-pointer flex-shrink-0 active:scale-95 hover:scale-110 hover:-translate-y-1.5 focus:outline-none"
+              className="group relative h-16 w-16 sm:h-20 sm:w-20 md:h-22 md:w-22 flex items-center justify-center p-0 bg-transparent transition-transform duration-300 cursor-pointer flex-shrink-0 active:scale-95 hover:scale-110 hover:-translate-y-1.5 focus:outline-none"
               style={{ contain: "layout paint" }}
             >
               <img
@@ -117,7 +117,7 @@ export const BrandTicker: React.FC = () => {
                 decoding="async"
                 width={88}
                 height={80}
-                className={`h-full w-full object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none drop-shadow-[0_4px_12px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)] ${brand.glowColor}`}
+                className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
               />
             </button>
           ))}

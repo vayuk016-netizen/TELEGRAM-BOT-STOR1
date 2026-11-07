@@ -49,9 +49,7 @@ export const HomePage: React.FC = () => {
     <div className="space-y-16 sm:space-y-24 pb-20">
       
       {/* 🚀 Hero Section */}
-      <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16 bg-gradient-to-b from-blue-500/5 via-indigo-500/5 to-transparent border-b border-slate-800/60">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.15),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.2),rgba(0,0,0,0))] pointer-events-none" />
-        
+      <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16 border-b border-slate-800/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-100 leading-[1.15]">
             {t("hero_title")}
