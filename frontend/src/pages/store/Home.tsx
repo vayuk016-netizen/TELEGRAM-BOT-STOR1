@@ -60,14 +60,79 @@ export const HomePage: React.FC = () => {
           </p>
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button
-              size="lg"
+            <button
               onClick={() => navigate("/products")}
-              className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 active:scale-95 transition-all btn-line-rolling btn-rolling-gradient"
+              className="group relative inline-flex items-center justify-center h-12 px-8 rounded-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] active:scale-95 bg-white/90 dark:bg-slate-900/80 hover:bg-white dark:hover:bg-slate-900/90 backdrop-blur-2xl shadow-[0_10px_25px_-4px_rgba(15,23,42,0.12),0_4px_10px_-2px_rgba(37,99,235,0.12)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.25)] hover:shadow-[0_14px_32px_-4px_rgba(15,23,42,0.18)] dark:hover:shadow-[0_12px_36px_-4px_rgba(0,0,0,0.9),0_0_30px_rgba(59,130,246,0.45)]"
             >
-              <ShoppingBag className="h-4 w-4" />
-              <span>{t("browse_catalog")}</span>
-            </Button>
+              {/* 💫 SVG Running Border Beam (Uniform speed along all 4 edges) */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none rounded-2xl overflow-visible"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="heroBtnBeamLight" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#2563eb" />
+                    <stop offset="50%" stopColor="#7c3aed" />
+                    <stop offset="100%" stopColor="#e11d48" />
+                  </linearGradient>
+                  <linearGradient id="heroBtnBeamDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#38bdf8" />
+                    <stop offset="50%" stopColor="#818cf8" />
+                    <stop offset="100%" stopColor="#f43f5e" />
+                  </linearGradient>
+                </defs>
+
+                {/* Base subtle glass border frame */}
+                <rect
+                  x="1"
+                  y="1"
+                  width="calc(100% - 2px)"
+                  height="calc(100% - 2px)"
+                  rx="15"
+                  fill="none"
+                  stroke="currentColor"
+                  className="text-slate-200/90 dark:text-white/15"
+                  strokeWidth="1.5"
+                />
+
+                {/* Active laser beam running around the box */}
+                <rect
+                  x="1"
+                  y="1"
+                  width="calc(100% - 2px)"
+                  height="calc(100% - 2px)"
+                  rx="15"
+                  fill="none"
+                  stroke="url(#heroBtnBeamLight)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  className="dark:hidden animate-border-beam-svg"
+                  style={{ strokeDasharray: "110 440" }}
+                />
+                <rect
+                  x="1"
+                  y="1"
+                  width="calc(100% - 2px)"
+                  height="calc(100% - 2px)"
+                  rx="15"
+                  fill="none"
+                  stroke="url(#heroBtnBeamDark)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  className="hidden dark:block animate-border-beam-svg"
+                  style={{
+                    strokeDasharray: "110 440",
+                    filter: "drop-shadow(0 0 5px rgba(56, 189, 248, 0.75))",
+                  }}
+                />
+              </svg>
+
+              {/* 🧊 Clear Button Text & Icon */}
+              <div className="relative z-10 flex items-center justify-center gap-2.5 font-extrabold text-sm sm:text-base text-[#0f172a] dark:text-white">
+                <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-cyan-400 filter drop-shadow(0_0_6px_rgba(56,189,248,0.4)) transition-transform group-hover:scale-110 flex-shrink-0" />
+                <span className="tracking-wide">{t("browse_catalog")}</span>
+              </div>
+            </button>
           </div>
         </div>
 

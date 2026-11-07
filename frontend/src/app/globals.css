@@ -285,3 +285,44 @@ body {
   transform: translateZ(0);
 }
 
+/* 💫 Running Border Light Beam for Glass Product Cards */
+@keyframes border-beam-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam-spin 6s linear infinite;
+  will-change: transform;
+}
+
+.animate-border-beam-fast {
+  animation: border-beam-spin 3s linear infinite;
+  will-change: transform;
+}
+
+/* 💫 SVG Running Border Beam (Uniform Speed around all 4 edges) */
+@keyframes border-beam-svg {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -550;
+  }
+}
+
+.animate-border-beam-svg {
+  animation: border-beam-svg 3.5s linear infinite;
+  will-change: stroke-dashoffset;
+}
+
+.group:hover .animate-border-beam-svg {
+  animation-duration: 1.8s;
+}
+
+
+
