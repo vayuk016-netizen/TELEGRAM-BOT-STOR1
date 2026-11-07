@@ -9,9 +9,9 @@ export const StoreFooter: React.FC = () => {
   const { t } = useLanguageStore();
 
   return (
-    <footer className="border-t border-slate-800 bg-slate-950 font-kantumruy-pro pt-14 pb-10 transition-colors text-slate-100">
+    <footer className="border-t border-slate-800 bg-slate-950 font-kantumruy-pro pt-12 sm:pt-14 pb-0 transition-colors text-slate-100 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 mb-6 sm:mb-8">
           
           {/* Col 1: Brand Info */}
           <div className="md:col-span-2 space-y-4">
@@ -79,9 +79,21 @@ export const StoreFooter: React.FC = () => {
             </a>
           </div>
         </div>
+      </div>
 
-        {/* Bottom bar */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+      {/* 🇰🇭 100% Full-Width Edge-to-Edge Cambodia Landmarks Skyline (Seamless Fit) */}
+      <div className="w-full overflow-hidden leading-none m-0 p-0 block select-none pointer-events-none">
+        <img
+          src="/images/cambodia-skyline.png"
+          alt="Cambodia Landmarks Skyline"
+          className="w-full h-auto object-cover object-bottom max-h-[140px] sm:max-h-[180px] lg:max-h-[220px] transition-opacity block"
+          loading="lazy"
+        />
+      </div>
+
+      {/* Bottom bar */}
+      <div className="border-t border-slate-800/80 bg-slate-900/40 py-5 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>© {new Date().getFullYear()} {t("copyright")}</p>
           <div className="flex items-center gap-2">
             <span>{t("footer_powered_by")}</span>

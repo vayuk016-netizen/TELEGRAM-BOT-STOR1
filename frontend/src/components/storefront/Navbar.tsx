@@ -49,17 +49,9 @@ export const StoreNavbar: React.FC = () => {
               className="h-full w-full object-contain rounded-xl"
             />
           </div>
-          <div>
-            <div className="font-extrabold text-base sm:text-lg tracking-tight text-slate-100 flex items-center gap-2">
-              <span>SP STORE</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                PRO
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-400 font-medium hidden sm:block">
-              {t("hero_badge")}
-            </p>
-          </div>
+          <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-100">
+            SP STORE
+          </span>
         </Link>
 
         {/* Desktop Navigation Links */}
@@ -85,21 +77,21 @@ export const StoreNavbar: React.FC = () => {
         {/* Right Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Language Switcher */}
+          {/* Language Switcher (Desktop) */}
           <button
             onClick={toggleLang}
             title="Switch Language"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 text-slate-100 text-xs font-bold transition-all shadow-sm"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 text-slate-100 text-xs font-bold transition-all shadow-sm"
           >
             <Globe className="h-3.5 w-3.5 text-blue-400" />
             <span>{language === "km" ? "🇰🇭 KM" : "🇬🇧 EN"}</span>
           </button>
 
-          {/* Night / Day Mode Toggle */}
+          {/* Night / Day Mode Toggle (Desktop) */}
           <button
             onClick={toggleTheme}
             title={theme === "dark" ? "Switch to Day Mode (Light)" : "Switch to Night Mode (Dark)"}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 text-xs font-bold text-slate-100 transition-all cursor-pointer active:scale-95 shadow-sm"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 text-xs font-bold text-slate-100 transition-all cursor-pointer active:scale-95 shadow-sm"
           >
             {theme === "dark" ? (
               <>
@@ -209,6 +201,34 @@ export const StoreNavbar: React.FC = () => {
                 {link.label}
               </Link>
             ))}
+          </div>
+
+          {/* Quick Controls: Language & Theme Toggle (Mobile Menu Drawer) */}
+          <div className="pt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2">
+            <button
+              onClick={toggleLang}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-slate-800 text-slate-100 text-xs font-bold transition-all shadow-sm active:scale-95 min-h-[42px]"
+            >
+              <Globe className="h-4 w-4 text-blue-400" />
+              <span>{language === "km" ? "🇰🇭 KM (ភាសាខ្មែរ)" : "🇬🇧 EN (English)"}</span>
+            </button>
+
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-slate-800 text-xs font-bold text-slate-100 transition-all cursor-pointer active:scale-95 shadow-sm min-h-[42px]"
+            >
+              {theme === "dark" ? (
+                <>
+                  <Moon className="h-4 w-4 text-blue-400" />
+                  <span className="text-xs text-slate-100 font-semibold">Night Mode</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="h-4 w-4 text-amber-500" />
+                  <span className="text-xs text-slate-100 font-semibold">Day Mode</span>
+                </>
+              )}
+            </button>
           </div>
 
           <div className="pt-2 border-t border-slate-800/80 flex justify-between items-center px-1">
