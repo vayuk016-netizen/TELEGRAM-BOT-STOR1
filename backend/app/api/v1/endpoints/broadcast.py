@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Backgro
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_db, get_current_admin
+from app.core.config import settings
 from app.db.models.broadcast_schedule import BroadcastSchedule
 from app.db.models.user import User
 from app.services.broadcast_scheduler import run_broadcast_worker
@@ -57,29 +58,34 @@ async def upload_image(
     admin=Depends(get_current_admin),
 ):
     """Accepts an image or video file and saves it to static/uploads directory."""
-    if not (file.content_type.startswith("image/") or file.content_type.startswith("video/")):
+    if not (file.content_type and (file.content_type.startswith("image/") or file.content_type.startswith("video/"))):
         raise HTTPException(status_code=400, detail="File must be an image or a video.")
 
     try:
         # Check if Cloudinary credentials are fully configured
         if settings.CLOUDINARY_CLOUD_NAME and settings.CLOUDINARY_API_KEY and settings.CLOUDINARY_API_SECRET:
-            import cloudinary
-            import cloudinary.uploader
-            cloudinary.config(
-                cloud_name=settings.CLOUDINARY_CLOUD_NAME,
-                api_key=settings.CLOUDINARY_API_KEY,
-                api_secret=settings.CLOUDINARY_API_SECRET,
-                secure=True
-            )
-            upload_result = cloudinary.uploader.upload(file.file, resource_type="auto")
-            cloudinary_url = upload_result.get("secure_url")
-            return {"image_path": cloudinary_url}
+            try:
+                import cloudinary
+                import cloudinary.uploader
+                cloudinary.config(
+                    cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+                    api_key=settings.CLOUDINARY_API_KEY,
+                    api_secret=settings.CLOUDINARY_API_SECRET,
+                    secure=True,
+                )
+                upload_result = cloudinary.uploader.upload(file.file, resource_type="auto")
+                cloudinary_url = upload_result.get("secure_url")
+                if cloudinary_url:
+                    return {"image_path": cloudinary_url}
+            except Exception as c_err:
+                print(f"[Broadcast Upload Warning] Cloudinary upload failed, falling back to local: {c_err}")
 
         os.makedirs(UPLOAD_DIR, exist_ok=True)
-        file_ext = os.path.splitext(file.filename)[1]
+        file_ext = os.path.splitext(file.filename)[1] if file.filename else ".jpg"
         filename = f"{uuid.uuid4()}{file_ext}"
         file_path = os.path.join(UPLOAD_DIR, filename)
 
+        await file.seek(0)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 

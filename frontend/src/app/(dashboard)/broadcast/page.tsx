@@ -68,8 +68,9 @@ export default function BroadcastPage() {
       setImagePath(res.image_path);
       showToast(`${isVideo ? "Video" : "Image"} uploaded successfully!`);
     } catch (err: any) {
-      setFileError("Failed to upload media file. Please try again.");
-      showToast("Media upload failed.", "error");
+      const errMsg = err.response?.data?.detail || "Failed to upload media file. Please try again.";
+      setFileError(errMsg);
+      showToast(errMsg, "error");
     } finally {
       setUploadingImage(false);
     }
