@@ -24,6 +24,8 @@ class BroadcastPayload(BaseModel):
     message_text: str = Field(..., description="HTML or plain text broadcast message content")
     interval_delay: int = 3
     image_path: Optional[str] = None
+    target_type: str = "users"  # "users", "group", "both"
+    group_chat_id: Optional[str] = None
 
 
 class BroadcastSchedulePayload(BaseModel):
@@ -32,6 +34,8 @@ class BroadcastSchedulePayload(BaseModel):
     scheduled_at: datetime = Field(..., description="Datetime to start sending the message")
     interval_delay: int = 3
     image_path: Optional[str] = None
+    target_type: str = "users"  # "users", "group", "both"
+    group_chat_id: Optional[str] = None
 
 
 class BroadcastScheduleResponse(BaseModel):
@@ -42,6 +46,8 @@ class BroadcastScheduleResponse(BaseModel):
     scheduled_at: datetime
     interval_delay: int
     status: str
+    target_type: str = "users"
+    group_chat_id: Optional[str] = None
     total_targets: int
     sent_successfully: int
     failed_or_blocked: int
@@ -111,6 +117,8 @@ async def send_immediate_broadcast(
             image_path=payload.image_path,
             scheduled_at=datetime.now(timezone.utc),
             interval_delay=payload.interval_delay,
+            target_type=payload.target_type or "users",
+            group_chat_id=payload.group_chat_id.strip() if payload.group_chat_id else None,
             status="pending",
         )
         db.add(schedule)
@@ -155,6 +163,8 @@ async def schedule_broadcast(
             image_path=payload.image_path,
             scheduled_at=payload.scheduled_at,
             interval_delay=payload.interval_delay,
+            target_type=payload.target_type or "users",
+            group_chat_id=payload.group_chat_id.strip() if payload.group_chat_id else None,
             status="pending",
         )
         db.add(schedule)

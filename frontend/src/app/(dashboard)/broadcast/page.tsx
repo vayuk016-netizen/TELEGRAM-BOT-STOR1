@@ -18,6 +18,8 @@ import { userService } from "@/services/user.service";
 export default function BroadcastPage() {
   // Form states
   const [title, setTitle] = useState<string>("");
+  const [targetType, setTargetType] = useState<"users" | "group" | "both">("users");
+  const [groupChatId, setGroupChatId] = useState<string>("");
   const [messageText, setMessageText] = useState<string>(
     "🎉 <b>ឳកាសពិសេស! (PROMO ANNOUNCEMENT)</b>\n\n" +
       "បញ្ចុះតម្លៃ 20% លើគ្រប់អាខោន <b>CapCut Pro</b> និង <b>Canva Pro</b> ថ្ងៃនេះ!\n" +
@@ -94,9 +96,23 @@ export default function BroadcastPage() {
   // Handle Send Now (Immediate)
   const handleSendNow = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageText.trim()) return;
+    if (!messageText.trim()) {
+      showToast("Please write a message content.", "error");
+      return;
+    }
 
-    if (!confirm("Are you sure you want to broadcast this message to ALL Telegram bot users immediately?")) {
+    if ((targetType === "group" || targetType === "both") && !groupChatId.trim()) {
+      showToast("Please enter a Telegram Group / Channel Chat ID (e.g. -100xxxxxxxxxx or @channel)", "error");
+      return;
+    }
+
+    const targetDesc = targetType === "group"
+      ? `Telegram Group (${groupChatId.trim()})`
+      : targetType === "both"
+      ? `ALL Bot Users AND Telegram Group (${groupChatId.trim()})`
+      : "ALL Telegram bot users (Direct Messages)";
+
+    if (!confirm(`Are you sure you want to broadcast this message to ${targetDesc} immediately?`)) {
       return;
     }
 
@@ -107,6 +123,8 @@ export default function BroadcastPage() {
         message_text: messageText,
         interval_delay: intervalDelay,
         image_path: imagePath || undefined,
+        target_type: targetType,
+        group_chat_id: (targetType === "group" || targetType === "both") ? groupChatId.trim() : undefined,
       });
 
       showToast("Immediate broadcast started in the background!");
@@ -127,6 +145,10 @@ export default function BroadcastPage() {
     e.preventDefault();
     if (!messageText.trim()) {
       showToast("Please write a message.", "error");
+      return;
+    }
+    if ((targetType === "group" || targetType === "both") && !groupChatId.trim()) {
+      showToast("Please enter a Telegram Group / Channel Chat ID (e.g. -100xxxxxxxxxx or @channel)", "error");
       return;
     }
     if (!dateStr) {
@@ -154,6 +176,8 @@ export default function BroadcastPage() {
         scheduled_at: isoDateTime,
         interval_delay: intervalDelay,
         image_path: imagePath || undefined,
+        target_type: targetType,
+        group_chat_id: (targetType === "group" || targetType === "both") ? groupChatId.trim() : undefined,
       });
 
       showToast("Broadcast scheduled successfully!");
@@ -197,16 +221,16 @@ export default function BroadcastPage() {
       )}
 
       {/* Main Console card */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 md:p-8 shadow-xl dark:shadow-2xl space-y-6">
+      <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/60 p-6 md:p-8 shadow-sm dark:shadow-2xl space-y-6 backdrop-blur-xl">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
             <Send className="h-5 w-5 text-blue-500 transform -rotate-12" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-slate-100">Broadcast Message</h1>
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
-              Send or schedule messages with pictures to all active bot users.
+            <h1 className="text-xl font-bold text-[#0f172a] dark:text-slate-100">Broadcast Message</h1>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Send or schedule messages with pictures to all active bot users or Telegram Groups.
             </p>
           </div>
         </div>
@@ -216,11 +240,87 @@ export default function BroadcastPage() {
           <div>
             <input
               type="text"
-              placeholder="Title"
+              placeholder="Title (Optional)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-4 py-3 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
             />
+          </div>
+
+          {/* 🎯 Target Audience / Destination Selector */}
+          <div className="space-y-2 rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-3.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#0f172a] dark:text-slate-200 flex items-center gap-1.5">
+                <span>🎯 Target Destination (គោលដៅផ្ញើសារ)</span>
+              </label>
+              <span className="text-[10px] text-slate-500 font-mono">
+                {targetType === "users" ? "Direct Messages (1-on-1)" : targetType === "group" ? "Telegram Group / Channel" : "Users + Group"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {/* Option 1: All Bot Users */}
+              <button
+                type="button"
+                onClick={() => setTargetType("users")}
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                  targetType === "users"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400"
+                }`}
+              >
+                <span>👥</span>
+                <span>All Bot Users (DM)</span>
+              </button>
+
+              {/* Option 2: Telegram Group / Channel */}
+              <button
+                type="button"
+                onClick={() => setTargetType("group")}
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                  targetType === "group"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400"
+                }`}
+              >
+                <span>📢</span>
+                <span>Telegram Group</span>
+              </button>
+
+              {/* Option 3: Both */}
+              <button
+                type="button"
+                onClick={() => setTargetType("both")}
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                  targetType === "both"
+                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400"
+                }`}
+              >
+                <span>🌐</span>
+                <span>Both (Users & Group)</span>
+              </button>
+            </div>
+
+            {/* Group Chat ID input if Group or Both is selected */}
+            {(targetType === "group" || targetType === "both") && (
+              <div className="space-y-1.5 pt-2 border-t border-gray-200 dark:border-slate-800/80 animate-in fade-in duration-200">
+                <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center justify-between">
+                  <span>Telegram Group / Channel Chat ID</span>
+                  <span className="text-[10px] text-slate-400">Example: -100xxxxxxxxxx or @channel_username</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. -1002485960142 or @channel_username"
+                  value={groupChatId}
+                  onChange={(e) => setGroupChatId(e.target.value)}
+                  className="w-full rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3.5 py-2.5 text-xs text-[#0f172a] dark:text-white placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all font-mono"
+                />
+                <p className="text-[10px] text-amber-700 dark:text-amber-400 bg-amber-500/10 p-2.5 rounded-md border border-amber-500/20 leading-relaxed">
+                  ⚠️ <b>សំខាន់:</b> សូម Add Bot ចូលទៅក្នុង Telegram Group / Channel របស់អ្នក និង Promote ជា <b>Admin</b> ឬបើកសិទ្ធិ <b>Send Messages</b> ដល់ Bot ជាមុនសិន ទើប Bot អាចផ្ញើសារចូលបាន។
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Message Area */}
@@ -230,12 +330,23 @@ export default function BroadcastPage() {
               rows={7}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 p-4 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all tracking-normal"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 p-4 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all tracking-normal"
               style={{ fontFamily: 'var(--font-kantumruy-pro), sans-serif' }}
             />
-            <span className="text-[10px] text-gray-500 dark:text-slate-400 mt-1 block pl-1">
-              
-            </span>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-1">
+              <span>
+                {imagePath && messageText.length > 1000 ? (
+                  <span className="text-blue-600 dark:text-blue-400 font-semibold">
+                    ⚡ Auto-Split Active: Over 1,000 chars with media. Photo and full message text will automatically be sent together!
+                  </span>
+                ) : (
+                  <span>Supports HTML tags: &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;a href="..."&gt;link&lt;/a&gt;</span>
+                )}
+              </span>
+              <span className={`font-mono font-medium ${messageText.length > 4096 ? "text-rose-500 font-bold" : ""}`}>
+                {messageText.length} chars
+              </span>
+            </div>
           </div>
 
           {/* Time / Date scheduling selectors */}
@@ -245,10 +356,10 @@ export default function BroadcastPage() {
               <select
                 value={hour}
                 onChange={(e) => setHour(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
               >
                 {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((hr) => (
-                  <option key={hr} value={hr} className="bg-slate-950 text-gray-900 dark:text-slate-100">
+                  <option key={hr} value={hr} className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">
                     {hr}
                   </option>
                 ))}
@@ -260,10 +371,10 @@ export default function BroadcastPage() {
               <select
                 value={minute}
                 onChange={(e) => setMinute(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
               >
                 {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((min) => (
-                  <option key={min} value={min} className="bg-slate-950 text-gray-900 dark:text-slate-100">
+                  <option key={min} value={min} className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">
                     {min}
                   </option>
                 ))}
@@ -275,10 +386,10 @@ export default function BroadcastPage() {
               <select
                 value={ampm}
                 onChange={(e) => setAmpm(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-3 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
               >
-                <option value="AM" className="bg-slate-950 text-gray-900 dark:text-slate-100">AM</option>
-                <option value="PM" className="bg-slate-950 text-gray-900 dark:text-slate-100">PM</option>
+                <option value="AM" className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">AM</option>
+                <option value="PM" className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">PM</option>
               </select>
             </div>
 
@@ -288,14 +399,14 @@ export default function BroadcastPage() {
                 type="date"
                 value={dateStr}
                 onChange={(e) => setDateStr(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-3 py-3 pr-8 text-sm text-gray-900 dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 pr-8 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
           </div>
 
           {/* Delay Settings */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-gray-500 dark:text-slate-400">
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400">
               Interval Delay between sends (seconds)
             </label>
             <input
@@ -304,7 +415,7 @@ export default function BroadcastPage() {
               max={60}
               value={intervalDelay}
               onChange={(e) => setIntervalDelay(Math.max(0, Number(e.target.value)))}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none transition-all"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-4 py-3 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none transition-all"
             />
           </div>
 
@@ -322,7 +433,7 @@ export default function BroadcastPage() {
             {!imagePath ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`w-full rounded-xl border-2 border-dashed border-slate-800 hover:border-slate-700 bg-slate-950/40 py-4 px-6 flex items-center justify-center gap-3 cursor-pointer transition-all ${
+                className={`w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 dark:border-slate-800 dark:hover:border-slate-700 bg-slate-50/60 dark:bg-slate-950/40 py-4 px-6 flex items-center justify-center gap-3 cursor-pointer transition-all ${
                   uploadingImage ? "pointer-events-none opacity-60" : ""
                 }`}
               >
@@ -331,7 +442,7 @@ export default function BroadcastPage() {
                 ) : (
                   <ImageIcon className="h-5 w-5 text-slate-400" />
                 )}
-                <span className="text-xs text-gray-550 dark:text-slate-400 font-medium">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                   {uploadingImage ? "Uploading media..." : "Upload image or video (optional)"}
                 </span>
               </div>
@@ -400,7 +511,7 @@ export default function BroadcastPage() {
             <Button
               onClick={handleSaveSchedule}
               disabled={loading || uploadingImage}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-800 text-gray-900 dark:text-slate-100 disabled:opacity-50 transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 border border-gray-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-100 shadow-xs disabled:opacity-50 transition-all"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Save Schedule

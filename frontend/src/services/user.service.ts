@@ -9,6 +9,8 @@ export interface BroadcastSchedule {
   scheduled_at: string;
   interval_delay: number;
   status: "pending" | "sending" | "completed" | "failed";
+  target_type?: "users" | "group" | "both";
+  group_chat_id?: string;
   total_targets: number;
   sent_successfully: number;
   failed_or_blocked: number;
@@ -21,6 +23,8 @@ export interface BroadcastPayload {
   message_text: string;
   interval_delay: number;
   image_path?: string;
+  target_type?: "users" | "group" | "both";
+  group_chat_id?: string;
 }
 
 export interface BroadcastSchedulePayload extends BroadcastPayload {
