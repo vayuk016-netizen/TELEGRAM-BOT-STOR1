@@ -79,16 +79,16 @@ export default function DashboardPage() {
       </div>
 
       {/* Main Analytics Grid: Chart + Live Feed */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Revenue & Sales Chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/50 p-4 sm:p-6 shadow-sm dark:shadow-lg backdrop-blur-xl flex flex-col justify-between">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4 font-sans">
+        <div className="xl:col-span-2 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/50 p-4 sm:p-6 shadow-sm dark:shadow-lg backdrop-blur-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-4 mb-4 font-sans">
             <div>
-              <h3 className="text-sm font-bold text-slate-100">{t("revenue_sales_analytics")}</h3>
-              <p className="text-[11px] font-medium text-slate-400">{isKhmer ? "ទិន្នន័យការលក់រយៈពេល ៧ ថ្ងៃចុងក្រោយ" : "7-Day Sales & Revenue Trends"}</p>
+              <h3 className="text-sm font-bold text-[#0f172a] dark:text-white">{t("revenue_sales_analytics")}</h3>
+              <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{isKhmer ? "ទិន្នន័យការលក់រយៈពេល ៧ ថ្ងៃចុងក្រោយ" : "7-Day Sales & Revenue Trends"}</p>
             </div>
             <div className="flex gap-1 text-[11px]">
-              <button className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-semibold">
+              <button className="px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-semibold whitespace-nowrap">
                 {t("weekly")}
               </button>
             </div>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ⚡ Live Bot Orders Feed */}
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           <LiveFeed feedItems={liveFeed} loading={loading} />
         </div>
       </div>
