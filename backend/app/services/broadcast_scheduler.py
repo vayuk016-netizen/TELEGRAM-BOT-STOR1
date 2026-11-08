@@ -1,15 +1,16 @@
 import asyncio
 import logging
 import os
+import re
 import traceback
 from datetime import datetime, timezone
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 from sqlalchemy import select, update
 from app.core.database import AsyncSessionLocal
 from app.db.models.broadcast_schedule import BroadcastSchedule
 from app.db.models.user import User
 from app.bot.bot import bot
-from aiogram.types import FSInputFile, BufferedInputFile, URLInputFile
+from aiogram.types import FSInputFile, BufferedInputFile, URLInputFile, LinkPreviewOptions
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -23,20 +24,68 @@ def get_input_file(file_path: str):
             return BufferedInputFile(f.read(), filename=os.path.basename(file_path))
 
 
+def smart_prepare_caption(title: Optional[str], message_text: Optional[str], max_caption_len: int = 1024) -> Tuple[str, bool]:
+    """
+    Prepares a clean caption that fits in ONE Telegram message bubble (max 1024 chars).
+    Returns (prepared_caption, fits_in_one_bubble).
+    """
+    text = (message_text or "").strip()
+    title = (title or "").strip()
+
+    # Avoid duplicating title if text already begins with title
+    has_title = False
+    if title:
+        first_line = text.split("\n")[0].strip().lower()
+        clean_title = re.sub(r'[^a-zA-Z0-9\u1780-\u17ff]', '', title.lower())
+        clean_first = re.sub(r'[^a-zA-Z0-9\u1780-\u17ff]', '', first_line)
+        if clean_title and clean_title in clean_first:
+            has_title = True
+
+    if title and not has_title:
+        combined = f"<b>{title}</b>\n\n{text}"
+    else:
+        combined = text
+
+    if len(combined) <= max_caption_len:
+        return combined, True
+
+    # Attempt 1: Compress excessive 3+ newlines to 2
+    c1 = re.sub(r'\n{3,}', '\n\n', combined)
+    if len(c1) <= max_caption_len:
+        return c1, True
+
+    # Attempt 2: Tighten spacing between emoji / bullet list items
+    c2 = re.sub(r'\n\n(?=[✅\-\*•▶️🔥✨⏳💸💬📩🤖🪩📲🌟\d+\.])', '\n', c1)
+    if len(c2) <= max_caption_len:
+        return c2, True
+
+    # Attempt 3: Collapse all remaining \n\n into \n
+    c3 = re.sub(r'\n{2,}', '\n', c2)
+    if len(c3) <= max_caption_len:
+        return c3, True
+
+    # Attempt 4: If slightly over by <= 30 chars, trim trailing whitespace
+    if len(c3) <= max_caption_len + 30:
+        c4 = c3[:max_caption_len].rstrip()
+        return c4, True
+
+    return combined, False
+
+
 async def send_broadcast_message_to_target(
     chat_id: Union[int, str],
     formatted_text: str,
     image_path: Optional[str],
     local_path: Optional[str],
     is_remote_url: bool,
+    single_bubble_caption: Optional[str] = None,
 ):
     """
     Sends broadcast message to a single target (user, group, or channel).
-    Handles Telegram's 1024-character caption limit automatically:
-    - If media exists and caption <= 1000 characters: sends with caption.
-    - If media exists and caption > 1000 characters: sends media first (no caption),
-      then immediately sends full text message (supporting up to 4096 characters).
-    - If HTML parsing fails in any message, falls back gracefully to plain text.
+    Guarantees that photo + text fit into ONE single bubble whenever possible:
+    1. If media + caption <= 1024 characters: sends as native photo/video with embedded caption (1 BUBBLE).
+    2. If media + text > 1024 characters and remote URL: sends as single message with LinkPreviewOptions (1 BUBBLE).
+    3. Fallback: only if single-bubble is impossible, sends media + separate text.
     """
     if image_path:
         is_video = False
@@ -51,50 +100,67 @@ async def send_broadcast_message_to_target(
             input_file = None
 
         if input_file:
-            # Telegram strictly limits captions on media to 1024 characters!
-            # If formatted_text is longer than 1000 characters, send media first, then full text separately.
-            if len(formatted_text) > 1000:
-                # 1. Send media without caption
-                if is_video:
-                    await bot.send_video(chat_id=chat_id, video=input_file)
-                else:
-                    await bot.send_photo(chat_id=chat_id, photo=input_file)
-                
-                # 2. Send full text message (Telegram text limit is 4096 characters)
-                if formatted_text.strip():
-                    try:
-                        await bot.send_message(chat_id=chat_id, text=formatted_text, parse_mode="HTML")
-                    except Exception as parse_err:
-                        logger.warning(f"HTML parse failed for text follow-up to {chat_id}, falling back to plain text: {parse_err}")
-                        await bot.send_message(chat_id=chat_id, text=formatted_text, parse_mode=None)
-                return
-            else:
-                # Try sending with caption embedded
+            caption_text = single_bubble_caption or formatted_text
+            
+            # Case 1: Caption fits in Telegram's 1024 limit -> Send as ONE native bubble!
+            if len(caption_text) <= 1024:
                 try:
                     if is_video:
-                        await bot.send_video(chat_id=chat_id, video=input_file, caption=formatted_text, parse_mode="HTML")
+                        await bot.send_video(chat_id=chat_id, video=input_file, caption=caption_text, parse_mode="HTML")
                     else:
-                        await bot.send_photo(chat_id=chat_id, photo=input_file, caption=formatted_text, parse_mode="HTML")
+                        await bot.send_photo(chat_id=chat_id, photo=input_file, caption=caption_text, parse_mode="HTML")
                     return
-                except Exception as caption_err:
-                    logger.warning(f"Embedded caption failed to {chat_id}: {caption_err}. Falling back to media + separate text.")
-                    # Fallback: re-create input file if needed and send separately
-                    if is_remote_url:
-                        fallback_file = URLInputFile(image_path)
-                    else:
-                        fallback_file = get_input_file(local_path)
+                except Exception as caption_html_err:
+                    logger.warning(f"HTML caption parse failed for {chat_id}: {caption_html_err}. Retrying with plain text caption...")
+                    # Retry without HTML parsing to maintain 1 single bubble!
+                    try:
+                        if is_remote_url:
+                            input_file_retry = URLInputFile(image_path)
+                        else:
+                            input_file_retry = get_input_file(local_path)
 
-                    if is_video:
-                        await bot.send_video(chat_id=chat_id, video=fallback_file)
-                    else:
-                        await bot.send_photo(chat_id=chat_id, photo=fallback_file)
+                        if is_video:
+                            await bot.send_video(chat_id=chat_id, video=input_file_retry, caption=caption_text, parse_mode=None)
+                        else:
+                            await bot.send_photo(chat_id=chat_id, photo=input_file_retry, caption=caption_text, parse_mode=None)
+                        return
+                    except Exception as caption_retry_err:
+                        logger.warning(f"Plain text caption retry also failed for {chat_id}: {caption_retry_err}")
 
-                    if formatted_text.strip():
-                        try:
-                            await bot.send_message(chat_id=chat_id, text=formatted_text, parse_mode="HTML")
-                        except Exception:
-                            await bot.send_message(chat_id=chat_id, text=formatted_text, parse_mode=None)
+            # Case 2: Caption > 1024 characters, but remote image URL -> Use Telegram LinkPreviewOptions for ONE bubble!
+            if is_remote_url and formatted_text.strip():
+                try:
+                    await bot.send_message(
+                        chat_id=chat_id,
+                        text=formatted_text,
+                        parse_mode="HTML",
+                        link_preview_options=LinkPreviewOptions(
+                            url=image_path,
+                            prefer_large_media=True,
+                            show_above_text=True,
+                        ),
+                    )
                     return
+                except Exception as preview_err:
+                    logger.warning(f"LinkPreviewOptions single bubble failed for {chat_id}: {preview_err}")
+
+            # Case 3: Ultimate Fallback -> Media + separate text message
+            if is_remote_url:
+                fallback_file = URLInputFile(image_path)
+            else:
+                fallback_file = get_input_file(local_path)
+
+            if is_video:
+                await bot.send_video(chat_id=chat_id, video=fallback_file)
+            else:
+                await bot.send_photo(chat_id=chat_id, photo=fallback_file)
+
+            if formatted_text.strip():
+                try:
+                    await bot.send_message(chat_id=chat_id, text=formatted_text, parse_mode="HTML")
+                except Exception:
+                    await bot.send_message(chat_id=chat_id, text=formatted_text, parse_mode=None)
+            return
 
     # Text-only message (Telegram allows up to 4096 characters for text messages)
     try:
@@ -158,6 +224,9 @@ async def run_broadcast_worker(schedule_id: int):
     if schedule.title and schedule.title.strip():
         formatted_text = f"<b>{schedule.title.strip()}</b>\n\n{formatted_text}"
 
+    # Generate smart caption that fits in 1 single Telegram bubble (photo + text together)
+    single_bubble_caption, fits_one_bubble = smart_prepare_caption(schedule.title, schedule.message_text)
+
     # Resolve local or remote media path if provided
     local_path = None
     is_remote_url = False
@@ -190,6 +259,7 @@ async def run_broadcast_worker(schedule_id: int):
                 image_path=schedule.image_path,
                 local_path=local_path,
                 is_remote_url=is_remote_url,
+                single_bubble_caption=single_bubble_caption,
             )
             success_count += 1
         except Exception as e:

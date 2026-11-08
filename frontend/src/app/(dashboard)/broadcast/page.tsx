@@ -11,6 +11,7 @@ import {
   X,
   FileImage,
   FileVideo,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { userService } from "@/services/user.service";
@@ -44,9 +45,67 @@ export default function BroadcastPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Single-Bubble Caption Calculation
+  const hasMedia = Boolean(imagePath || localPreviewUrl);
+  const titleFormattedLen = title.trim() ? title.trim().length + 11 : 0; // <b>Title</b>\n\n
+  const effectiveLength = titleFormattedLen + messageText.length;
+  const fitsSingleBubble = !hasMedia || effectiveLength <= 1024;
+  const overflowChars = effectiveLength - 1024;
+
   const showToast = (message: string, type: "success" | "error" = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 5000);
+  };
+
+  // Auto-Fit to 1 Telegram Bubble
+  const handleAutoFitToSingleBubble = () => {
+    let text = messageText;
+    let curTitle = title.trim();
+
+    // 1. Check if title is duplicated in first line of text
+    if (curTitle) {
+      const firstLine = text.split("\n")[0].trim().toLowerCase();
+      const cleanTitle = curTitle.toLowerCase().replace(/[^a-zA-Z0-9\u1780-\u17ff]/g, "");
+      const cleanFirst = firstLine.replace(/[^a-zA-Z0-9\u1780-\u17ff]/g, "");
+      if (cleanTitle && cleanFirst.includes(cleanTitle)) {
+        setTitle("");
+        curTitle = "";
+      }
+    }
+
+    // 2. Compress 3+ newlines to 2
+    text = text.replace(/\n{3,}/g, "\n\n");
+
+    // 3. Compress double newlines before list items / bullet points / emojis
+    text = text.replace(/\n\n(?=[✅\-\*•▶️🔥✨⏳💸💬📩🤖🪩📲🌟\d+\.])/g, "\n");
+
+    // 4. If still over 1024, compress all \n\n to \n
+    let effLen = (curTitle ? curTitle.length + 11 : 0) + text.length;
+    if (effLen > 1024) {
+      text = text.replace(/\n{2,}/g, "\n");
+    }
+
+    // 5. Remove redundant duplicate feature blocks if present
+    effLen = (curTitle ? curTitle.length + 11 : 0) + text.length;
+    if (effLen > 1024) {
+      const whyIdx = text.search(/🔥\s*WHY CHOOSE/i);
+      if (whyIdx !== -1) {
+        const valIdx = text.search(/⏳\s*VALIDITY/i);
+        if (valIdx !== -1 && valIdx > whyIdx) {
+          text = text.substring(0, whyIdx).trim() + "\n\n" + text.substring(valIdx).trim();
+        }
+      }
+    }
+
+    // 6. Trim trailing whitespace
+    text = text.trim();
+    effLen = (curTitle ? curTitle.length + 11 : 0) + text.length;
+    if (effLen > 1024) {
+      text = text.substring(0, 1024 - (curTitle ? curTitle.length + 11 : 0)).trim();
+    }
+
+    setMessageText(text);
+    showToast("✨ Auto-Fit complete! Content condensed to fit in 1 single Telegram bubble.", "success");
   };
 
   // Image Upload handler
@@ -324,7 +383,32 @@ export default function BroadcastPage() {
           </div>
 
           {/* Message Area */}
-          <div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#0f172a] dark:text-slate-200 flex items-center gap-1.5">
+                <span>Message Content (អត្ថបទសារ)</span>
+              </label>
+              {hasMedia && (
+                <div className="flex items-center gap-2">
+                  {fitsSingleBubble ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2 className="h-3 w-3" />
+                      <span>Fits 1 Bubble ({effectiveLength}/1024)</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAutoFitToSingleBubble}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-sm transition animate-pulse cursor-pointer"
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      <span>Auto-Fit 1 Bubble (+{overflowChars} over)</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <textarea
               placeholder="Write message..."
               rows={7}
@@ -333,20 +417,56 @@ export default function BroadcastPage() {
               className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 p-4 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all tracking-normal"
               style={{ fontFamily: 'var(--font-kantumruy-pro), sans-serif' }}
             />
-            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-1 pl-1">
-              <span>
-                {imagePath && messageText.length > 1000 ? (
-                  <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                    ⚡ Auto-Split Active: Over 1,000 chars with media. Photo and full message text will automatically be sent together!
-                  </span>
-                ) : (
-                  <span>Supports HTML tags: &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;a href="..."&gt;link&lt;/a&gt;</span>
+
+            {/* Bubble Status Banner */}
+            {hasMedia ? (
+              <div
+                className={`p-3 rounded-xl border transition-all text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 ${
+                  fitsSingleBubble
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300"
+                }`}
+              >
+                <div className="flex items-start sm:items-center gap-2">
+                  {fitsSingleBubble ? (
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500 mt-0.5 sm:mt-0" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 shrink-0 text-amber-500 mt-0.5 sm:mt-0" />
+                  )}
+                  <div>
+                    <span className="font-bold">
+                      {fitsSingleBubble
+                        ? "✅ Fits in 1 Single Bubble (រូបភាព និង អក្សរនៅក្នុងសារតែមួយ)"
+                        : `⚠️ Telegram 1024-Char Caption Limit Exceeded (+${overflowChars} chars over)`}
+                    </span>
+                    <p className="text-[11px] opacity-90 mt-0.5 leading-relaxed">
+                      {fitsSingleBubble
+                        ? `Caption length is ${effectiveLength} / 1024 chars. Telegram will deliver photo + text combined in ONE single bubble.`
+                        : `Telegram strictly limits photo captions to 1,024 characters. Without Auto-Fit, Telegram splits this into 2 separate messages! Click "Auto-Fit 1 Bubble" to combine them into 1 bubble.`}
+                    </p>
+                  </div>
+                </div>
+
+                {!fitsSingleBubble && (
+                  <Button
+                    type="button"
+                    onClick={handleAutoFitToSingleBubble}
+                    size="sm"
+                    className="shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow transition cursor-pointer"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Auto-Fit 1 Bubble</span>
+                  </Button>
                 )}
-              </span>
-              <span className={`font-mono font-medium ${messageText.length > 4096 ? "text-rose-500 font-bold" : ""}`}>
-                {messageText.length} chars
-              </span>
-            </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pl-1">
+                <span>Supports HTML tags: &lt;b&gt;bold&lt;/b&gt;, &lt;i&gt;italic&lt;/i&gt;, &lt;a href="..."&gt;link&lt;/a&gt;</span>
+                <span className={`font-mono font-medium ${messageText.length > 4096 ? "text-rose-500 font-bold" : ""}`}>
+                  {messageText.length} / 4096 chars
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Time / Date scheduling selectors */}
@@ -452,17 +572,17 @@ export default function BroadcastPage() {
                 const fullMediaUrl = localPreviewUrl || (imagePath.startsWith("http") ? imagePath : (typeof window !== "undefined" ? `${window.location.origin}${imagePath}` : imagePath));
 
                 return (
-                  <div className="relative rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-3 shadow-xl">
+                  <div className="relative rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/60 p-4 space-y-4 shadow-sm dark:shadow-xl">
                     {/* Header info & remove button */}
-                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                    <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800/80 pb-2.5">
                       <div className="flex items-center gap-2">
                         {isAttachedVideo ? (
                           <FileVideo className="h-5 w-5 text-rose-500 animate-pulse" />
                         ) : (
                           <FileImage className="h-5 w-5 text-blue-500" />
                         )}
-                        <span className="text-xs font-bold text-gray-900 dark:text-slate-100">
-                          {isAttachedVideo ? "📹 Video Preview" : "🖼️ Photo Preview"}
+                        <span className="text-xs font-bold text-[#0f172a] dark:text-slate-100">
+                          {isAttachedVideo ? "📹 Video Attachment" : "🖼️ Image Attachment"}
                         </span>
                       </div>
                       <button
@@ -471,29 +591,91 @@ export default function BroadcastPage() {
                           setLocalPreviewUrl("");
                         }}
                         type="button"
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition cursor-pointer"
                       >
                         <X className="h-3.5 w-3.5" />
                         <span>Remove</span>
                       </button>
                     </div>
 
-                    {/* Media element: Full View Image or Video */}
-                    <div className="relative overflow-hidden rounded-xl border border-slate-800 bg-black/40 max-h-80 flex items-center justify-center">
-                      {isAttachedVideo ? (
-                        <video
-                          src={fullMediaUrl}
-                          controls
-                          autoPlay={false}
-                          className="max-h-80 w-full object-contain rounded-xl"
-                        />
-                      ) : (
-                        <img
-                          src={fullMediaUrl}
-                          alt="Broadcast Media Preview"
-                          className="max-h-80 w-full object-contain rounded-xl"
-                        />
-                      )}
+                    {/* 📱 Telegram Live Bubble Preview */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                          <span>📱 Telegram Message Preview (សារដែលនឹងបង្ហាញក្នុង Telegram)</span>
+                        </span>
+                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                          fitsSingleBubble
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+                        }`}>
+                          {fitsSingleBubble ? "🟢 1 Single Message Bubble" : "⚠️ Splits into 2 Bubbles"}
+                        </span>
+                      </div>
+
+                      {/* Mockup Container */}
+                      <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col items-center">
+                        <div className="w-full max-w-sm rounded-2xl overflow-hidden bg-white dark:bg-[#182533] border border-gray-200 dark:border-[#243447] shadow-lg transition-all">
+                          {/* Media Header */}
+                          <div className="relative bg-black/10 dark:bg-black/50 overflow-hidden flex items-center justify-center max-h-72">
+                            {isAttachedVideo ? (
+                              <video
+                                src={fullMediaUrl}
+                                controls
+                                autoPlay={false}
+                                className="max-h-72 w-full object-contain"
+                              />
+                            ) : (
+                              <img
+                                src={fullMediaUrl}
+                                alt="Telegram Message Preview"
+                                className="max-h-72 w-full object-cover"
+                              />
+                            )}
+                          </div>
+
+                          {/* Caption Body */}
+                          <div className="p-3.5 space-y-1.5 text-xs text-[#0f172a] dark:text-slate-100 font-normal leading-relaxed">
+                            {title.trim() && (
+                              <p className="font-bold text-sm text-[#0f172a] dark:text-white">
+                                {title.trim()}
+                              </p>
+                            )}
+                            <div
+                              className="whitespace-pre-wrap break-words opacity-95 text-[11px] max-h-56 overflow-y-auto pr-1"
+                              style={{ fontFamily: 'var(--font-kantumruy-pro), sans-serif' }}
+                            >
+                              {messageText}
+                            </div>
+                            
+                            {/* Timestamp & check ticks */}
+                            <div className="flex items-center justify-end gap-1 pt-1.5 text-[10px] text-slate-400 dark:text-slate-400 font-medium">
+                              <span>10:25 PM</span>
+                              <span className="text-blue-500 font-bold">✓✓</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Status guidance note */}
+                        <div className="mt-2.5 w-full max-w-sm text-center">
+                          {fitsSingleBubble ? (
+                            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                              ✨ <b>Perfect:</b> Photo and text will arrive in <b>1 single message bubble</b> ({effectiveLength}/1024 chars).
+                            </p>
+                          ) : (
+                            <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-700 dark:text-amber-300 text-left">
+                              <span>⚠️ Over 1024 chars! Click button to combine into 1 bubble:</span>
+                              <button
+                                type="button"
+                                onClick={handleAutoFitToSingleBubble}
+                                className="shrink-0 px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px] shadow transition cursor-pointer"
+                              >
+                                Auto-Fit Now
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                     
                     <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate">
