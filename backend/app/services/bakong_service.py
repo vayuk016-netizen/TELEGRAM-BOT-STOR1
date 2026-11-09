@@ -232,30 +232,27 @@ class BakongService:
         ]
 
         # Check if Merchant account (Tag 30) or Individual account (Tag 29)
-        # ABA Pay / Merchant uses Tag 30 with MID (e.g. 126103017113061) and Acquiring Bank (ABA Bank)
-        merchant_id = getattr(settings, "BAKONG_MERCHANT_ID", None) or settings.KHQR_ACCOUNT_NUMBER or "126103017113061"
-        acquiring_bank = getattr(settings, "BAKONG_ACQUIRING_BANK", "ABA Bank")
-
+        # Corporate Acquiring Bank Merchant accounts (e.g. abaakhppxxx@abaa) use Tag 30.
+        # Bakong Individual accounts (e.g. sopha@abaa, user@bank) use Tag 29.
         is_merchant = (
             "abaakhpp" in acc.lower()
-            or bool(merchant_id and len(str(merchant_id).strip()) >= 10)
+            or "hpp" in acc.lower()
         )
 
         if is_merchant:
             # Tag 30: Merchant Account Information
-            # Subtag 00: Bakong Account ID (e.g. abaakhppxxx@abaa)
-            # Subtag 01: Merchant ID / MID (e.g. 126103017113061)
-            # Subtag 02: Acquiring Bank Name (e.g. ABA Bank)
+            merchant_id = getattr(settings, "BAKONG_MERCHANT_ID", None) or "126103017113061"
+            acquiring_bank = getattr(settings, "BAKONG_ACQUIRING_BANK", "ABA Bank")
             sub_tag30 = (
                 format_tlv("00", acc)
                 + format_tlv("01", str(merchant_id).strip())
                 + format_tlv("02", acquiring_bank.strip())
             )
             parts.append(format_tlv("30", sub_tag30))
-            # Tag 52: Merchant Category Code (5399: Retail / Specialty Stores per ABA standard)
-            parts.append("52045399")
+            # Tag 52: Merchant Category Code
+            parts.append("52045999")
         else:
-            # Tag 29: Merchant Account Information Individual (e.g. user@abaa)
+            # Tag 29: Merchant Account Information Individual (e.g. user@abaa, sopha@abaa)
             sub_acc = format_tlv("00", acc)
             parts.append(format_tlv("29", sub_acc))
             # Tag 52: Merchant Category Code (5999 = General / Digital)
@@ -280,12 +277,9 @@ class BakongService:
         # Tag 60: Merchant City
         parts.append(format_tlv("60", m_city))
 
-        # Tag 62: Additional Data Field (Tag 01: Bill Number, Tag 68: ABA PayWay Reference)
+        # Tag 62: Additional Data Field (Tag 01: Bill Number)
         clean_bill = str(bill_number).replace(" ", "_")[:25]
         sub_62 = format_tlv("01", clean_bill)
-        if "aba" in acc.lower() or "aba" in acquiring_bank.lower():
-            # Include ABA PayWay terminal reference for instant ABA Mobile app recognition
-            sub_62 += format_tlv("68", "0010PAYWAY@ABA010720916130209032636692")
         parts.append(format_tlv("62", sub_62))
 
         # Expiration timestamp (24 hours)

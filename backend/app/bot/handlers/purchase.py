@@ -231,16 +231,6 @@ async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db
             await callback.answer("⚠️ Product not found!", show_alert=True)
             return
 
-        khqr_info = BakongService.generate_khqr(
-            amount=price,
-            bill_number=f"TG_{db_user.telegram_id}_{int(time.time())}",
-            currency="USD",
-        )
-        khqr_string = khqr_info["khqr_string"]
-        md5 = khqr_info["md5"]
-        qr_url = khqr_info["qr_url"]
-        png_bytes = khqr_info.get("qr_png_bytes")
-
         order_repo = OrderRepository(session)
         order = await order_repo.create_order_with_item(
             user_id=db_user.id,
@@ -251,10 +241,23 @@ async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db
             source="telegram",
             payment_method="khqr",
             status="PENDING",
-            khqr_md5=md5,
+            khqr_md5=None,
         )
         await session.flush()
         order_id = order.id
+
+        khqr_info = BakongService.generate_khqr(
+            amount=price,
+            bill_number=f"ORD_{order_id}",
+            currency="USD",
+        )
+        khqr_string = khqr_info["khqr_string"]
+        md5 = khqr_info["md5"]
+        qr_url = khqr_info["qr_url"]
+        png_bytes = khqr_info.get("qr_png_bytes")
+
+        order.khqr_md5 = md5
+        await session.commit()
 
         if png_bytes:
             from aiogram.types import BufferedInputFile

@@ -501,19 +501,6 @@ async def create_website_order(
             "message": "Payment successful and product delivered!",
         }
 
-    # B) PAYMENT VIA BAKONG KHQR OR MANUAL ABA/WING
-    from app.services.bakong_service import BakongService
-    khqr_info = BakongService.generate_khqr(
-        amount=total_amount,
-        bill_number=f"TG_{user.telegram_id}_{int(time.time())}",
-        currency="USD",
-    )
-    khqr_string = khqr_info["khqr_string"]
-    khqr_md5 = khqr_info["md5"]
-    khqr_qr_url = khqr_info["qr_url"]
-    khqr_qr_data_url = khqr_info.get("qr_data_url", "")
-    deep_link = khqr_info.get("deep_link", "")
-
     # Create PENDING order
     order = await order_repo.create_order_with_item(
         user_id=user.id,
@@ -524,8 +511,32 @@ async def create_website_order(
         source="website",
         payment_method=payload.payment_method,
         status="PENDING",
-        khqr_md5=khqr_md5 if payload.payment_method == "khqr" else None,
+        khqr_md5=None,
     )
+    await db.flush()
+
+    khqr_string = None
+    khqr_md5 = None
+    khqr_qr_url = None
+    khqr_qr_data_url = None
+    deep_link = None
+
+    # B) PAYMENT VIA BAKONG KHQR OR MANUAL ABA/WING
+    if payload.payment_method == "khqr":
+        from app.services.bakong_service import BakongService
+        khqr_info = BakongService.generate_khqr(
+            amount=total_amount,
+            bill_number=f"ORD_{order.id}",
+            currency="USD",
+        )
+        khqr_string = khqr_info["khqr_string"]
+        khqr_md5 = khqr_info["md5"]
+        khqr_qr_url = khqr_info["qr_url"]
+        khqr_qr_data_url = khqr_info.get("qr_data_url", "")
+        deep_link = khqr_info.get("deep_link", "")
+
+        order.khqr_md5 = khqr_md5
+
     await db.commit()
 
     # Notify admin on Telegram
