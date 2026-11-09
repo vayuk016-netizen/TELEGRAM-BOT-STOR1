@@ -21,5 +21,13 @@
       "errorCode": 0,
       "message": "Active & Ready"
     }
+  },
+  "2026-11-09": {
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmJiNjZhYzJhOWIzNGNiNCJ9LCJpYXQiOjE3OTMyNjc4MDMsImV4cCI6MTgwMTA0MzgwM30.KJBslDbpo0H-tsgnpj5-lpRyvHVEsldQPBjKIE2pPMY": {
+      "exhausted": false,
+      "used": 2,
+      "errorCode": 0,
+      "message": "Active & Ready"
+    }
   }
 }
