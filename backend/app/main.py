@@ -73,7 +73,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown actions
-    stop_payment_scheduler()
+    # stop_payment_scheduler()
     await stop_scheduler(scheduler_task)
 
     if bot_module.bot_task:
