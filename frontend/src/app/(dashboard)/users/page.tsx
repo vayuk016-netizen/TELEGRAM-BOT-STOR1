@@ -63,8 +63,8 @@ export default function UsersPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-100">👥 Telegram Customer Base</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0f172a] dark:text-white">👥 Telegram Customer Base</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Registered Telegram bot users, balance auditing, and manual balance adjustment console.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function UsersPage() {
       {/* Users Data Table */}
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-gray-50/90 dark:bg-slate-900/90 hover:bg-gray-50/90 dark:hover:bg-slate-900/90 hover:shadow-none">
             <TableHead>User ID</TableHead>
             <TableHead>Telegram ID</TableHead>
             <TableHead>Name / Handle</TableHead>
@@ -97,12 +97,12 @@ export default function UsersPage() {
           ) : (
             users.map((u) => (
               <TableRow key={u.id}>
-                <TableCell className="font-mono text-xs text-slate-400">#{u.id}</TableCell>
-                <TableCell className="font-mono text-xs text-blue-400">{u.telegram_id}</TableCell>
-                <TableCell className="font-semibold text-slate-100">
+                <TableCell className="font-mono text-xs font-bold text-slate-500 dark:text-slate-400">#{u.id}</TableCell>
+                <TableCell className="font-mono text-xs text-blue-600 dark:text-blue-400 font-semibold">{u.telegram_id}</TableCell>
+                <TableCell className="font-semibold text-[#0f172a] dark:text-white">
                   {u.first_name} {u.last_name || ""} {u.username ? `(@${u.username})` : ""}
                 </TableCell>
-                <TableCell className="font-bold text-emerald-400">
+                <TableCell className="font-bold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(u.balance)}
                 </TableCell>
                 <TableCell>
@@ -120,7 +120,7 @@ export default function UsersPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => openAdjustModal(u)}
-                    className="gap-1.5 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                    className="gap-1.5 text-xs border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 shadow-2xs font-semibold cursor-pointer"
                   >
                     <DollarSign className="h-3.5 w-3.5" />
                     Adjust Balance

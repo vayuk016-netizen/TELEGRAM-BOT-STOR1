@@ -115,16 +115,16 @@ export default function OrdersPage() {
         <div className="overflow-x-auto">
           <Table className="min-w-[980px]">
             <TableHeader>
-              <TableRow className="bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-100/90 dark:hover:bg-slate-900/90 hover:shadow-none">
-                <TableHead className="w-16 whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Order ID</TableHead>
-                <TableHead className="w-24 whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Source</TableHead>
-                <TableHead className="min-w-[140px] whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Customer</TableHead>
-                <TableHead className="min-w-[160px] whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Purchased Item</TableHead>
-                <TableHead className="min-w-[100px] whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Total Amount</TableHead>
-                <TableHead className="min-w-[110px] whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Status</TableHead>
-                <TableHead className="min-w-[90px] whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Method</TableHead>
-                <TableHead className="min-w-[160px] whitespace-nowrap font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Date & Time</TableHead>
-                <TableHead className="min-w-[230px] whitespace-nowrap text-right font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">Actions</TableHead>
+              <TableRow className="bg-gray-50/90 dark:bg-slate-900/90 hover:bg-gray-50/90 dark:hover:bg-slate-900/90 hover:shadow-none">
+                <TableHead className="w-16 whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Order ID</TableHead>
+                <TableHead className="w-24 whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Source</TableHead>
+                <TableHead className="min-w-[140px] whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Customer</TableHead>
+                <TableHead className="min-w-[160px] whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Purchased Item</TableHead>
+                <TableHead className="min-w-[100px] whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Total Amount</TableHead>
+                <TableHead className="min-w-[110px] whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Status</TableHead>
+                <TableHead className="min-w-[90px] whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Method</TableHead>
+                <TableHead className="min-w-[160px] whitespace-nowrap font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Date & Time</TableHead>
+                <TableHead className="min-w-[230px] whitespace-nowrap text-right font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -164,7 +164,7 @@ export default function OrdersPage() {
                           <span>{customerName}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-800 dark:text-slate-200 whitespace-nowrap font-medium">
+                      <TableCell className="text-[#0f172a] dark:text-slate-200 whitespace-nowrap font-medium">
                         <div className="flex items-center gap-1.5">
                           <span>{itemTitle}</span>
                           {item?.delivered_payload && (
@@ -186,10 +186,10 @@ export default function OrdersPage() {
                           {order.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-xs uppercase text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap font-medium">
+                      <TableCell className="text-xs uppercase text-slate-700 dark:text-slate-400 font-mono whitespace-nowrap font-medium">
                         {order.payment_method || "KHQR"}
                       </TableCell>
-                      <TableCell className="text-xs text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
+                      <TableCell className="text-xs text-slate-700 dark:text-slate-400 font-mono whitespace-nowrap">
                         {new Date(order.created_at).toLocaleString()}
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">

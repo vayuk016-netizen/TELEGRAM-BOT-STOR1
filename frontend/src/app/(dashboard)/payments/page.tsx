@@ -723,13 +723,13 @@ export default function PaymentsPage() {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-100/90 dark:bg-slate-900/90 hover:bg-slate-100/90 dark:hover:bg-slate-900/90 hover:shadow-none">
-                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "អតិថិជន (Customer)" : "Customer"}</TableHead>
-                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "ចំនួនទឹកប្រាក់" : "Amount"}</TableHead>
-                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "វិធីទូទាត់" : "Method"}</TableHead>
-                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "ស្ថានភាព" : "Status"}</TableHead>
-                <TableHead className="font-semibold text-slate-700 dark:text-slate-300">{isKh ? "កាលបរិច្ឆេទ" : "Date & Time"}</TableHead>
-                <TableHead className="text-right font-semibold text-slate-700 dark:text-slate-300">{isKh ? "សកម្មភាព" : "Actions"}</TableHead>
+              <TableRow className="bg-gray-50/90 dark:bg-slate-900/90 hover:bg-gray-50/90 dark:hover:bg-slate-900/90 hover:shadow-none">
+                <TableHead className="font-semibold text-gray-700 dark:text-slate-300">{isKh ? "អតិថិជន (Customer)" : "Customer"}</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-slate-300">{isKh ? "ចំនួនទឹកប្រាក់" : "Amount"}</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-slate-300">{isKh ? "វិធីទូទាត់" : "Method"}</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-slate-300">{isKh ? "ស្ថានភាព" : "Status"}</TableHead>
+                <TableHead className="font-semibold text-gray-700 dark:text-slate-300">{isKh ? "កាលបរិច្ឆេទ" : "Date & Time"}</TableHead>
+                <TableHead className="text-right font-semibold text-gray-700 dark:text-slate-300">{isKh ? "សកម្មភាព" : "Actions"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

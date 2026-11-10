@@ -12,7 +12,7 @@ Table.displayName = "Table";
 
 export const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(
   ({ className, ...props }, ref) => (
-    <thead ref={ref} className={cn("border-b border-slate-200 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-900/90 [&_tr]:border-b-0", className)} {...props} />
+    <thead ref={ref} className={cn("border-b border-gray-200 dark:border-slate-800 bg-gray-50/90 dark:bg-slate-900/90 [&_tr]:border-b-0", className)} {...props} />
   )
 );
 TableHeader.displayName = "TableHeader";
@@ -29,7 +29,7 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttribut
     <tr
       ref={ref}
       className={cn(
-        "border-b border-slate-200/80 dark:border-slate-800/60 transition-all duration-150",
+        "border-b border-gray-200/80 dark:border-slate-800/60 transition-all duration-150",
         // 🌟 Blue shape when scrolling, touching, hovering, or active
         "hover:bg-blue-50/80 active:bg-blue-100/90 dark:hover:bg-blue-950/40 dark:active:bg-blue-900/50",
         "hover:shadow-[inset_4px_0_0_0_#2563eb] dark:hover:shadow-[inset_4px_0_0_0_#38bdf8]",
@@ -48,7 +48,7 @@ export const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttr
     <th
       ref={ref}
       className={cn(
-        "h-12 px-4 text-left align-middle font-bold text-slate-700 dark:text-slate-200 text-xs uppercase tracking-wider whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        "h-12 px-4 text-left align-middle font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider whitespace-nowrap [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}
@@ -59,7 +59,7 @@ TableHead.displayName = "TableHead";
 
 export const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
   ({ className, ...props }, ref) => (
-    <td ref={ref} className={cn("p-4 align-middle text-slate-800 dark:text-slate-200 [&:has([role=checkbox])]:pr-0", className)} {...props} />
+    <td ref={ref} className={cn("p-4 align-middle text-[#0f172a] dark:text-slate-200 [&:has([role=checkbox])]:pr-0", className)} {...props} />
   )
 );
 TableCell.displayName = "TableCell";
