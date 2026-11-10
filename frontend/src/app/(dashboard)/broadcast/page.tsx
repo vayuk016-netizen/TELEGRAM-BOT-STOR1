@@ -302,12 +302,12 @@ export default function BroadcastPage() {
               placeholder="Title (Optional)"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-4 py-3 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-4 py-3 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-2xs focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all"
             />
           </div>
 
           {/* 🎯 Target Audience / Destination Selector */}
-          <div className="space-y-2 rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/60 p-3.5">
+          <div className="space-y-2 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-950/60 p-3.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-[#0f172a] dark:text-slate-200 flex items-center gap-1.5">
                 <span>🎯 Target Destination (គោលដៅផ្ញើសារ)</span>
@@ -322,10 +322,10 @@ export default function BroadcastPage() {
               <button
                 type="button"
                 onClick={() => setTargetType("users")}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   targetType === "users"
                     ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400 shadow-2xs"
                 }`}
               >
                 <span>👥</span>
@@ -336,10 +336,10 @@ export default function BroadcastPage() {
               <button
                 type="button"
                 onClick={() => setTargetType("group")}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   targetType === "group"
                     ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400 shadow-2xs"
                 }`}
               >
                 <span>📢</span>
@@ -350,10 +350,10 @@ export default function BroadcastPage() {
               <button
                 type="button"
                 onClick={() => setTargetType("both")}
-                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all ${
+                className={`flex items-center justify-center gap-2 p-2.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
                   targetType === "both"
                     ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400"
+                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-800 hover:border-blue-400 shadow-2xs"
                 }`}
               >
                 <span>🌐</span>
@@ -414,7 +414,7 @@ export default function BroadcastPage() {
               rows={7}
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 p-4 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all tracking-normal"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 p-4 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-2xs focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all tracking-normal"
               style={{ fontFamily: 'var(--font-kantumruy-pro), sans-serif' }}
             />
 
@@ -476,7 +476,7 @@ export default function BroadcastPage() {
               <select
                 value={hour}
                 onChange={(e) => setHour(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 shadow-2xs focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
               >
                 {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((hr) => (
                   <option key={hr} value={hr} className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">
@@ -491,7 +491,7 @@ export default function BroadcastPage() {
               <select
                 value={minute}
                 onChange={(e) => setMinute(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 shadow-2xs focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
               >
                 {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((min) => (
                   <option key={min} value={min} className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">
@@ -506,7 +506,7 @@ export default function BroadcastPage() {
               <select
                 value={ampm}
                 onChange={(e) => setAmpm(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-3 py-3 text-sm text-[#0f172a] dark:text-slate-100 shadow-2xs focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer"
               >
                 <option value="AM" className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">AM</option>
                 <option value="PM" className="bg-white dark:bg-slate-950 text-[#0f172a] dark:text-slate-100">PM</option>
@@ -519,7 +519,7 @@ export default function BroadcastPage() {
                 type="date"
                 value={dateStr}
                 onChange={(e) => setDateStr(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-3 py-3 pr-8 text-sm text-[#0f172a] dark:text-slate-100 focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
+                className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-3 py-3 pr-8 text-sm text-[#0f172a] dark:text-slate-100 shadow-2xs focus:border-blue-500/50 focus:outline-none transition-all cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
               />
             </div>
           </div>
@@ -535,7 +535,7 @@ export default function BroadcastPage() {
               max={60}
               value={intervalDelay}
               onChange={(e) => setIntervalDelay(Math.max(0, Number(e.target.value)))}
-              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 px-4 py-3 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-500/50 focus:outline-none transition-all"
+              className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 px-4 py-3 text-sm text-[#0f172a] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-2xs focus:border-blue-500/50 focus:outline-none transition-all"
             />
           </div>
 
@@ -553,7 +553,7 @@ export default function BroadcastPage() {
             {!imagePath ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 dark:border-slate-800 dark:hover:border-slate-700 bg-slate-50/60 dark:bg-slate-950/40 py-4 px-6 flex items-center justify-center gap-3 cursor-pointer transition-all ${
+                className={`w-full rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 dark:border-slate-800 dark:hover:border-slate-700 bg-gray-50/70 hover:bg-gray-100/70 dark:bg-slate-950/40 dark:hover:bg-slate-950/70 py-4 px-6 flex items-center justify-center gap-3 cursor-pointer transition-all ${
                   uploadingImage ? "pointer-events-none opacity-60" : ""
                 }`}
               >
@@ -614,7 +614,7 @@ export default function BroadcastPage() {
                       </div>
 
                       {/* Mockup Container */}
-                      <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 flex flex-col items-center">
+                      <div className="p-4 rounded-xl bg-gray-100 dark:bg-slate-900/90 border border-gray-200 dark:border-slate-800 flex flex-col items-center">
                         <div className="w-full max-w-sm rounded-2xl overflow-hidden bg-white dark:bg-[#182533] border border-gray-200 dark:border-[#243447] shadow-lg transition-all">
                           {/* Media Header */}
                           <div className="relative bg-black/10 dark:bg-black/50 overflow-hidden flex items-center justify-center max-h-72">
@@ -693,7 +693,7 @@ export default function BroadcastPage() {
             <Button
               onClick={handleSaveSchedule}
               disabled={loading || uploadingImage}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 border border-gray-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-100 shadow-xs disabled:opacity-50 transition-all"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-xs font-semibold bg-white hover:bg-gray-50 border border-gray-300 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-100 shadow-xs disabled:opacity-50 transition-all cursor-pointer"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Save Schedule
