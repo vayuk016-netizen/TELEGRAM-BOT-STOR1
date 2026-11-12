@@ -122,7 +122,7 @@ export const StoreProductDetailPage: React.FC = () => {
           )}
 
           {/* Quick Info Badges */}
-          <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-2 text-center text-xs">
             <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
               <Zap className="h-4 w-4 text-blue-500 mx-auto mb-1" />
               <span className="font-bold text-[11px] block text-slate-100">{t("instant_delivery_title")}</span>
@@ -174,7 +174,7 @@ export const StoreProductDetailPage: React.FC = () => {
               </span>
             </div>
           )}
-          <div className="flex items-baseline gap-4 py-2 border-y border-slate-800">
+          <div className="flex flex-wrap items-baseline justify-between sm:justify-start gap-3 sm:gap-4 py-2 border-y border-slate-800">
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">
                 {discount.hasPromo ? t("promo_price") : t("unit_price")}
@@ -252,7 +252,7 @@ export const StoreProductDetailPage: React.FC = () => {
               <Button
                 size="lg"
                 onClick={() => navigate(`/checkout/${product.id}?qty=${quantity}`)}
-                className="w-full sm:w-auto h-12 px-8 rounded-xl font-bold text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 active:scale-95 transition-all justify-center btn-line-rolling btn-rolling-gradient"
+                className="w-full sm:w-auto min-h-12 h-auto py-3 px-8 rounded-xl font-bold text-sm whitespace-nowrap flex-shrink-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/25 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 gap-2 active:scale-95 transition-all justify-center btn-line-rolling btn-rolling-gradient"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span>{t("buy_now")}</span>

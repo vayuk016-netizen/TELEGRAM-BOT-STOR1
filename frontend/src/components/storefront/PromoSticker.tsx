@@ -30,7 +30,7 @@ export const PromoSticker: React.FC<PromoStickerProps> = ({
   if (variant === "overlay") {
     return (
       <div
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 via-red-500 to-orange-500 text-white text-[11px] font-black tracking-wide uppercase shadow-md shadow-rose-600/25 border border-white/20 ${className}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 via-red-500 to-orange-500 text-white text-[11px] font-black tracking-wide uppercase whitespace-nowrap shadow-md shadow-rose-600/25 border border-white/20 ${className}`}
       >
         <Flame className="h-3.5 w-3.5 text-amber-200 fill-amber-300 flex-shrink-0" />
         <span>{label}</span>
@@ -41,7 +41,7 @@ export const PromoSticker: React.FC<PromoStickerProps> = ({
   if (variant === "compact") {
     return (
       <span
-        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-500/15 text-rose-500 dark:text-rose-400 border border-rose-500/30 text-[10px] font-extrabold uppercase tracking-wider ${className}`}
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-rose-500/15 text-rose-500 dark:text-rose-400 border border-rose-500/30 text-[10px] font-extrabold uppercase tracking-wider whitespace-nowrap flex-shrink-0 ${className}`}
       >
         <Tag className="h-2.5 w-2.5 flex-shrink-0" />
         <span>-{discountPercent}%</span>
@@ -51,12 +51,12 @@ export const PromoSticker: React.FC<PromoStickerProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 text-white text-[11px] font-black uppercase tracking-wide shadow-md shadow-rose-600/20 border border-rose-300/30 ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wide whitespace-nowrap max-w-full shadow-md shadow-rose-600/20 border border-rose-300/30 ${className}`}
     >
       <Flame className="h-3.5 w-3.5 text-amber-200 fill-amber-300 flex-shrink-0" />
-      <span>
+      <span className="truncate">
         {isKm
-          ? `ប្រូម៉ូសិនពិសេស • បញ្ចុះតម្លៃ ${discountPercent}% OFF`
+          ? `ប្រូម៉ូសិន • បញ្ចុះតម្លៃ ${discountPercent}%`
           : `PROMOTION ${discountPercent}% OFF`}
       </span>
     </span>

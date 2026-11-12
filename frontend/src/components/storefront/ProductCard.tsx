@@ -99,32 +99,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* Bottom: Price & Buy Action */}
-        <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between gap-3">
-          <div>
+        <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="text-[10px] text-slate-400 uppercase font-bold">
+              <span className="text-[10px] text-slate-400 uppercase font-bold whitespace-nowrap">
                 {discount.hasPromo ? t("promo_price") : t("total_price")}
               </span>
               {discount.hasPromo && (
                 <PromoSticker discountPercent={discount.discountPercent} variant="compact" />
               )}
             </div>
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className={`text-lg sm:text-xl font-extrabold font-mono ${discount.hasPromo ? "text-emerald-600 dark:text-emerald-400" : "text-blue-400"}`}>
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className={`text-lg sm:text-xl font-extrabold font-mono whitespace-nowrap ${discount.hasPromo ? "text-emerald-600 dark:text-emerald-400" : "text-blue-400"}`}>
                 ${product.price.toFixed(2)}
               </span>
               {discount.hasPromo && discount.originalPrice !== null && (
-                <span className="text-xs sm:text-sm font-semibold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono">
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono whitespace-nowrap">
                   ${discount.originalPrice.toFixed(2)}
                 </span>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 ml-auto flex-shrink-0">
             <Link
               to={`/products/${product.id}`}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors text-xs font-semibold"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors text-xs font-semibold flex-shrink-0"
               title={t("view_details")}
             >
               <ArrowRight className="h-4 w-4" />
@@ -134,13 +134,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               size="sm"
               disabled={isOutOfStock}
               onClick={() => navigate(`/checkout/${product.id}`)}
-              className={`text-xs font-bold gap-1.5 rounded-xl h-9 px-3.5 transition-all shadow-md ${
+              className={`text-xs font-bold gap-1.5 rounded-xl min-h-9 h-auto py-2 px-3.5 leading-normal whitespace-nowrap flex-shrink-0 transition-all shadow-md ${
                 isOutOfStock
                   ? "bg-slate-800 text-slate-500 cursor-not-allowed shadow-none"
                   : "bg-gradient-to-r from-blue-600 via-indigo-600 to-rose-600 hover:from-blue-500 hover:via-indigo-500 hover:to-rose-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-rose-500/30 filter hover:brightness-110 border border-white/10 active:scale-95 btn-line-rolling btn-rolling-gradient"
               }`}
             >
-              <ShoppingCart className="h-3.5 w-3.5" />
+              <ShoppingCart className="h-3.5 w-3.5 flex-shrink-0" />
               <span>{isOutOfStock ? t("out_of_stock") : t("buy_now")}</span>
             </Button>
           </div>
