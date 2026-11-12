@@ -29,6 +29,8 @@ import { CategoryFormModal } from "@/components/features/products/category-form"
 import { productService } from "@/services/product.service";
 import { Category, Product } from "@/types/product.types";
 import { formatCurrency } from "@/lib/utils";
+import { getProductDiscount } from "@/lib/promo";
+import { PromoSticker } from "@/components/storefront/PromoSticker";
 import { useNavigate } from "react-router-dom";
 
 type TabKey = "products" | "categories";
@@ -492,6 +494,7 @@ export default function ProductsPage() {
                   {filteredProducts.map((prod) => {
                     const cat = categories.find((c) => c.id === prod.category_id);
                     const inStock = prod.stock_count > 0;
+                    const discount = getProductDiscount(prod);
 
                     return (
                       <div
@@ -514,6 +517,11 @@ export default function ProductsPage() {
 
                           {/* Card Thumbnail Image (Fits Image Perfectly) */}
                           <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
+                            {discount.hasPromo && (
+                              <div className="absolute top-2 left-2 z-20">
+                                <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
+                              </div>
+                            )}
                             {prod.image_url ? (
                               <img
                                 src={prod.image_url}
@@ -532,9 +540,16 @@ export default function ProductsPage() {
                           <div>
                             <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
                               <span className="font-mono">#{prod.id}</span>
-                              <span className="font-extrabold text-sm text-emerald-400">
-                                {formatCurrency(prod.price)}
-                              </span>
+                              <div className="flex items-baseline gap-1.5">
+                                {discount.hasPromo && discount.originalPrice !== null && (
+                                  <span className="text-xs font-mono text-slate-500 line-through">
+                                    {formatCurrency(discount.originalPrice)}
+                                  </span>
+                                )}
+                                <span className="font-extrabold text-sm text-emerald-400">
+                                  {formatCurrency(prod.price)}
+                                </span>
+                              </div>
                             </div>
                             <h3 className="font-bold text-sm text-slate-100 line-clamp-1 group-hover:text-blue-400 transition-colors">
                               {prod.title}
@@ -611,6 +626,7 @@ export default function ProductsPage() {
                   filteredProducts.map((prod) => {
                     const cat = categories.find((c) => c.id === prod.category_id);
                     const inStock = prod.stock_count > 0;
+                    const discount = getProductDiscount(prod);
                     return (
                       <TableRow key={prod.id}>
                         <TableCell className="font-mono text-xs text-slate-400">#{prod.id}</TableCell>
@@ -646,8 +662,20 @@ export default function ProductsPage() {
                             {cat ? `${cat.icon || "📦"} ${cat.name}` : `Cat #${prod.category_id}`}
                           </Badge>
                         </TableCell>
-                        <TableCell className="font-bold text-emerald-400">
-                          {formatCurrency(prod.price)}
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-emerald-400">
+                              {formatCurrency(prod.price)}
+                            </span>
+                            {discount.hasPromo && discount.originalPrice !== null && (
+                              <>
+                                <span className="text-xs font-mono text-slate-500 line-through">
+                                  {formatCurrency(discount.originalPrice)}
+                                </span>
+                                <PromoSticker discountPercent={discount.discountPercent} variant="compact" />
+                              </>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Badge variant={inStock ? "success" : "danger"}>

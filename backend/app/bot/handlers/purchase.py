@@ -1,3 +1,4 @@
+import html
 import logging
 from pathlib import Path
 from aiogram import Router, F
@@ -16,7 +17,7 @@ from app.core.exceptions import (
     InsufficientBalanceException,
     ProductNotFoundException,
 )
-from app.bot.utils.localization import get_text
+from app.bot.utils.localization import get_text, format_bot_price_html
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -25,19 +26,23 @@ router = Router()
 def build_buy_confirmation_text(product, db_user, qty: int, stock_count: int, lang: str) -> str:
     prod_lbl = "Product" if lang == "en" else "ផលិតផល"
     qty_lbl = "Quantity" if lang == "en" else "ចំនួន"
-    unit_price_lbl = "Unit Price" if lang == "en" else "តម្លៃ"
+    unit_price_lbl = "Unit Price" if lang == "en" else "តម្លៃរាយ"
     total_lbl = "Total Price" if lang == "en" else "តម្លៃសរុប"
-    bal_lbl = "Your Balance" if lang == "en" else "តុល្យភាពរបស់អ្នក"
+    bal_lbl = "Your Balance" if lang == "en" else "សមតុល្យរបស់លោកអ្នក"
     stock_lbl = "In Stock" if lang == "en" else "ស្តុកនៅសល់"
 
-    total_price = product.price * qty
+    pct = getattr(product, "discount_percent", 0)
+    promo_line = f"{get_text(lang, 'promo_sticker', percent=pct)}\n\n" if pct > 0 else ""
+    unit_price_html = format_bot_price_html(product, qty=1)
+    total_price_html = format_bot_price_html(product, qty=qty)
 
     if qty == 1:
         return (
             f"{get_text(lang, 'buy_confirm_title')}\n\n"
-            f"📦 <b>{prod_lbl}:</b> {product.title}\n"
+            f"{promo_line}"
+            f"📦 <b>{prod_lbl}:</b> {html.escape(product.title)}\n"
             f"🔢 <b>{qty_lbl}:</b> <b>{qty}</b>\n"
-            f"💵 <b>{unit_price_lbl}:</b> ${product.price:.2f}\n"
+            f"💵 <b>{unit_price_lbl}:</b> {unit_price_html}\n"
             f"💳 <b>{bal_lbl}:</b> ${db_user.balance:.2f}\n"
             f"📊 <b>{stock_lbl}:</b> {stock_count}\n\n"
             f"{get_text(lang, 'buy_confirm_prompt')}"
@@ -45,10 +50,11 @@ def build_buy_confirmation_text(product, db_user, qty: int, stock_count: int, la
 
     return (
         f"{get_text(lang, 'buy_confirm_title')}\n\n"
-        f"📦 <b>{prod_lbl}:</b> {product.title}\n"
+        f"{promo_line}"
+        f"📦 <b>{prod_lbl}:</b> {html.escape(product.title)}\n"
         f"🔢 <b>{qty_lbl}:</b> <b>{qty}</b>\n"
-        f"💵 <b>{unit_price_lbl}:</b> ${product.price:.2f}\n"
-        f"💰 <b>{total_lbl}:</b> <b>${total_price:.2f}</b>\n"
+        f"💵 <b>{unit_price_lbl}:</b> {unit_price_html}\n"
+        f"💰 <b>{total_lbl}:</b> {total_price_html}\n"
         f"💳 <b>{bal_lbl}:</b> ${db_user.balance:.2f}\n"
         f"📊 <b>{stock_lbl}:</b> {stock_count}\n\n"
         f"{get_text(lang, 'buy_confirm_prompt')}"

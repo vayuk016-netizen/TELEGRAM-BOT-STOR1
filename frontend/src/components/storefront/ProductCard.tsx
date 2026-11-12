@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, CheckCircle2, AlertTriangle, ArrowRight, Zap } from "lucide-react";
 import { StoreProduct } from "@/services/store.service";
 import { useLanguageStore } from "@/store/use-language-store";
+import { PromoSticker } from "@/components/storefront/PromoSticker";
+import { getProductDiscount } from "@/lib/promo";
 import { Button } from "@/components/ui/button";
 
 interface ProductCardProps {
@@ -14,6 +16,7 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const { t } = useLanguageStore();
+  const discount = getProductDiscount(product);
 
   const isOutOfStock = product.stock_count <= 0;
 
@@ -60,8 +63,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           {/* Product Image / Icon placeholder */}
-          {product.image_url ? (
-            <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 bg-slate-950 border border-slate-800/80 relative flex items-center justify-center group/img">
+          <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 bg-slate-950 border border-slate-800/80 relative flex items-center justify-center group/img">
+            {discount.hasPromo && (
+              <div className="absolute top-2 left-2 z-20">
+                <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
+              </div>
+            )}
+            <div className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] text-white font-bold flex items-center gap-1 shadow border border-white/10">
+              <Zap className="h-3 w-3 text-amber-400" />
+              <span>{t("instant_badge")}</span>
+            </div>
+            {product.image_url ? (
               <img
                 src={product.image_url}
                 alt={product.title}
@@ -69,16 +81,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 decoding="async"
                 className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
               />
-              <div className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] text-white font-bold flex items-center gap-1 shadow border border-white/10">
-                <Zap className="h-3 w-3 text-amber-400" />
-                <span>{t("instant_badge")}</span>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
+                {product.category?.icon || "⚡"}
               </div>
-            </div>
-          ) : (
-            <div className="w-full aspect-[16/9] rounded-xl mb-4 bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 border border-blue-500/10 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
-              {product.category?.icon || "⚡"}
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Product Title */}
           <Link to={`/products/${product.id}`} className="block group-hover:text-blue-400 transition-colors">
@@ -96,12 +104,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Bottom: Price & Buy Action */}
         <div className="pt-3 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between gap-3">
           <div>
-            <span className="text-[10px] text-slate-400 uppercase font-bold block">
-              {t("total_price")}
-            </span>
-            <span className="text-lg sm:text-xl font-extrabold text-blue-400 font-mono">
-              ${product.price.toFixed(2)}
-            </span>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-[10px] text-slate-400 uppercase font-bold">
+                {discount.hasPromo ? t("promo_price") : t("total_price")}
+              </span>
+              {discount.hasPromo && (
+                <PromoSticker discountPercent={discount.discountPercent} variant="compact" />
+              )}
+            </div>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className={`text-lg sm:text-xl font-extrabold font-mono ${discount.hasPromo ? "text-emerald-600 dark:text-emerald-400" : "text-blue-400"}`}>
+                ${product.price.toFixed(2)}
+              </span>
+              {discount.hasPromo && discount.originalPrice !== null && (
+                <span className="text-xs sm:text-sm font-semibold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono">
+                  ${discount.originalPrice.toFixed(2)}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-1.5">

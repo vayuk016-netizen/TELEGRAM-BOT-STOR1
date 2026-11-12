@@ -33,6 +33,7 @@ class ProductCreate(BaseModel):
     title: str = Field(..., max_length=255)
     description: Optional[str] = None
     price: Decimal = Field(default=Decimal("0.00"), ge=0)
+    original_price: Optional[Decimal] = Field(None, ge=0)
     image_url: Optional[str] = None
     is_active: bool = True
 
@@ -42,6 +43,7 @@ class ProductUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     price: Optional[Decimal] = Field(None, ge=0)
+    original_price: Optional[Decimal] = Field(None, ge=0)
     image_url: Optional[str] = None
     is_active: Optional[bool] = None
 
@@ -49,6 +51,8 @@ class ProductUpdate(BaseModel):
 class ProductResponse(ProductCreate):
     id: int
     price: Decimal = Field(default=Decimal("0.00"), ge=0)
+    original_price: Optional[Decimal] = None
+    discount_percent: int = 0
     stock_count: int = 0
     created_at: datetime
     updated_at: datetime

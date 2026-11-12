@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { storeService, StoreProduct } from "@/services/store.service";
 import { useLanguageStore } from "@/store/use-language-store";
+import { PromoSticker } from "@/components/storefront/PromoSticker";
+import { getProductDiscount } from "@/lib/promo";
 import { Button } from "@/components/ui/button";
 
 export const StoreProductDetailPage: React.FC = () => {
@@ -77,6 +79,7 @@ export const StoreProductDetailPage: React.FC = () => {
 
   const isOutOfStock = product.stock_count <= 0;
   const maxQty = Math.min(10, Math.max(1, product.stock_count));
+  const discount = getProductDiscount(product);
   const totalPrice = product.price * quantity;
 
   return (
@@ -158,12 +161,29 @@ export const StoreProductDetailPage: React.FC = () => {
           </h1>
 
           {/* Price & Stock Badge */}
+          {discount.hasPromo && (
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <PromoSticker discountPercent={discount.discountPercent} variant="inline" />
+              <span className="text-xs font-bold text-rose-500 dark:text-rose-400">
+                {t("you_save")} ${discount.savingsAmount.toFixed(2)}
+              </span>
+            </div>
+          )}
           <div className="flex items-baseline gap-4 py-2 border-y border-slate-800">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">{t("unit_price")}</span>
-              <span className="text-3xl font-black text-blue-500 font-mono">
-                ${product.price.toFixed(2)}
+              <span className="text-[10px] text-slate-400 uppercase font-bold block mb-0.5">
+                {discount.hasPromo ? t("promo_price") : t("unit_price")}
               </span>
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className={`text-3xl font-black font-mono ${discount.hasPromo ? "text-emerald-600 dark:text-emerald-400" : "text-blue-500"}`}>
+                  ${product.price.toFixed(2)}
+                </span>
+                {discount.hasPromo && discount.originalPrice !== null && (
+                  <span className="text-lg font-bold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono">
+                    ${discount.originalPrice.toFixed(2)}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div>
@@ -213,9 +233,16 @@ export const StoreProductDetailPage: React.FC = () => {
                 <span className="text-xs text-slate-400 block font-medium">
                   {t("total_price")} ({quantity} item{quantity > 1 ? "s" : ""})
                 </span>
-                <span className="text-2xl font-black text-slate-100 font-mono">
-                  ${totalPrice.toFixed(2)}
-                </span>
+                <div className="flex items-baseline gap-2.5 flex-wrap">
+                  <span className="text-2xl font-black text-slate-100 font-mono">
+                    ${totalPrice.toFixed(2)}
+                  </span>
+                  {discount.hasPromo && discount.originalPrice !== null && (
+                    <span className="text-sm font-bold text-slate-400 line-through decoration-rose-500 decoration-2 font-mono">
+                      ${(discount.originalPrice * quantity).toFixed(2)}
+                    </span>
+                  )}
+                </div>
               </div>
               <Button
                 size="lg"

@@ -34,14 +34,18 @@ def get_products_paginated_keyboard(
     # 1. Product grid (2 columns)
     product_buttons = []
     for prod, stock in current_items:
-        btn_label = prod.title
+        pct = getattr(prod, "discount_percent", 0)
         if stock <= 0:
-            out_of_stock_text = "អស់ពីស្តុក" if lang == "km" else "Out of stock"
-            btn_label += f" | {out_of_stock_text}"
-            
-        if len(btn_label) > 28:
-            btn_label = btn_label[:25] + "..."
-            
+            out_of_stock_text = "អស់ស្តុក" if lang == "km" else "Out of stock"
+            btn_label = f"{prod.title} | {out_of_stock_text}"
+        elif pct > 0:
+            btn_label = f"🔥 {prod.title} (-{pct}%)"
+        else:
+            btn_label = prod.title
+
+        if len(btn_label) > 34:
+            btn_label = btn_label[:31] + "..."
+
         product_buttons.append(InlineKeyboardButton(text=btn_label, callback_data=f"prod:{prod.id}"))
         
     for i in range(0, len(product_buttons), 2):

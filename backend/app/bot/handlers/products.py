@@ -1,3 +1,4 @@
+import html
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
@@ -8,7 +9,7 @@ from app.bot.keyboards.inline import (
     get_products_paginated_keyboard,
     get_product_detail_keyboard,
 )
-from app.bot.utils.localization import get_text
+from app.bot.utils.localization import get_text, format_bot_price_html
 from app.db.models.user import User
 
 router = Router()
@@ -108,22 +109,26 @@ async def show_category_products(callback: CallbackQuery, session: AsyncSession,
     balance_label = "សមតុល្យ" if lang == "km" else "Balance"
     update_label = "ធ្វើបច្ចុប្បន្នភាព" if lang == "km" else "Updated"
     terms_text = (
-        "⚠️ ផលិតផលឌីជីថល - មិនអាចធ្វើសងប្រាក់វិញបានទេក្រោយពេលដឹកជញ្ជូន។"
+        "⚠️ ផលិតផលឌីជីថល - មិនអាចប្តូរ ឬសងប្រាក់វិញបានទេបន្ទាប់ពីប្រគល់ជូន។"
         if lang == "km"
         else "⚠️ Digital products - Non-refundable after delivery."
     )
 
+    max_promo = max((getattr(p, "discount_percent", 0) for p, _ in current_items), default=0)
+    promo_line = f"{get_text(lang, 'promo_sticker', percent=max_promo)}\n" if max_promo > 0 else ""
+
     text = (
         f"🛍️ <b>{title_text}</b>\n\n"
+        f"{promo_line}"
         f"💰 <b>{balance_label}:</b> <code>${db_user.balance:.2f} USD</code>\n"
         f"🕒 <b>{update_label}:</b> <code>{local_time}</code>\n"
-        f"⚠️ <b>{terms_text}</b>\n"
+        f"<b>{terms_text}</b>\n"
         f"--------------------------------------------------\n"
     )
 
     product_lines = []
     for idx, (prod, stock) in enumerate(current_items, start=start_idx + 1):
-        line = f"{idx}. {prod.title} — ${prod.price:.2f}"
+        line = f"{idx}. {html.escape(prod.title)} — {format_bot_price_html(prod)}"
         if stock > 0:
             line += f" 🟢 {stock}"
         product_lines.append(line)
@@ -159,10 +164,26 @@ async def product_detail_handler(callback: CallbackQuery, session: AsyncSession,
     else:
         stock_status = get_text(lang, "stock_empty")
 
+    pct = getattr(product, "discount_percent", 0)
+    if pct > 0 and product.original_price is not None:
+        save_amt = float(product.original_price) - float(product.price)
+        save_note = get_text(lang, "product_save_label", amount=save_amt, percent=pct)
+        promo_header = f"{get_text(lang, 'promo_sticker', percent=pct)}\n\n"
+        price_block = (
+            f"{get_text(lang, 'product_orig_price_label')} <s>${float(product.original_price):.2f}</s>\n"
+            f"{get_text(lang, 'product_promo_price_label')} <code>${float(product.price):.2f}</code> "
+            f"<i>({save_note})</i>\n"
+        )
+    else:
+        promo_header = ""
+        price_block = f"{get_text(lang, 'product_price_label')} <code>${product.price:.2f}</code>\n"
+
+    desc_safe = html.escape(product.description) if product.description else "N/A"
     detail_text = (
-        f"📦 <b>{product.title}</b>\n\n"
-        f"{get_text(lang, 'product_desc_label')} {product.description or 'N/A'}\n"
-        f"{get_text(lang, 'product_price_label')} <code>${product.price:.2f}</code>\n"
+        f"{promo_header}"
+        f"📦 <b>{html.escape(product.title)}</b>\n\n"
+        f"{get_text(lang, 'product_desc_label')} {desc_safe}\n\n"
+        f"{price_block}"
         f"{get_text(lang, 'product_status_label')} {stock_status}\n"
     )
 

@@ -45,6 +45,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [price, setPrice] = useState<string>(
     initialProduct?.price ? String(initialProduct.price) : ""
   );
+  const [originalPrice, setOriginalPrice] = useState<string>(
+    initialProduct?.original_price ? String(initialProduct.original_price) : ""
+  );
   const [imageUrl, setImageUrl] = useState<string>(initialProduct?.image_url || "");
   const [isActive, setIsActive] = useState<boolean>(
     initialProduct ? (initialProduct.is_active ?? true) : true
@@ -90,6 +93,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setTitle(initialProduct.title || "");
       setDescription(initialProduct.description || "");
       setPrice(initialProduct.price ? String(initialProduct.price) : "");
+      setOriginalPrice(initialProduct.original_price ? String(initialProduct.original_price) : "");
       setImageUrl(initialProduct.image_url || "");
       setIsActive(initialProduct.is_active ?? true);
       setRawKeysText("");
@@ -99,6 +103,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setTitle("");
       setDescription("");
       setPrice("");
+      setOriginalPrice("");
       setImageUrl("");
       setIsActive(true);
       setRawKeysText("");
@@ -121,6 +126,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setErrorMsg("តម្លៃផលិតផលត្រូវតែធំជាង $0 (Price must be greater than $0).");
       return;
     }
+    const trimmedOrig = originalPrice.trim();
+    const numOriginalPrice = trimmedOrig ? Number(trimmedOrig) : null;
+    if (trimmedOrig && (numOriginalPrice === null || isNaN(numOriginalPrice) || numOriginalPrice < 0)) {
+      setErrorMsg("តម្លៃពីមុនមិនត្រឹមត្រូវទេ (Invalid original price).");
+      return;
+    }
     if (!categoryId) {
       setErrorMsg("សូមជ្រើសរើស Category មួយ (Please select a category).");
       return;
@@ -139,6 +150,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           title: title.trim(),
           description: description.trim() || undefined,
           price: numPrice,
+          original_price: numOriginalPrice,
           image_url: imageUrl || undefined,
           is_active: isActive,
         });
@@ -148,6 +160,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           title: title.trim(),
           description: description.trim() || undefined,
           price: numPrice,
+          original_price: numOriginalPrice,
           image_url: imageUrl || undefined,
           is_active: isActive,
         });
@@ -259,38 +272,84 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           />
         </div>
 
-        {/* Price & Current Stock */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              តម្លៃ ($ USD) <span className="text-rose-400">*</span>
-            </label>
-            <Input
-              type="number"
-              step="0.01"
-              value={price}
-              onChange={(e) => {
-                setPrice(e.target.value);
-                setErrorMsg(null);
-              }}
-              placeholder="10.00"
-              className="text-slate-100 font-mono"
-              required
-            />
-          </div>
+        {/* Price, Original Price & Current Stock */}
+        <div className="space-y-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
+                តម្លៃលក់ ($ USD) <span className="text-rose-400">*</span>
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                value={price}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  setErrorMsg(null);
+                }}
+                placeholder="5.00"
+                className="text-slate-100 font-mono"
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">ស្តុកបច្ចុប្បន្ន</label>
-            <div className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm">
-              <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs">
-                <Key className="h-3.5 w-3.5 text-emerald-400" />
-                Available:
-              </span>
-              <span className="font-bold text-emerald-400 font-mono text-sm">
-                {initialProduct ? initialProduct.stock_count : 0} Keys
-              </span>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-300">
+                  តម្លៃពីមុន (Original $)
+                </label>
+                {Number(price) > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const base = Number(originalPrice) > 0 ? Number(originalPrice) : Number(price);
+                      setOriginalPrice(base.toFixed(2));
+                      setPrice((base * 0.5).toFixed(2));
+                    }}
+                    className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 transition-colors"
+                  >
+                    -50%
+                  </button>
+                )}
+              </div>
+              <Input
+                type="number"
+                step="0.01"
+                value={originalPrice}
+                onChange={(e) => {
+                  setOriginalPrice(e.target.value);
+                  setErrorMsg(null);
+                }}
+                placeholder="10.00"
+                className="text-slate-100 font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">ស្តុកបច្ចុប្បន្ន</label>
+              <div className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm">
+                <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs">
+                  <Key className="h-3.5 w-3.5 text-emerald-400" />
+                  Available:
+                </span>
+                <span className="font-bold text-emerald-400 font-mono text-sm">
+                  {initialProduct ? initialProduct.stock_count : 0} Keys
+                </span>
+              </div>
             </div>
           </div>
+
+          {Number(originalPrice) > Number(price) && Number(price) > 0 && (
+            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/25 text-xs">
+              <span className="font-bold text-rose-400">
+                🔥 PROMOTION {Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100)}% OFF
+              </span>
+              <span className="font-mono text-slate-300">
+                <span className="line-through text-slate-500 mr-2">${Number(originalPrice).toFixed(2)}</span>
+                <span className="font-bold text-emerald-400">${Number(price).toFixed(2)}</span>
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Description */}

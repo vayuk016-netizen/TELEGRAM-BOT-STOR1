@@ -13,6 +13,8 @@ export interface Product {
   title: string;
   description?: string;
   price: number;
+  original_price?: number | null;
+  discount_percent?: number;
   image_url?: string;
   is_active: boolean;
   stock_count: number;

@@ -25,9 +25,17 @@ class Product(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    original_price: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 2), nullable=True)
     image_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     category: Mapped["Category"] = relationship("Category", back_populates="products")
     digital_keys: Mapped[List["DigitalKey"]] = relationship("DigitalKey", back_populates="product", cascade="all, delete-orphan")
     order_items: Mapped[List["OrderItem"]] = relationship("OrderItem", back_populates="product")
+
+    @property
+    def discount_percent(self) -> int:
+        if self.original_price and self.original_price > self.price and self.original_price > 0:
+            pct = ((self.original_price - self.price) / self.original_price) * Decimal("100")
+            return int(round(float(pct)))
+        return 0

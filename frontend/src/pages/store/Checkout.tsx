@@ -24,6 +24,8 @@ import {
 import { storeService, StoreProduct, OrderDetail } from "@/services/store.service";
 import { useCustomerStore } from "@/store/use-customer-store";
 import { useLanguageStore } from "@/store/use-language-store";
+import { PromoSticker } from "@/components/storefront/PromoSticker";
+import { getProductDiscount } from "@/lib/promo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InvoiceModal } from "@/components/storefront/InvoiceModal";
@@ -215,6 +217,7 @@ export const StoreCheckoutPage: React.FC = () => {
     );
   }
 
+  const discount = getProductDiscount(product);
   const totalPrice = product.price * quantity;
   const isDelivered = orderDetail?.status === "COMPLETED" || orderDetail?.status === "PAID";
 
@@ -619,12 +622,25 @@ export const StoreCheckoutPage: React.FC = () => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-xs text-slate-100 truncate">
-                    {product.title}
-                  </h4>
-                  <span className="text-[10px] text-slate-400">
-                    Unit: ${product.price.toFixed(2)}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h4 className="font-bold text-xs text-slate-100 truncate">
+                      {product.title}
+                    </h4>
+                    {discount.hasPromo && (
+                      <PromoSticker discountPercent={discount.discountPercent} variant="compact" />
+                    )}
+                  </div>
+                  <div className="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                    <span>Unit:</span>
+                    {discount.hasPromo && discount.originalPrice !== null && (
+                      <span className="line-through text-slate-500 font-mono">
+                        ${discount.originalPrice.toFixed(2)}
+                      </span>
+                    )}
+                    <span className={discount.hasPromo ? "text-emerald-500 font-bold font-mono" : "font-mono"}>
+                      ${product.price.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -652,6 +668,22 @@ export const StoreCheckoutPage: React.FC = () => {
 
               {/* Subtotal and Total */}
               <div className="pt-3 border-t border-slate-800 space-y-1.5 text-xs">
+                {discount.hasPromo && discount.originalPrice !== null && (
+                  <>
+                    <div className="flex justify-between text-slate-400">
+                      <span>{t("original_price")}</span>
+                      <span className="font-mono line-through text-slate-500">
+                        ${(discount.originalPrice * quantity).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-rose-500 dark:text-rose-400 font-semibold">
+                      <span>{t("promo_discount_label")} (-{discount.discountPercent}%)</span>
+                      <span className="font-mono">
+                        -${(discount.savingsAmount * quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between text-slate-400">
                   <span>Subtotal</span>
                   <span className="font-mono text-slate-100">${totalPrice.toFixed(2)}</span>

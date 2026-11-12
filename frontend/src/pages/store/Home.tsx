@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { storeService, StoreProduct, StoreCategory } from "@/services/store.service";
 import { useLanguageStore } from "@/store/use-language-store";
+import { getProductDiscount } from "@/lib/promo";
 import { ProductCard } from "@/components/storefront/ProductCard";
 import { BrandTicker } from "@/components/storefront/BrandTicker";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,14 @@ export const HomePage: React.FC = () => {
       {/* 🚀 Hero Section */}
       <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16 border-b border-slate-800/50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
+          {featuredProducts.some((p) => getProductDiscount(p).hasPromo) && (
+            <div className="inline-flex flex-col sm:flex-row items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 via-red-500 to-orange-500 text-white shadow-xl shadow-rose-500/20 border border-white/20">
+              <span className="text-xs sm:text-sm font-black tracking-wide uppercase">
+                {t("promo_banner_title")}
+              </span>
+            </div>
+          )}
+
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-100 leading-[1.15]">
             {t("hero_title")}
           </h1>

@@ -193,6 +193,25 @@ async def get_public_categories(db: AsyncSession = Depends(get_db)):
     return res
 
 
+def _serialize_public_product(prod: Product, cat: Optional[Category], stock: int) -> Dict[str, Any]:
+    return {
+        "id": prod.id,
+        "title": prod.title,
+        "description": prod.description or "",
+        "price": float(prod.price),
+        "original_price": float(prod.original_price) if prod.original_price is not None else None,
+        "discount_percent": prod.discount_percent,
+        "image_url": prod.image_url,
+        "is_active": prod.is_active,
+        "stock_count": stock,
+        "category": {
+            "id": cat.id if cat else 0,
+            "name": cat.name if cat else "General",
+            "icon": (cat.icon or "📦") if cat else "📦",
+        },
+    }
+
+
 @router.get("/products")
 async def get_public_products(
     category_id: Optional[int] = None,
@@ -232,23 +251,7 @@ async def get_public_products(
     res = await db.execute(stmt)
     rows = res.all()
 
-    items = []
-    for prod, cat, stock in rows:
-        items.append({
-            "id": prod.id,
-            "title": prod.title,
-            "description": prod.description or "",
-            "price": float(prod.price),
-            "image_url": prod.image_url,
-            "is_active": prod.is_active,
-            "stock_count": stock,
-            "category": {
-                "id": cat.id,
-                "name": cat.name,
-                "icon": cat.icon or "📦",
-            },
-        })
-    return items
+    return [_serialize_public_product(prod, cat, stock) for prod, cat, stock in rows]
 
 
 @router.get("/products/{product_id}")
@@ -263,21 +266,7 @@ async def get_public_product_detail(product_id: int, db: AsyncSession = Depends(
         raise HTTPException(status_code=404, detail="Product is not currently available")
 
     cat = await repo.get_category_by_id(prod.category_id)
-
-    return {
-        "id": prod.id,
-        "title": prod.title,
-        "description": prod.description or "",
-        "price": float(prod.price),
-        "image_url": prod.image_url,
-        "is_active": prod.is_active,
-        "stock_count": stock,
-        "category": {
-            "id": cat.id if cat else 0,
-            "name": cat.name if cat else "General",
-            "icon": cat.icon if cat else "📦",
-        },
-    }
+    return _serialize_public_product(prod, cat, stock)
 
 
 # -------------------------------------------------------------

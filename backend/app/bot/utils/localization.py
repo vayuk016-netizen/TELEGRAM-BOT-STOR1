@@ -5,8 +5,8 @@ TRANSLATIONS = {
         "welcome": (
             "👋 សួស្ដី <b>{name}</b>!\n\n"
             "សូមស្វាគមន៍មកកាន់ <b>Store Manager Digital Bot</b> 🛍\n"
-            "ហាងលក់អាខោន និង License Keys ឌីជីថលស្វ័យប្រវត្តិ 24/7!\n\n"
-            "💵 តុល្យភាពបច្ចុប្បន្ន: <b>${balance:.2f}</b>\n"
+            "ហាងលក់អាខោន និង License Keys ឌីជីថលស្វ័យប្រវត្តិ ២៤/៧!\n\n"
+            "💵 សមតុល្យបច្ចុប្បន្ន: <b>${balance:.2f}</b>\n"
             "🆔 Telegram ID: <code>{telegram_id}</code>\n\n"
             "សូមជ្រើសរើសម៉ឺនុយខាងក្រោមដើម្បីចាប់ផ្តើម៖"
         ),
@@ -42,9 +42,9 @@ TRANSLATIONS = {
             "<i>💡 អរគុណសម្រាប់ការគាំទ្រហាងរបស់យើងខ្ញុំ!</i>"
         ),
         "insufficient_balance": (
-            "<b>⚠️ តុល្យភាពគណនីមិនគ្រប់គ្រាន់ទេ! (Insufficient Balance)</b>\n\n"
+            "<b>⚠️ សមតុល្យគណនីមិនគ្រប់គ្រាន់ទេ! (Insufficient Balance)</b>\n\n"
             "💵 <b>តម្លៃទំនិញ:</b> <code>${price:.2f}</code>\n"
-            "💳 <b>តុល្យភាពបច្ចុប្បន្ន:</b> <code>${balance:.2f}</code>\n\n"
+            "💳 <b>សមតុល្យបច្ចុប្បន្ន:</b> <code>${balance:.2f}</code>\n\n"
             "សូមចុចប៊ូតុងខាងក្រោមដើម្បីទូទាត់ប្រាក់ដោយផ្ទាល់តាម <b>ABA App (ABA Pay)</b> ឬបង្ហាញ <b>Bakong KHQR</b> សម្រាប់ស្កេន៖"
         ),
         "aba_pay_btn": "🏦 ABA Pay (Direct App)",
@@ -63,17 +63,17 @@ TRANSLATIONS = {
             "🆔 <b>Telegram ID:</b> <code>{telegram_id}</code>\n"
             "👤 <b>ឈ្មោះ:</b> {name}\n"
             "🏷️ <b>Username:</b> @{username}\n"
-            "💵 <b>តុល្យភាព (Balance):</b> <code>${balance:.2f}</code>\n"
+            "💵 <b>សមតុល្យ (Balance):</b> <code>${balance:.2f}</code>\n"
             "📅 <b>កាលបរិច្ឆេទចូលរួម:</b> {joined_date}\n"
         ),
-        "no_history": "📜 អ្នកមិនទាន់មានប្រវត្តិបញ្ជាទិញនៅឡើយទេ។",
+        "no_history": "📜 លោកអ្នកមិនទាន់មានប្រវត្តិបញ្ជាទិញនៅឡើយទេ។",
         "history_title": "<b>📜 ប្រវត្តិបញ្ជាទិញ ១០ លើកចុងក្រោយ៖</b>\n",
         "referral_info": (
             "<b>👥 កម្មវិធីណែនាំមិត្តភក្ដិ (Referral Program)</b>\n\n"
             "ណែនាំមិត្តភក្ដិរបស់អ្នកឱ្យប្រើប្រាស់ Bot នេះ ដើម្បីទទួលបានអត្ថប្រយោជន៍គណៈកម្មការ 5% រាល់ពេលដែលពួកគេទិញទំនិញ!\n\n"
             "🔗 <b>តំណភ្ជាប់ណែនាំរបស់អ្នក៖</b>\n"
             "<code>https://t.me/{bot_username}?start=ref_{telegram_id}</code>\n\n"
-            "🎁 <i>រាល់ការទិញរបស់សមាជិកដែលអ្នកណែនាំ ទឹកប្រាក់គណៈកម្មការនឹងចូលទៅក្នុងតុល្យភាពគណនីរបស់អ្នកដោយស្វ័យប្រវត្តិ!</i>"
+            "🎁 <i>រាល់ការទិញរបស់សមាជិកដែលអ្នកណែនាំ ទឹកប្រាក់គណៈកម្មការនឹងចូលទៅក្នុងសមតុល្យគណនីរបស់អ្នកដោយស្វ័យប្រវត្តិ!</i>"
         ),
         "payment_history_empty": (
             "<b>💳 ប្រវត្តិការទូទាត់ប្រាក់ (Payment History)</b>\n\n"
@@ -102,6 +102,10 @@ TRANSLATIONS = {
         "keys_encrypted": "Keys are encrypted with AES-256 upon submission.",
         "product_desc_label": "📝 <b>ពិពណ៌នា:</b>",
         "product_price_label": "💰 <b>តម្លៃ:</b>",
+        "product_orig_price_label": "🏷️ <b>តម្លៃពីមុន (Before):</b>",
+        "product_promo_price_label": "💰 <b>តម្លៃបញ្ចុះរួច (Now):</b>",
+        "product_save_label": "សន្សំបាន ${amount:.2f} / -{percent}%",
+        "promo_sticker": "🔥 <b>[ ប្រូម៉ូសិនពិសេស៖ បញ្ចុះតម្លៃ {percent}% | PROMOTION {percent}% OFF ]</b>",
         "product_status_label": "📊 <b>ស្ថានភាព:</b>",
         "stock_available": "🟢 មានស្តុក ({count})",
         "stock_empty": "🔴 អស់ស្តុក",
@@ -208,12 +212,27 @@ TRANSLATIONS = {
         "keys_encrypted": "Keys are encrypted with AES-256 upon submission.",
         "product_desc_label": "📝 <b>Description:</b>",
         "product_price_label": "💰 <b>Price:</b>",
+        "product_orig_price_label": "🏷️ <b>Original Price:</b>",
+        "product_promo_price_label": "💰 <b>Promo Price:</b>",
+        "product_save_label": "Save ${amount:.2f} / -{percent}%",
+        "promo_sticker": "🔥 <b>[ SPECIAL PROMOTION: {percent}% OFF ]</b>",
         "product_status_label": "📊 <b>Status:</b>",
         "stock_available": "🟢 In Stock ({count})",
         "stock_empty": "🔴 Out of Stock",
         "buy_confirm_prompt": "Are you sure you want to purchase this product?",
     }
 }
+
+
+def format_bot_price_html(product, qty: int = 1) -> str:
+    """Format a product price (or subtotal) in Telegram HTML, showing strikethrough original price on promo."""
+    total = float(product.price) * qty
+    pct = getattr(product, "discount_percent", 0)
+    orig = getattr(product, "original_price", None)
+    if pct > 0 and orig is not None:
+        orig_total = float(orig) * qty
+        return f"<s>${orig_total:.2f}</s> <b>${total:.2f}</b> 🏷️ <i>(-{pct}%)</i>"
+    return f"<code>${total:.2f}</code>"
 
 
 def get_text(lang_code: str, key: str, **kwargs) -> str:
