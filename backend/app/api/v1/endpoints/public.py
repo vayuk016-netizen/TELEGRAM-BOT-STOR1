@@ -3,7 +3,7 @@ import shutil
 import time
 from decimal import Decimal
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Header
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Header, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
@@ -214,11 +214,34 @@ def _serialize_public_product(prod: Product, cat: Optional[Category], stock: int
 
 @router.get("/products")
 async def get_public_products(
+    response: Response,
     category_id: Optional[int] = None,
     search: Optional[str] = None,
     sort: Optional[str] = "newest",  # "newest", "price_asc", "price_desc"
+    limit: Optional[int] = Query(default=None, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
+    filters = [Product.is_active == True, Category.is_active == True]
+
+    if category_id:
+        filters.append(Product.category_id == category_id)
+
+    if search:
+        search_filter = f"%{search.strip().lower()}%"
+        filters.append(
+            func.lower(Product.title).like(search_filter)
+            | func.lower(Product.description).like(search_filter)
+        )
+
+    count_stmt = (
+        select(func.count(Product.id))
+        .join(Category, Product.category_id == Category.id)
+        .where(*filters)
+    )
+    total_count = (await db.execute(count_stmt)).scalar_one() or 0
+    response.headers["X-Total-Count"] = str(total_count)
+
     stmt = (
         select(
             Product,
@@ -227,26 +250,21 @@ async def get_public_products(
         )
         .join(Category, Product.category_id == Category.id)
         .outerjoin(DigitalKey, DigitalKey.product_id == Product.id)
-        .where(Product.is_active == True, Category.is_active == True)
+        .where(*filters)
         .group_by(Product.id, Category.id)
     )
 
-    if category_id:
-        stmt = stmt.where(Product.category_id == category_id)
-
-    if search:
-        search_filter = f"%{search.strip().lower()}%"
-        stmt = stmt.where(
-            func.lower(Product.title).like(search_filter)
-            | func.lower(Product.description).like(search_filter)
-        )
-
     if sort == "price_asc":
-        stmt = stmt.order_by(Product.price.asc())
+        stmt = stmt.order_by(Product.price.asc(), Product.id.desc())
     elif sort == "price_desc":
-        stmt = stmt.order_by(Product.price.desc())
+        stmt = stmt.order_by(Product.price.desc(), Product.id.desc())
     else:
         stmt = stmt.order_by(Product.id.desc())
+
+    if offset > 0:
+        stmt = stmt.offset(offset)
+    if limit is not None:
+        stmt = stmt.limit(limit)
 
     res = await db.execute(stmt)
     rows = res.all()

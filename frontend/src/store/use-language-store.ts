@@ -183,6 +183,10 @@ const translations: Record<Language, Record<string, string>> = {
     promo_price: "Now",
     you_save: "Save",
     promo_discount_label: "Promotion Discount",
+    loading_more: "Loading more products...",
+    load_more: "Load More",
+    showing_count: "Showing",
+    of_total: "of",
   },
   km: {
     dashboard: "ផ្ទាំងគ្រប់គ្រង",
@@ -358,6 +362,10 @@ const translations: Record<Language, Record<string, string>> = {
     promo_price: "ឥឡូវ",
     you_save: "សន្សំបាន",
     promo_discount_label: "បញ្ចុះតម្លៃប្រូម៉ូសិន",
+    loading_more: "កំពុងផ្ទុកផលិតផលបន្ថែម...",
+    load_more: "មើលបន្ថែមទៀត",
+    showing_count: "កំពុងបង្ហាញ",
+    of_total: "នៃ",
   },
 };
 

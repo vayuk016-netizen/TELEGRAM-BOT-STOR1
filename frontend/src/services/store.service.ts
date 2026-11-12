@@ -96,9 +96,33 @@ export const storeService = {
     category_id?: number;
     search?: string;
     sort?: string;
+    limit?: number;
+    offset?: number;
   }): Promise<StoreProduct[]> {
     const res = await apiClient.get<StoreProduct[]>("/public/products", { params });
     return res.data;
+  },
+
+  async getProductsPage(
+    params?: {
+      category_id?: number;
+      search?: string;
+      sort?: string;
+      limit?: number;
+      offset?: number;
+    },
+    skipLoader: boolean = false
+  ): Promise<{ items: StoreProduct[]; total: number }> {
+    const res = await apiClient.get<StoreProduct[]>("/public/products", {
+      params,
+      headers: skipLoader ? { "x-skip-loader": "true" } : undefined,
+    });
+    const rawHeader = res.headers?.["x-total-count"] ?? res.headers?.["X-Total-Count"];
+    const parsedTotal = rawHeader !== undefined ? Number(rawHeader) : NaN;
+    const offset = params?.offset ?? 0;
+    const items = Array.isArray(res.data) ? res.data : [];
+    const total = Number.isFinite(parsedTotal) ? parsedTotal : offset + items.length;
+    return { items, total };
   },
 
   async getProduct(id: number): Promise<StoreProduct> {

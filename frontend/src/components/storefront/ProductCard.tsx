@@ -17,6 +17,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const { t } = useLanguageStore();
   const discount = getProductDiscount(product);
+  const [imgLoaded, setImgLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgLoaded(false);
+  }, [product.image_url]);
 
   const isOutOfStock = product.stock_count <= 0;
 
@@ -65,13 +70,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Product Image / Icon placeholder */}
           <div className={`w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 relative flex items-center justify-center group/img ${discount.hasPromo ? "mb-3" : "mb-4"}`}>
             {product.image_url ? (
-              <img
-                src={product.image_url}
-                alt={product.title}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-              />
+              <>
+                {!imgLoaded && (
+                  <div className="absolute inset-0 bg-slate-800/70 animate-pulse" />
+                )}
+                <img
+                  src={product.image_url}
+                  alt={product.title}
+                  loading="lazy"
+                  decoding="async"
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => setImgLoaded(true)}
+                  className={`w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-300 ${
+                    imgLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              </>
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-purple-500/10 flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
                 {product.category?.icon || "⚡"}

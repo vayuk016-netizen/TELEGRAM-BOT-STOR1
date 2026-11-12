@@ -1,21 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, SlidersHorizontal, Sparkles, ShoppingBag } from "lucide-react";
-import { storeService, StoreProduct, StoreCategory } from "@/services/store.service";
+import { useSearchParams } from "react-router-dom";
+import { Search, SlidersHorizontal, ShoppingBag } from "lucide-react";
+import { storeService, StoreCategory } from "@/services/store.service";
+import { useInfiniteProducts } from "@/hooks/use-infinite-products";
 import { useLanguageStore } from "@/store/use-language-store";
-import { ProductCard } from "@/components/storefront/ProductCard";
+import { LazyProductGrid } from "@/components/storefront/LazyProductGrid";
 import { Input } from "@/components/ui/input";
 
 export const StoreProductsPage: React.FC = () => {
   const { t } = useLanguageStore();
+  const [searchParams] = useSearchParams();
 
-  const [products, setProducts] = useState<StoreProduct[]>([]);
   const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => searchParams.get("search") || "");
   const [sort, setSort] = useState("newest");
-  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const queryParam = searchParams.get("search") || "";
+    setSearch(queryParam);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -29,29 +35,21 @@ export const StoreProductsPage: React.FC = () => {
     fetchCats();
   }, []);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const data = await storeService.getProducts({
-          category_id: selectedCategory || undefined,
-          search: search || undefined,
-          sort,
-        });
-        setProducts(data);
-      } catch (err) {
-        console.error("Failed to load products:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const delay = setTimeout(() => {
-      fetchProducts();
-    }, 250);
-
-    return () => clearTimeout(delay);
-  }, [selectedCategory, search, sort]);
+  const {
+    products,
+    total,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+    sentinelRef,
+  } = useInfiniteProducts({
+    categoryId: selectedCategory,
+    search,
+    sort,
+    pageSize: 8,
+    debounceMs: 250,
+  });
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -129,29 +127,24 @@ export const StoreProductsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Products Grid / Skeletons */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-            <div
-              key={n}
-              className="h-72 rounded-2xl bg-slate-900/60 animate-pulse border border-slate-800"
-            />
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-20 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
-          <ShoppingBag className="h-10 w-10 text-slate-400 mx-auto" />
-          <h4 className="font-bold text-base text-slate-100">{t("no_products_found")}</h4>
-          <p className="text-xs text-slate-400">{t("no_products_desc")}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((prod) => (
-            <ProductCard key={prod.id} product={prod} />
-          ))}
-        </div>
-      )}
+      {/* Products Grid / Scroll Lazy Loading */}
+      <LazyProductGrid
+        products={products}
+        total={total}
+        loading={loading}
+        loadingMore={loadingMore}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
+        sentinelRef={sentinelRef}
+        initialSkeletonCount={8}
+        emptyState={
+          <div className="text-center py-20 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
+            <ShoppingBag className="h-10 w-10 text-slate-400 mx-auto" />
+            <h4 className="font-bold text-base text-slate-100">{t("no_products_found")}</h4>
+            <p className="text-xs text-slate-400">{t("no_products_desc")}</p>
+          </div>
+        }
+      />
     </div>
   );
 };

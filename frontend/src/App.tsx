@@ -5,14 +5,25 @@ import { ProtectedRoute } from "@/components/auth/protected-route";
 import { DashboardWrapper } from "@/components/layout/dashboard-wrapper";
 import AuthLayout from "@/app/(auth)/layout";
 
-// Customer Storefront Components (Directly imported for instant FCP)
+// Customer Storefront Components (Home eagerly loaded for instant FCP; secondary pages lazy-loaded)
 import { StoreLayout } from "@/components/storefront/StoreLayout";
 import { HomePage } from "@/pages/store/Home";
-import { StoreProductsPage } from "@/pages/store/Products";
-import { StoreProductDetailPage } from "@/pages/store/ProductDetail";
-import { StoreCheckoutPage } from "@/pages/store/Checkout";
-import { StoreMyOrdersPage } from "@/pages/store/MyOrders";
-import { StoreContactPage } from "@/pages/store/Contact";
+
+const StoreProductsPage = React.lazy(() =>
+  import("@/pages/store/Products").then((m) => ({ default: m.StoreProductsPage }))
+);
+const StoreProductDetailPage = React.lazy(() =>
+  import("@/pages/store/ProductDetail").then((m) => ({ default: m.StoreProductDetailPage }))
+);
+const StoreCheckoutPage = React.lazy(() =>
+  import("@/pages/store/Checkout").then((m) => ({ default: m.StoreCheckoutPage }))
+);
+const StoreMyOrdersPage = React.lazy(() =>
+  import("@/pages/store/MyOrders").then((m) => ({ default: m.StoreMyOrdersPage }))
+);
+const StoreContactPage = React.lazy(() =>
+  import("@/pages/store/Contact").then((m) => ({ default: m.StoreContactPage }))
+);
 
 // ⚡ Lazy-loaded Admin & Auth Components (Keeps storefront initial bundle ultra-light)
 const LoginPage = React.lazy(() => import("@/app/(auth)/login/page"));
@@ -42,12 +53,54 @@ export default function App() {
         {/* ======================================================== */}
         <Route element={<StoreLayout />}>
           <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<StoreProductsPage />} />
-          <Route path="/products/:id" element={<StoreProductDetailPage />} />
-          <Route path="/checkout/:id" element={<StoreCheckoutPage />} />
-          <Route path="/my-orders" element={<StoreMyOrdersPage />} />
-          <Route path="/orders/lookup" element={<StoreMyOrdersPage />} />
-          <Route path="/contact" element={<StoreContactPage />} />
+          <Route
+            path="/products"
+            element={
+              <Suspense fallback={RouteSuspenseFallback}>
+                <StoreProductsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/products/:id"
+            element={
+              <Suspense fallback={RouteSuspenseFallback}>
+                <StoreProductDetailPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/checkout/:id"
+            element={
+              <Suspense fallback={RouteSuspenseFallback}>
+                <StoreCheckoutPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/my-orders"
+            element={
+              <Suspense fallback={RouteSuspenseFallback}>
+                <StoreMyOrdersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/orders/lookup"
+            element={
+              <Suspense fallback={RouteSuspenseFallback}>
+                <StoreMyOrdersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <Suspense fallback={RouteSuspenseFallback}>
+                <StoreContactPage />
+              </Suspense>
+            }
+          />
         </Route>
 
         {/* ======================================================== */}

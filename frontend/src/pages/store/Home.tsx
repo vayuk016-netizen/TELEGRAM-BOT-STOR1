@@ -7,10 +7,11 @@ import {
   ShoppingBag,
   ArrowRight,
 } from "lucide-react";
-import { storeService, StoreProduct, StoreCategory } from "@/services/store.service";
+import { storeService, StoreCategory } from "@/services/store.service";
+import { useInfiniteProducts } from "@/hooks/use-infinite-products";
 import { useLanguageStore } from "@/store/use-language-store";
 import { getProductDiscount } from "@/lib/promo";
-import { ProductCard } from "@/components/storefront/ProductCard";
+import { LazyProductGrid } from "@/components/storefront/LazyProductGrid";
 import { BrandTicker } from "@/components/storefront/BrandTicker";
 import { Button } from "@/components/ui/button";
 
@@ -19,32 +20,32 @@ export const HomePage: React.FC = () => {
   const { t } = useLanguageStore();
 
   const [categories, setCategories] = useState<StoreCategory[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<StoreProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCats = async () => {
       try {
-        setLoading(true);
-        const [cats, prods] = await Promise.all([
-          storeService.getCategories(),
-          storeService.getProducts(),
-        ]);
+        const cats = await storeService.getCategories();
         setCategories(cats);
-        setFeaturedProducts(prods);
       } catch (err) {
-        console.error("Failed to load storefront data:", err);
-      } finally {
-        setLoading(false);
+        console.error("Failed to load categories:", err);
       }
     };
-    fetchData();
+    fetchCats();
   }, []);
 
-  const filteredProducts = selectedCategory
-    ? featuredProducts.filter((p) => p.category?.id === selectedCategory)
-    : featuredProducts;
+  const {
+    products: featuredProducts,
+    total,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+    sentinelRef,
+  } = useInfiniteProducts({
+    categoryId: selectedCategory,
+    pageSize: 8,
+  });
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-20">
@@ -200,26 +201,24 @@ export const HomePage: React.FC = () => {
           ))}
         </div>
 
-        {/* Products Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="h-72 rounded-2xl bg-slate-900/60 animate-pulse border border-slate-800" />
-            ))}
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-16 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
-            <Sparkles className="h-8 w-8 text-slate-400 mx-auto" />
-            <h4 className="font-bold text-slate-100">{t("no_products_category")}</h4>
-            <p className="text-xs text-slate-400">{t("no_products_category_desc")}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((prod) => (
-              <ProductCard key={prod.id} product={prod} />
-            ))}
-          </div>
-        )}
+        {/* Products Grid (Scroll Lazy Loading) */}
+        <LazyProductGrid
+          products={featuredProducts}
+          total={total}
+          loading={loading}
+          loadingMore={loadingMore}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+          sentinelRef={sentinelRef}
+          initialSkeletonCount={4}
+          emptyState={
+            <div className="text-center py-16 rounded-2xl border border-dashed border-slate-800 p-8 space-y-3">
+              <Sparkles className="h-8 w-8 text-slate-400 mx-auto" />
+              <h4 className="font-bold text-slate-100">{t("no_products_category")}</h4>
+              <p className="text-xs text-slate-400">{t("no_products_category_desc")}</p>
+            </div>
+          }
+        />
       </section>
     </div>
   );
