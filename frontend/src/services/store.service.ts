@@ -1,4 +1,23 @@
 import { apiClient } from "@/lib/api-client";
+import {
+  getBrowserCache,
+  setBrowserCache,
+  invalidateBrowserCache,
+} from "@/lib/browser-cache";
+
+const TTL_STORE_INFO_MS = 5 * 60 * 1000;
+const TTL_CATEGORIES_MS = 2 * 60 * 1000;
+const TTL_PRODUCTS_MS = 45 * 1000;
+
+function buildProductsCacheKey(params?: {
+  category_id?: number;
+  search?: string;
+  sort?: string;
+  limit?: number;
+  offset?: number;
+}): string {
+  return `products:${params?.category_id ?? "all"}:${(params?.search || "").trim().toLowerCase()}:${params?.sort || "newest"}:${params?.limit ?? "all"}:${params?.offset ?? 0}`;
+}
 
 export interface StoreCategory {
   id: number;
@@ -82,13 +101,26 @@ export interface TelegramAuthData {
 }
 
 export const storeService = {
+  invalidateCache() {
+    invalidateBrowserCache("products");
+    invalidateBrowserCache("categories");
+  },
+
   async getStoreInfo(): Promise<StoreInfo> {
+    const cached = getBrowserCache<StoreInfo>("store-info");
+    if (cached) return cached;
+
     const res = await apiClient.get<StoreInfo>("/public/store-info");
+    setBrowserCache("store-info", res.data, TTL_STORE_INFO_MS);
     return res.data;
   },
 
   async getCategories(): Promise<StoreCategory[]> {
+    const cached = getBrowserCache<StoreCategory[]>("categories");
+    if (cached) return cached;
+
     const res = await apiClient.get<StoreCategory[]>("/public/categories");
+    setBrowserCache("categories", res.data, TTL_CATEGORIES_MS);
     return res.data;
   },
 
@@ -99,7 +131,12 @@ export const storeService = {
     limit?: number;
     offset?: number;
   }): Promise<StoreProduct[]> {
+    const cacheKey = buildProductsCacheKey(params);
+    const cached = getBrowserCache<StoreProduct[]>(`list:${cacheKey}`);
+    if (cached) return cached;
+
     const res = await apiClient.get<StoreProduct[]>("/public/products", { params });
+    setBrowserCache(`list:${cacheKey}`, res.data, TTL_PRODUCTS_MS);
     return res.data;
   },
 
@@ -113,6 +150,10 @@ export const storeService = {
     },
     skipLoader: boolean = false
   ): Promise<{ items: StoreProduct[]; total: number }> {
+    const cacheKey = `page:${buildProductsCacheKey(params)}`;
+    const cached = getBrowserCache<{ items: StoreProduct[]; total: number }>(cacheKey);
+    if (cached) return cached;
+
     const res = await apiClient.get<StoreProduct[]>("/public/products", {
       params,
       headers: skipLoader ? { "x-skip-loader": "true" } : undefined,
@@ -122,16 +163,24 @@ export const storeService = {
     const offset = params?.offset ?? 0;
     const items = Array.isArray(res.data) ? res.data : [];
     const total = Number.isFinite(parsedTotal) ? parsedTotal : offset + items.length;
-    return { items, total };
+    const payload = { items, total };
+    setBrowserCache(cacheKey, payload, TTL_PRODUCTS_MS);
+    return payload;
   },
 
   async getProduct(id: number): Promise<StoreProduct> {
+    const cacheKey = `product:${id}`;
+    const cached = getBrowserCache<StoreProduct>(cacheKey);
+    if (cached) return cached;
+
     const res = await apiClient.get<StoreProduct>(`/public/products/${id}`);
+    setBrowserCache(cacheKey, res.data, TTL_PRODUCTS_MS);
     return res.data;
   },
 
   async createOrder(data: CreateOrderPayload): Promise<any> {
     const res = await apiClient.post("/public/orders", data);
+    this.invalidateCache();
     return res.data;
   },
 

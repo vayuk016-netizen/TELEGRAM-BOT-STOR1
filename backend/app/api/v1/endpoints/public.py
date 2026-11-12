@@ -145,7 +145,8 @@ async def get_public_order_invoice_image(order_id: int, db: AsyncSession = Depen
 
 
 @router.get("/store-info")
-async def get_store_info():
+async def get_store_info(response: Response):
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=600"
     bot_user = settings.TELEGRAM_BOT_USERNAME or "sopha9926"
     return {
         "store_name": "Digital Subscription Store",
@@ -170,7 +171,8 @@ async def get_store_info():
 # 2. Categories & Products
 # -------------------------------------------------------------
 @router.get("/categories")
-async def get_public_categories(db: AsyncSession = Depends(get_db)):
+async def get_public_categories(response: Response, db: AsyncSession = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=120"
     repo = ProductRepository(db)
     categories = await repo.get_active_categories()
     
@@ -241,6 +243,7 @@ async def get_public_products(
     )
     total_count = (await db.execute(count_stmt)).scalar_one() or 0
     response.headers["X-Total-Count"] = str(total_count)
+    response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=60"
 
     stmt = (
         select(
@@ -273,7 +276,12 @@ async def get_public_products(
 
 
 @router.get("/products/{product_id}")
-async def get_public_product_detail(product_id: int, db: AsyncSession = Depends(get_db)):
+async def get_public_product_detail(
+    product_id: int,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=60"
     repo = ProductRepository(db)
     res = await repo.get_product_with_stock(product_id)
     if not res:
