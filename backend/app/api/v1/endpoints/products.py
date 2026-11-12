@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_db, get_current_admin
 from app.core.config import settings
+from app.core.redis import invalidate_catalog_cache, invalidate_analytics_cache
 from app.db.repositories.product_repository import ProductRepository
 from app.db.models.product import Category, Product
 from app.schemas.product import (
@@ -39,7 +40,9 @@ async def create_category(
 ):
     repo = ProductRepository(db)
     cat = Category(**payload.model_dump())
-    return await repo.create_category(cat)
+    created = await repo.create_category(cat)
+    await invalidate_catalog_cache()
+    return created
 
 
 @router.put("/categories/{category_id}", response_model=CategoryResponse)
@@ -57,6 +60,7 @@ async def update_category(
     for key, val in data.items():
         setattr(cat, key, val)
     await db.flush()
+    await invalidate_catalog_cache()
     return cat
 
 
@@ -72,6 +76,7 @@ async def delete_category(
         raise HTTPException(status_code=404, detail="Category not found")
     await db.delete(cat)
     await db.flush()
+    await invalidate_catalog_cache()
 
 
 # Product Endpoints
@@ -99,6 +104,8 @@ async def create_product(
     repo = ProductRepository(db)
     prod = Product(**payload.model_dump())
     created = await repo.create(prod)
+    await invalidate_catalog_cache()
+    await invalidate_analytics_cache()
     p_dict = ProductResponse.model_validate(created).model_dump()
     p_dict["stock_count"] = 0
     return ProductResponse(**p_dict)
@@ -121,6 +128,7 @@ async def update_product(
         setattr(prod, key, val)
 
     await db.flush()
+    await invalidate_catalog_cache()
     res = await repo.get_product_with_stock(product_id)
     p, stock = res
     p_dict = ProductResponse.model_validate(p).model_dump()
@@ -139,6 +147,8 @@ async def delete_product(
     if not prod:
         raise HTTPException(status_code=404, detail="Product not found")
     await repo.delete(prod)
+    await invalidate_catalog_cache()
+    await invalidate_analytics_cache()
 
 
 @router.post("/upload-image")

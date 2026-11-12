@@ -445,6 +445,10 @@ class BakongService:
         db.add(tx)
         await db.commit()
 
+        from app.core.redis import invalidate_catalog_cache, invalidate_analytics_cache
+        await invalidate_catalog_cache()
+        await invalidate_analytics_cache()
+
         # Send instant delivery message to customer Telegram
         from app.bot.bot import bot
         if order.user and order.user.telegram_id:

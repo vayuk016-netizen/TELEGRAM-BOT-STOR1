@@ -96,4 +96,8 @@ class PurchaseService:
         # Commit explicit transaction
         await self.session.commit()
 
+        from app.core.redis import invalidate_catalog_cache, invalidate_analytics_cache
+        await invalidate_catalog_cache()
+        await invalidate_analytics_cache()
+
         return order, plain_key_content

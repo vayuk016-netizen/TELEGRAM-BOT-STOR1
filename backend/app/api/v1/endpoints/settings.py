@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from app.api.dependencies import get_current_admin
 from app.core.config import settings
+from app.core.redis import invalidate_store_info_cache
 from app.bot.bot import reload_bot
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
@@ -114,6 +115,7 @@ async def update_settings(payload: SettingsUpdate, admin=Depends(get_current_adm
             detail=str(e),
         )
 
+    await invalidate_store_info_cache()
     return get_current_settings_response()
 
 

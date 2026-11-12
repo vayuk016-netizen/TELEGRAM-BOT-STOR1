@@ -10,6 +10,7 @@ from app.schemas.stock import (
     DeleteKeyResponse,
 )
 from app.core.exceptions import ProductNotFoundException
+from app.core.redis import invalidate_catalog_cache, invalidate_analytics_cache
 
 router = APIRouter(prefix="/stock", tags=["Stock Vault"])
 
@@ -27,6 +28,8 @@ async def bulk_upload_keys(
             raw_text_data=payload.raw_keys_text,
             skip_duplicates=payload.skip_duplicates,
         )
+        await invalidate_catalog_cache()
+        await invalidate_analytics_cache()
         msg = f"Successfully encrypted & uploaded {count} keys into vault! Current stock: {current_stock}"
         if duplicates_skipped > 0:
             msg += f" ({duplicates_skipped} duplicate keys skipped)"
@@ -83,6 +86,8 @@ async def delete_key(
             status_code=400,
             detail="Cannot delete this key. It either does not exist or has already been sold.",
         )
+    await invalidate_catalog_cache()
+    await invalidate_analytics_cache()
     return DeleteKeyResponse(
         success=True,
         message=f"Key #{key_id} removed from vault.",
@@ -100,6 +105,8 @@ async def clear_unsold_stock(
     """Clears all unsold keys for a product."""
     service = StockService(db)
     count, current_stock = await service.clear_unsold_keys_for_product(product_id)
+    await invalidate_catalog_cache()
+    await invalidate_analytics_cache()
     return DeleteKeyResponse(
         success=True,
         message=f"Cleared {count} unsold keys from vault.",

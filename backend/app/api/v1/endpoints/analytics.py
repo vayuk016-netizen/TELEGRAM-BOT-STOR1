@@ -1,8 +1,9 @@
 import asyncio
 import time
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_db, get_current_admin
+from app.core.redis import cache_get_json, cache_set_json, get_cache_version
 from app.db.repositories.order_repository import OrderRepository
 from app.db.repositories.user_repository import UserRepository
 from app.db.repositories.product_repository import ProductRepository
@@ -16,21 +17,21 @@ from app.db.models.order import Order, OrderItem
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
-# 3-Second In-Memory Cache to prevent database overloading from admin dashboard polling
-_cache_data = None
-_cache_time = 0.0
-CACHE_TTL = 3.0
+ANALYTICS_CACHE_TTL_SECONDS = 5
 
 
 @router.get("/overview")
 async def get_analytics_overview(
+    response: Response,
     db: AsyncSession = Depends(get_db),
     admin=Depends(get_current_admin),
 ):
-    global _cache_data, _cache_time
-    now = time.time()
-    if _cache_data is not None and (now - _cache_time) < CACHE_TTL:
-        return _cache_data
+    ver = await get_cache_version("analytics")
+    cache_key = f"analytics:v{ver}:overview"
+    cached = await cache_get_json(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
 
     order_repo = OrderRepository(db)
     user_repo = UserRepository(db)
@@ -54,7 +55,7 @@ async def get_analytics_overview(
             }
         )
 
-    _cache_data = {
+    payload = {
         "today_revenue": metrics["revenue_today"],
         "total_revenue": metrics["total_revenue"],
         "sold_today": metrics["sold_today"],
@@ -64,8 +65,9 @@ async def get_analytics_overview(
         "live_feed": live_feed,
         "chart_data": chart_data,
     }
-    _cache_time = now
-    return _cache_data
+    await cache_set_json(cache_key, payload, ANALYTICS_CACHE_TTL_SECONDS)
+    response.headers["X-Cache"] = "MISS"
+    return payload
 
 
 @router.post("/seed")

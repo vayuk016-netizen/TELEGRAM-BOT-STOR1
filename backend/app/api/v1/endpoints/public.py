@@ -11,6 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db
 from app.core.config import settings
+from app.core.redis import (
+    cache_get_json,
+    cache_set_json,
+    get_cache_version,
+    invalidate_analytics_cache,
+    invalidate_catalog_cache,
+)
 from app.core.security import (
     create_access_token,
     decode_access_token,
@@ -147,8 +154,15 @@ async def get_public_order_invoice_image(order_id: int, db: AsyncSession = Depen
 @router.get("/store-info")
 async def get_store_info(response: Response):
     response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=600"
+    ver = await get_cache_version("store_info")
+    cache_key = f"store:info:v{ver}"
+    cached = await cache_get_json(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
     bot_user = settings.TELEGRAM_BOT_USERNAME or "sopha9926"
-    return {
+    payload = {
         "store_name": "Digital Subscription Store",
         "currency": "USD",
         "currency_symbol": "$",
@@ -165,6 +179,9 @@ async def get_store_info(response: Response):
             "account_number": settings.KHQR_ACCOUNT_NUMBER,
         },
     }
+    await cache_set_json(cache_key, payload, 300)
+    response.headers["X-Cache"] = "MISS"
+    return payload
 
 
 # -------------------------------------------------------------
@@ -173,6 +190,13 @@ async def get_store_info(response: Response):
 @router.get("/categories")
 async def get_public_categories(response: Response, db: AsyncSession = Depends(get_db)):
     response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=120"
+    ver = await get_cache_version("catalog")
+    cache_key = f"store:v{ver}:categories"
+    cached = await cache_get_json(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
     repo = ProductRepository(db)
     categories = await repo.get_active_categories()
     
@@ -192,6 +216,8 @@ async def get_public_categories(response: Response, db: AsyncSession = Depends(g
             "description": cat.description or "",
             "product_count": prod_count,
         })
+    await cache_set_json(cache_key, res, 120)
+    response.headers["X-Cache"] = "MISS"
     return res
 
 
@@ -224,6 +250,16 @@ async def get_public_products(
     offset: int = Query(default=0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
+    response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=60"
+    ver = await get_cache_version("catalog")
+    norm_search = (search or "").strip().lower()
+    cache_key = f"store:v{ver}:products:{category_id or 'all'}:{norm_search}:{sort or 'newest'}:{limit or 'all'}:{offset}"
+    cached = await cache_get_json(cache_key)
+    if isinstance(cached, dict) and "items" in cached and "total" in cached:
+        response.headers["X-Total-Count"] = str(cached["total"])
+        response.headers["X-Cache"] = "HIT"
+        return cached["items"]
+
     filters = [Product.is_active == True, Category.is_active == True]
 
     if category_id:
@@ -243,7 +279,6 @@ async def get_public_products(
     )
     total_count = (await db.execute(count_stmt)).scalar_one() or 0
     response.headers["X-Total-Count"] = str(total_count)
-    response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=60"
 
     stmt = (
         select(
@@ -271,8 +306,11 @@ async def get_public_products(
 
     res = await db.execute(stmt)
     rows = res.all()
+    items = [_serialize_public_product(prod, cat, stock) for prod, cat, stock in rows]
 
-    return [_serialize_public_product(prod, cat, stock) for prod, cat, stock in rows]
+    await cache_set_json(cache_key, {"items": items, "total": total_count}, 60)
+    response.headers["X-Cache"] = "MISS"
+    return items
 
 
 @router.get("/products/{product_id}")
@@ -282,6 +320,13 @@ async def get_public_product_detail(
     db: AsyncSession = Depends(get_db),
 ):
     response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=60"
+    ver = await get_cache_version("catalog")
+    cache_key = f"store:v{ver}:product:{product_id}"
+    cached = await cache_get_json(cache_key)
+    if cached is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
     repo = ProductRepository(db)
     res = await repo.get_product_with_stock(product_id)
     if not res:
@@ -292,7 +337,10 @@ async def get_public_product_detail(
         raise HTTPException(status_code=404, detail="Product is not currently available")
 
     cat = await repo.get_category_by_id(prod.category_id)
-    return _serialize_public_product(prod, cat, stock)
+    payload = _serialize_public_product(prod, cat, stock)
+    await cache_set_json(cache_key, payload, 60)
+    response.headers["X-Cache"] = "MISS"
+    return payload
 
 
 # -------------------------------------------------------------
@@ -467,6 +515,8 @@ async def create_website_order(
         # Mark keys sold
         await stock_repo.mark_keys_as_sold([k.id for k in digital_keys], order.id)
         await db.commit()
+        await invalidate_catalog_cache()
+        await invalidate_analytics_cache()
 
         # Send Telegram notification to user
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton

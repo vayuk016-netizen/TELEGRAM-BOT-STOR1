@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from app.core.config import settings
-from app.core.redis import init_redis, close_redis
+from app.core.redis import init_redis, close_redis, get_redis_status
 from app.api.v1.router import api_v1_router
 from app.bot.bot import bot, dp, setup_bot_handlers
 
@@ -133,7 +133,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Total-Count"],
+    expose_headers=["X-Total-Count", "X-Cache"],
 )
 
 # Include Router
@@ -142,4 +142,8 @@ app.include_router(api_v1_router)
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "env": settings.ENV}
+    return {
+        "status": "healthy",
+        "env": settings.ENV,
+        "redis": await get_redis_status(),
+    }

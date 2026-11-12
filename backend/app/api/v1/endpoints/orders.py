@@ -8,6 +8,7 @@ from app.db.models.order import Order, OrderItem
 from app.db.repositories.order_repository import OrderRepository
 from app.schemas.order import OrderResponse
 from app.services.bakong_service import BakongService
+from app.core.redis import invalidate_analytics_cache
 
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
@@ -99,4 +100,5 @@ async def admin_cancel_order(
 
     order.status = "CANCELLED"
     await db.commit()
+    await invalidate_analytics_cache()
     return {"status": "CANCELLED", "message": f"Order #{order_id} has been cancelled."}
