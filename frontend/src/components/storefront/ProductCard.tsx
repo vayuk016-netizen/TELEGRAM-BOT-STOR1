@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, CheckCircle2, AlertTriangle, ArrowRight, Zap } from "lucide-react";
+import { ShoppingCart, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { StoreProduct } from "@/services/store.service";
 import { useLanguageStore } from "@/store/use-language-store";
 import { PromoSticker } from "@/components/storefront/PromoSticker";
@@ -63,16 +63,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           {/* Product Image / Icon placeholder */}
-          <div className="w-full aspect-[16/9] rounded-xl overflow-hidden mb-4 bg-slate-950 border border-slate-800/80 relative flex items-center justify-center group/img">
-            {discount.hasPromo && (
-              <div className="absolute top-2 left-2 z-20">
-                <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
-              </div>
-            )}
-            <div className="absolute top-2 right-2 z-20 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] text-white font-bold flex items-center gap-1 shadow border border-white/10">
-              <Zap className="h-3 w-3 text-amber-400" />
-              <span>{t("instant_badge")}</span>
-            </div>
+          <div className={`w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 relative flex items-center justify-center group/img ${discount.hasPromo ? "mb-3" : "mb-4"}`}>
             {product.image_url ? (
               <img
                 src={product.image_url}
@@ -87,6 +78,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </div>
             )}
           </div>
+
+          {discount.hasPromo && (
+            <div className="mb-2.5">
+              <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
+            </div>
+          )}
 
           {/* Product Title */}
           <Link to={`/products/${product.id}`} className="block group-hover:text-blue-400 transition-colors">

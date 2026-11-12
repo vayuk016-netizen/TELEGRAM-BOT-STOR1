@@ -517,11 +517,6 @@ export default function ProductsPage() {
 
                           {/* Card Thumbnail Image (Fits Image Perfectly) */}
                           <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-800/80 flex items-center justify-center">
-                            {discount.hasPromo && (
-                              <div className="absolute top-2 left-2 z-20">
-                                <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
-                              </div>
-                            )}
                             {prod.image_url ? (
                               <img
                                 src={prod.image_url}
@@ -535,6 +530,12 @@ export default function ProductsPage() {
                               </div>
                             )}
                           </div>
+
+                          {discount.hasPromo && (
+                            <div>
+                              <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
+                            </div>
+                          )}
 
                           {/* Product Info */}
                           <div>

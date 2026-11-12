@@ -45,3 +45,4 @@ export function getProductDiscount(product: DiscountableProduct): ProductDiscoun
     savingsAmount: 0,
   };
 }
+

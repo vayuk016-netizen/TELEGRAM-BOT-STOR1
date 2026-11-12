@@ -30,9 +30,9 @@ export const PromoSticker: React.FC<PromoStickerProps> = ({
   if (variant === "overlay") {
     return (
       <div
-        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 via-red-500 to-orange-500 text-white text-[10px] sm:text-[11px] font-black tracking-wide uppercase shadow-lg shadow-rose-950/40 border border-white/25 backdrop-blur-sm ${className}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 via-red-500 to-orange-500 text-white text-[11px] font-black tracking-wide uppercase shadow-md shadow-rose-600/25 border border-white/20 ${className}`}
       >
-        <Flame className="h-3 w-3 text-amber-200 fill-amber-300 flex-shrink-0" />
+        <Flame className="h-3.5 w-3.5 text-amber-200 fill-amber-300 flex-shrink-0" />
         <span>{label}</span>
       </div>
     );
@@ -62,3 +62,4 @@ export const PromoSticker: React.FC<PromoStickerProps> = ({
     </span>
   );
 };
+

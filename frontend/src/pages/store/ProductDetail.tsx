@@ -105,14 +105,19 @@ export const StoreProductDetailPage: React.FC = () => {
                 alt={product.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-3 right-3 z-20 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md text-xs text-white font-bold flex items-center gap-1.5 shadow border border-white/10">
-                <Zap className="h-3.5 w-3.5 text-amber-400" />
-                <span>{t("instant_badge")}</span>
-              </div>
             </div>
           ) : (
             <div className="w-full aspect-[16/9] rounded-2xl bg-gradient-to-br from-blue-600/10 via-indigo-600/5 to-purple-600/10 border border-blue-500/10 flex items-center justify-center text-7xl">
               {product.category?.icon || "⚡"}
+            </div>
+          )}
+
+          {discount.hasPromo && (
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+              <PromoSticker discountPercent={discount.discountPercent} variant="overlay" />
+              <span className="text-xs font-bold text-rose-500 dark:text-rose-400">
+                {t("you_save")} ${discount.savingsAmount.toFixed(2)}
+              </span>
             </div>
           )}
 
