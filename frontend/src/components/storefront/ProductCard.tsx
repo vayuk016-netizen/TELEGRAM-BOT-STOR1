@@ -17,11 +17,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
   const { t } = useLanguageStore();
   const discount = getProductDiscount(product);
-  const [imgLoaded, setImgLoaded] = React.useState(false);
-
-  React.useEffect(() => {
-    setImgLoaded(false);
-  }, [product.image_url]);
+  const [loadedUrl, setLoadedUrl] = React.useState<string | null>(null);
+  const imgLoaded = Boolean(product.image_url && loadedUrl === product.image_url);
 
   const isOutOfStock = product.stock_count <= 0;
 
@@ -72,18 +69,22 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.image_url ? (
               <>
                 {!imgLoaded && (
-                  <div className="absolute inset-0 bg-slate-800/70 animate-pulse" />
+                  <div className="absolute inset-0 bg-slate-800/70 animate-pulse pointer-events-none" />
                 )}
                 <img
+                  key={product.image_url}
+                  ref={(el) => {
+                    if (el?.complete && el.naturalWidth > 0 && loadedUrl !== product.image_url) {
+                      setLoadedUrl(product.image_url || null);
+                    }
+                  }}
                   src={product.image_url}
                   alt={product.title}
                   loading="lazy"
                   decoding="async"
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgLoaded(true)}
-                  className={`w-full h-full object-cover group-hover:scale-[1.03] transition-all duration-300 ${
-                    imgLoaded ? "opacity-100" : "opacity-0"
-                  }`}
+                  onLoad={() => setLoadedUrl(product.image_url || null)}
+                  onError={() => setLoadedUrl(product.image_url || null)}
+                  className="relative z-10 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </>
             ) : (
