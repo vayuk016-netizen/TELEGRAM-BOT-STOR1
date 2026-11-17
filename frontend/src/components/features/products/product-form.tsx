@@ -196,6 +196,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      className="max-w-xl sm:max-w-2xl"
       title={initialProduct ? `✏️ កែប្រែព័ត៌មានផលិតផល — ${initialProduct.title}` : "➕ បង្កើតផលិតផលថ្មី (Add Product)"}
     >
       <form onSubmit={handleSubmit} className="space-y-4 font-kantumruy-pro max-h-[80vh] overflow-y-auto pr-1">
@@ -275,9 +276,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         {/* Price, Original Price & Current Stock */}
         <div className="space-y-2.5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                តម្លៃលក់ ($ USD) <span className="text-rose-400">*</span>
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-slate-300 h-5 flex items-center truncate">
+                តម្លៃលក់ ($ USD) <span className="text-rose-400 ml-1">*</span>
               </label>
               <Input
                 type="number"
@@ -288,15 +289,15 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   setErrorMsg(null);
                 }}
                 placeholder="5.00"
-                className="text-slate-100 font-mono"
+                className="text-slate-100 font-mono h-10"
                 required
               />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-slate-300">
-                  តម្លៃដើមមុនបញ្ចុះ (Original $)
+            <div className="space-y-1">
+              <div className="h-5 flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-300 truncate" title="តម្លៃដើម (Original $)">
+                  តម្លៃដើម (Original $)
                 </label>
                 {Number(originalPrice) > Number(price) && (
                   <button
@@ -305,9 +306,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       if (originalPrice) setPrice(originalPrice);
                       setOriginalPrice("");
                     }}
-                    className="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors"
+                    className="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors whitespace-nowrap ml-1"
                   >
-                    ✕ លុបប្រូម៉ូសិន
+                    ✕ លុប
                   </button>
                 )}
               </div>
@@ -320,19 +321,24 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   setErrorMsg(null);
                 }}
                 placeholder="10.00"
-                className="text-slate-100 font-mono"
+                className="text-slate-100 font-mono h-10"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">ស្តុកបច្ចុប្បន្ន</label>
-              <div className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-950 px-3 text-sm">
-                <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs">
-                  <Key className="h-3.5 w-3.5 text-emerald-400" />
-                  Available:
+            <div className="space-y-1">
+              <div className="h-5 flex items-center">
+                <label className="text-xs font-semibold text-slate-300 truncate">
+                  ស្តុកបច្ចុប្បន្ន (In Stock)
+                </label>
+              </div>
+              <div className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 text-sm">
+                <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs whitespace-nowrap">
+                  <Key className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>Available:</span>
                 </span>
-                <span className="font-bold text-emerald-400 font-mono text-sm">
-                  {initialProduct ? initialProduct.stock_count : 0} Keys
+                <span className="font-bold text-emerald-400 font-mono text-sm whitespace-nowrap">
+                  {initialProduct ? initialProduct.stock_count : 0}{" "}
+                  <span className="text-[11px] text-emerald-400/80 font-sans font-normal">Keys</span>
                 </span>
               </div>
             </div>
