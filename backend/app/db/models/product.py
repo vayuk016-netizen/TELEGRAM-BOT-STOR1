@@ -35,7 +35,4 @@ class Product(Base, TimestampMixin):
 
     @property
     def discount_percent(self) -> int:
-        if self.original_price and self.original_price > self.price and self.original_price > 0:
-            pct = ((self.original_price - self.price) / self.original_price) * Decimal("100")
-            return int(round(float(pct)))
         return 0

@@ -406,7 +406,12 @@ class BakongService:
 
         item = order.items[0]
         product = item.product
-        quantity = int(order.total_amount / item.unit_price) if item.unit_price else 1
+        quantity = (
+            int(round(float(order.total_amount) / float(item.unit_price)))
+            if item.unit_price and float(item.unit_price) > 0
+            else 1
+        )
+        quantity = max(1, quantity)
 
         # Atomically lock and reserve digital keys
         stock_repo = StockRepository(db)
@@ -575,7 +580,14 @@ class BakongService:
         # Check with Bakong Open API
         tx_data = await cls.check_transaction_by_md5(order.khqr_md5)
         if tx_data:
-            return await cls.verify_and_fulfill_order(order, db, tx_data)
+            paid_amt = Decimal(str(tx_data.get("amount", "0")))
+            if paid_amt >= order.total_amount:
+                return await cls.verify_and_fulfill_order(order, db, tx_data)
+            else:
+                logger.warning(
+                    f"Order #{order_id}: paid amount ${paid_amt} is less than required ${order.total_amount}"
+                )
+                return False, None
 
         return False, None
 

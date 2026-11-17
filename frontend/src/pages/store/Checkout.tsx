@@ -94,16 +94,23 @@ export const StoreCheckoutPage: React.FC = () => {
 
   // 2. Automated status polling when order is active and PENDING
   useEffect(() => {
-    if (!activeOrder?.order_id || orderDetail?.status === "COMPLETED") return;
+    if (!activeOrder?.order_id || orderDetail?.status === "COMPLETED" || orderDetail?.status === "PAID") return;
 
     let intervalId: any = null;
+    let pollCount = 0;
+    const maxPolls = 20; // Poll every 8s for ~2.5 minutes (160s) to protect 100/day Bakong quota
 
     const pollStatus = async () => {
+      pollCount++;
       try {
         const detail = await storeService.getOrderStatus(activeOrder.order_id, true);
         setOrderDetail(detail);
         if (detail.status === "COMPLETED" || detail.status === "PAID") {
           setIsPolling(false);
+          if (intervalId) clearInterval(intervalId);
+        } else if (pollCount >= maxPolls) {
+          setIsPolling(false);
+          if (intervalId) clearInterval(intervalId);
         }
       } catch (err) {
         // silent
@@ -111,7 +118,7 @@ export const StoreCheckoutPage: React.FC = () => {
     };
 
     setIsPolling(true);
-    intervalId = setInterval(pollStatus, 5000);
+    intervalId = setInterval(pollStatus, 8000);
 
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -257,32 +264,50 @@ export const StoreCheckoutPage: React.FC = () => {
 
           <div className="space-y-2">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-100">
-              {t("status_completed")}
+              {orderDetail?.status === "PAID" ? "ការទូទាត់ទទួលបានជោគជ័យ!" : t("status_completed")}
             </h2>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Your order <span className="font-mono font-bold text-blue-500">#{orderDetail?.order_id}</span> has been confirmed. Your digital credentials are ready below:
+              Your order <span className="font-mono font-bold text-blue-500">#{orderDetail?.order_id}</span> has been confirmed.{" "}
+              {orderDetail?.status === "PAID"
+                ? "យើងបានទទួលការបង់ប្រាក់រួចរាល់។ ក្រុមការងារកំពុងរៀបចំកូដ/Account ជូនលោកអ្នក ឬទាក់ទងមក Telegram: @sopha9926"
+                : "Your digital credentials are ready below:"}
             </p>
           </div>
 
           {/* Delivered Keys Box */}
-          <div className="text-left space-y-2 max-w-xl mx-auto">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold uppercase tracking-wider text-slate-100">
-                {t("delivered_keys")}
-              </span>
-              <button
-                onClick={() => handleCopy(orderDetail?.delivered_payload || "")}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white font-bold filter hover:brightness-110 shadow-sm shadow-blue-500/20 transition-all"
-              >
-                <Copy className="h-3.5 w-3.5" />
-                <span>{copyStatus ? t("key_copied") : t("copy_key")}</span>
-              </button>
-            </div>
+          {orderDetail?.delivered_payload ? (
+            <div className="text-left space-y-2 max-w-xl mx-auto">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold uppercase tracking-wider text-slate-100">
+                  {t("delivered_keys")}
+                </span>
+                <button
+                  onClick={() => handleCopy(orderDetail?.delivered_payload || "")}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-blue-600 to-rose-600 hover:from-blue-500 hover:to-rose-500 text-white font-bold filter hover:brightness-110 shadow-sm shadow-blue-500/20 transition-all"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>{copyStatus ? t("key_copied") : t("copy_key")}</span>
+                </button>
+              </div>
 
-            <div className="p-5 rounded-2xl bg-slate-950 text-emerald-400 font-mono text-sm border border-slate-800 shadow-inner select-all whitespace-pre-wrap break-all leading-relaxed">
-              {orderDetail?.delivered_payload || "Digital key delivered. Please check your Telegram."}
+              <div className="p-5 rounded-2xl bg-slate-950 text-emerald-400 font-mono text-sm border border-slate-800 shadow-inner select-all whitespace-pre-wrap break-all leading-relaxed">
+                {orderDetail.delivered_payload}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="p-5 rounded-2xl bg-slate-950/70 border border-amber-500/30 text-amber-300 text-xs max-w-xl mx-auto space-y-2 text-left">
+              <p className="font-semibold flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                <span>បានទទួលការទូទាត់ជោគជ័យ! បុគ្គលិកកំពុងពិនិត្យ និងប្រគល់កូដជូនលោកអ្នកក្នុងពេលឆាប់ៗនេះ។</span>
+              </p>
+              <p className="text-slate-400 text-[11px]">
+                ជំនួយបន្ទាន់ 24/7 សូមទាក់ទងមក Telegram៖{" "}
+                <a href="https://t.me/sopha9926" target="_blank" rel="noreferrer" className="text-blue-400 font-bold underline">
+                  @sopha9926
+                </a>
+              </p>
+            </div>
+          )}
 
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button

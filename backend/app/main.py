@@ -32,6 +32,7 @@ async def lifespan(app: FastAPI):
                 "CREATE UNIQUE INDEX IF NOT EXISTS idx_transactions_khqr_md5 ON transactions (khqr_md5);",
                 "ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);",
                 "ALTER TABLE products ADD COLUMN IF NOT EXISTS original_price NUMERIC(10, 2);",
+                "UPDATE products SET original_price = NULL WHERE original_price IS NOT NULL;",
             ]:
                 try:
                     await conn.execute(text(ddl))
