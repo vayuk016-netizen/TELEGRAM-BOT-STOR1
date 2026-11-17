@@ -111,7 +111,7 @@ export const StoreCheckoutPage: React.FC = () => {
     };
 
     setIsPolling(true);
-    intervalId = setInterval(pollStatus, 3500);
+    intervalId = setInterval(pollStatus, 5000);
 
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -404,14 +404,14 @@ export const StoreCheckoutPage: React.FC = () => {
                 <div className="space-y-1.5 text-xs">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Account Name:</span>
-                    <span className="font-bold text-slate-100">{activeOrder.aba?.account_name || "HAK HAK"}</span>
+                    <span className="font-bold text-slate-100">{activeOrder.aba?.account_name || "SOPHA SOK"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-slate-400">Account No:</span>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-bold text-blue-500">{activeOrder.aba?.account_number || "000 111 222"}</span>
+                      <span className="font-mono font-bold text-blue-500">{activeOrder.aba?.account_number || "126 103 017 113 061"}</span>
                       <button
-                        onClick={() => handleCopy(activeOrder.aba?.account_number || "000 111 222")}
+                        onClick={() => handleCopy(activeOrder.aba?.account_number || "126103017113061")}
                         className="text-slate-400 hover:text-slate-100"
                       >
                         <Copy className="h-3.5 w-3.5" />

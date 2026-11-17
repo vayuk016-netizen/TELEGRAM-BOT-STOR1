@@ -296,19 +296,18 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-semibold text-slate-300">
-                  តម្លៃពីមុន (Original $)
+                  តម្លៃដើមមុនបញ្ចុះ (Original $)
                 </label>
-                {Number(price) > 0 && (
+                {Number(originalPrice) > Number(price) && (
                   <button
                     type="button"
                     onClick={() => {
-                      const base = Number(originalPrice) > 0 ? Number(originalPrice) : Number(price);
-                      setOriginalPrice(base.toFixed(2));
-                      setPrice((base * 0.5).toFixed(2));
+                      if (originalPrice) setPrice(originalPrice);
+                      setOriginalPrice("");
                     }}
-                    className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 transition-colors"
+                    className="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors"
                   >
-                    -50%
+                    ✕ លុបប្រូម៉ូសិន
                   </button>
                 )}
               </div>
@@ -336,6 +335,53 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   {initialProduct ? initialProduct.stock_count : 0} Keys
                 </span>
               </div>
+            </div>
+          </div>
+
+          {/* Quick Promotion Percent Buttons (5% - 50%) */}
+          <div className="pt-1">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-bold text-rose-400 flex items-center gap-1">
+                🔥 កំណត់ប្រូម៉ូសិនរហ័ស (Quick ProMotion 5% - 50%):
+              </span>
+              {Number(originalPrice) > Number(price) && (
+                <span className="text-[10px] font-bold text-emerald-400">
+                  កំពុងបញ្ចុះ: -{Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100)}%
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {[5, 10, 15, 20, 25, 30, 40, 50].map((pct) => (
+                <button
+                  key={pct}
+                  type="button"
+                  onClick={() => {
+                    const base = Number(originalPrice) > 0 ? Number(originalPrice) : Number(price) > 0 ? Number(price) : 10;
+                    setOriginalPrice(base.toFixed(2));
+                    const discounted = base * (1 - pct / 100);
+                    setPrice(discounted.toFixed(2));
+                  }}
+                  className={`text-[11px] font-extrabold px-2.5 py-1 rounded-lg border transition-all ${
+                    Number(originalPrice) > 0 && Math.round(((Number(originalPrice) - Number(price)) / Number(originalPrice)) * 100) === pct
+                      ? "bg-rose-500 text-white border-rose-400 shadow-md shadow-rose-500/30 scale-105"
+                      : "bg-slate-900 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 border-slate-700/80 hover:border-rose-500/40"
+                  }`}
+                >
+                  -{pct}%
+                </button>
+              ))}
+              {Number(originalPrice) > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (originalPrice) setPrice(originalPrice);
+                    setOriginalPrice("");
+                  }}
+                  className="text-[11px] font-bold px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  Clear (ធម្មតា)
+                </button>
+              )}
             </div>
           </div>
 

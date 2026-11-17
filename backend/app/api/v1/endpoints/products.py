@@ -17,6 +17,7 @@ from app.schemas.product import (
     ProductCreate,
     ProductResponse,
     ProductUpdate,
+    BulkPromotionRequest,
 )
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -149,6 +150,61 @@ async def delete_product(
     await repo.delete(prod)
     await invalidate_catalog_cache()
     await invalidate_analytics_cache()
+
+
+@router.post("/bulk-promotion")
+async def bulk_promotion(
+    payload: BulkPromotionRequest,
+    db: AsyncSession = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    """
+    Applies or clears promotion discounts (5% to 50% or custom) on selected products or categories.
+    """
+    from sqlalchemy import select
+    from decimal import Decimal
+
+    stmt = select(Product)
+    if payload.product_ids:
+        stmt = stmt.where(Product.id.in_(payload.product_ids))
+    elif payload.category_id:
+        stmt = stmt.where(Product.category_id == payload.category_id)
+
+    res = await db.execute(stmt)
+    products = res.scalars().all()
+    if not products:
+        raise HTTPException(status_code=404, detail="No matching products found")
+
+    updated_count = 0
+    if payload.action == "clear":
+        for prod in products:
+            if prod.original_price is not None and prod.original_price > prod.price:
+                prod.price = prod.original_price
+            prod.original_price = None
+            updated_count += 1
+    else:
+        # Apply promotion (5% - 50%)
+        pct = payload.discount_percent or 50
+        multiplier = Decimal("1.0") - (Decimal(str(pct)) / Decimal("100.0"))
+        for prod in products:
+            base_price = prod.original_price if (prod.original_price and prod.original_price > prod.price) else prod.price
+            if base_price > 0:
+                prod.original_price = base_price
+                new_price = round(base_price * multiplier, 2)
+                prod.price = max(Decimal("0.01"), new_price)
+                updated_count += 1
+
+    await db.commit()
+    await invalidate_catalog_cache()
+    await invalidate_analytics_cache()
+
+    return {
+        "success": True,
+        "action": payload.action,
+        "discount_percent": payload.discount_percent if payload.action == "apply" else 0,
+        "updated_count": updated_count,
+        "message": f"Successfully {'applied ' + str(payload.discount_percent) + '% promotion to' if payload.action == 'apply' else 'cleared promotions from'} {updated_count} product(s)!",
+    }
 
 
 @router.post("/upload-image")

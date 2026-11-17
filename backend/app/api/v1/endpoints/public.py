@@ -637,6 +637,9 @@ async def create_website_order(
 # -------------------------------------------------------------
 # 5. Check Order Status & Retrieve Delivered Key
 # -------------------------------------------------------------
+_last_order_status_check: Dict[int, float] = {}
+
+
 @router.get("/orders/{order_id}")
 async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
     from app.services.bakong_service import BakongService
@@ -652,7 +655,11 @@ async def get_order_status(order_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
 
     # If pending and paid via KHQR, automatically verify with Bakong API!
-    if order.status == "PENDING" and order.payment_method == "khqr" and order.khqr_md5:
+    # Throttled to once every 10 seconds per order to conserve the 100/day NBC Bakong Open API quota
+    now = time.time()
+    last_check = _last_order_status_check.get(order_id, 0.0)
+    if order.status == "PENDING" and order.payment_method == "khqr" and order.khqr_md5 and (now - last_check >= 10.0):
+        _last_order_status_check[order_id] = now
         tx_data = await BakongService.check_transaction_by_md5(order.khqr_md5)
         if tx_data:
             paid_amt = Decimal(str(tx_data.get("amount", "0")))

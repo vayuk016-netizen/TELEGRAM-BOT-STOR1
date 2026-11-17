@@ -28,6 +28,8 @@ async def lifespan(app: FastAPI):
                 "ALTER TABLE orders ADD COLUMN IF NOT EXISTS receipt_url VARCHAR(500);",
                 "ALTER TABLE orders ADD COLUMN IF NOT EXISTS khqr_md5 VARCHAR(64);",
                 "CREATE INDEX IF NOT EXISTS idx_orders_khqr_md5 ON orders (khqr_md5);",
+                "ALTER TABLE transactions ADD COLUMN IF NOT EXISTS khqr_md5 VARCHAR(64);",
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_transactions_khqr_md5 ON transactions (khqr_md5);",
                 "ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url VARCHAR(500);",
                 "ALTER TABLE products ADD COLUMN IF NOT EXISTS original_price NUMERIC(10, 2);",
             ]:

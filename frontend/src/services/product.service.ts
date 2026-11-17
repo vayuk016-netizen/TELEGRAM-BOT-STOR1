@@ -50,4 +50,17 @@ export const productService = {
     });
     return res.data;
   },
+
+  async bulkPromotion(data: {
+    product_ids?: number[];
+    category_id?: number;
+    discount_percent?: number;
+    action: "apply" | "clear";
+  }): Promise<{ success: boolean; message: string; updated_count: number }> {
+    const res = await apiClient.post<{ success: boolean; message: string; updated_count: number }>(
+      "/products/bulk-promotion",
+      data
+    );
+    return res.data;
+  },
 };

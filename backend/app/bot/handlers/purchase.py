@@ -180,7 +180,7 @@ async def execute_purchase_handler(callback: CallbackQuery, session: AsyncSessio
             balance=db_user.balance,
         )
         from app.bot.keyboards.inline import get_insufficient_balance_keyboard
-        kb = get_insufficient_balance_keyboard(product_id, float(total_price), db_user.telegram_id, lang)
+        kb = get_insufficient_balance_keyboard(product_id, float(total_price), db_user.telegram_id, lang, qty=qty)
         
         await callback.message.edit_text(text, reply_markup=kb)
         await callback.answer()
@@ -201,6 +201,7 @@ async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db
     parts = callback.data.split(":")
     product_id = int(parts[1])
     price = Decimal(parts[2])
+    qty = int(parts[3]) if len(parts) > 3 else 1
 
     # 1. Provide instant loading feedback to user
     loading_toast = (
@@ -241,7 +242,7 @@ async def show_buy_qr_handler(callback: CallbackQuery, session: AsyncSession, db
         order = await order_repo.create_order_with_item(
             user_id=db_user.id,
             product_id=product.id,
-            unit_price=price,
+            unit_price=product.price,
             delivered_payload=None,
             total_amount=price,
             source="telegram",

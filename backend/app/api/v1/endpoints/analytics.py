@@ -113,6 +113,7 @@ async def seed_database(db: AsyncSession = Depends(get_db)):
         {"cat_name": "Gift Cards", "title": "Netflix $20 Gift Card", "description": "Netflix subscription voucher.", "price": Decimal("21.00")},
         {"cat_name": "Premium Subscriptions", "title": "ChatGPT Plus 1 Month", "description": "Access GPT-4 and advanced tools.", "price": Decimal("22.00")},
         {"cat_name": "Premium Subscriptions", "title": "Spotify Premium 1 Year", "description": "Premium subscription plan.", "price": Decimal("35.00")},
+        {"cat_name": "Premium Subscriptions", "title": "Canva Pro 1 Year", "description": "Canva Pro subscription with Brand Kit & unlimited premium assets.", "price": Decimal("5.00"), "original_price": Decimal("10.00")},
     ]
     
     prods = []
@@ -122,6 +123,7 @@ async def seed_database(db: AsyncSession = Depends(get_db)):
             title=p_data["title"],
             description=p_data["description"],
             price=p_data["price"],
+            original_price=p_data.get("original_price"),
             is_active=True
         )
         db.add(prod)

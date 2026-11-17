@@ -1,6 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
@@ -59,3 +59,11 @@ class ProductResponse(ProductCreate):
 
     class Config:
         from_attributes = True
+
+
+class BulkPromotionRequest(BaseModel):
+    product_ids: Optional[List[int]] = None
+    category_id: Optional[int] = None
+    discount_percent: Optional[int] = Field(None, ge=1, le=90)
+    action: str = Field("apply", description="'apply' or 'clear'")
+

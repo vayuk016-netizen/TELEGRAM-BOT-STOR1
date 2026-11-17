@@ -155,14 +155,14 @@ def get_topup_preset_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def get_insufficient_balance_keyboard(product_id: int, price: float, telegram_id: int, lang: str = "km") -> InlineKeyboardMarkup:
+def get_insufficient_balance_keyboard(product_id: int, price: float, telegram_id: int, lang: str = "km", qty: int = 1) -> InlineKeyboardMarkup:
     show_qr_btn_text = "🇰🇭 Show Bakong KHQR" if lang == "en" else "🇰🇭 បង្ហាញ Bakong KHQR"
     back_btn_text = "🔙 Back" if lang == "en" else "🔙 ត្រឡប់ក្រោយ"
     
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text=show_qr_btn_text, callback_data=f"show_buy_qr:{product_id}:{price}"),
+                InlineKeyboardButton(text=show_qr_btn_text, callback_data=f"show_buy_qr:{product_id}:{price}:{qty}"),
             ],
             [
                 InlineKeyboardButton(text="💬 Supporters : @sopha9926", url="https://t.me/sopha9926"),

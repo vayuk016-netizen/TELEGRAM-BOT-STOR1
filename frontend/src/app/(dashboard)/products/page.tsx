@@ -19,6 +19,7 @@ import {
   Image as ImageIcon,
   X,
   Layers,
+  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
@@ -26,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ProductFormModal } from "@/components/features/products/product-form";
 import { CategoryFormModal } from "@/components/features/products/category-form";
+import { PromotionModal } from "@/components/features/products/promotion-modal";
 import { productService } from "@/services/product.service";
 import { Category, Product } from "@/types/product.types";
 import { formatCurrency } from "@/lib/utils";
@@ -43,6 +45,8 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState<boolean>(false);
+  const [promoTargetProductId, setPromoTargetProductId] = useState<number | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [successBanner, setSuccessBanner] = useState<string | null>(null);
@@ -234,6 +238,18 @@ export default function ProductsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setPromoTargetProductId(null);
+              setIsPromoModalOpen(true);
+            }}
+            className="gap-2 border-rose-500/40 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 font-bold text-xs flex-1 sm:flex-initial shadow-sm shadow-rose-500/10"
+          >
+            <Flame className="h-3.5 w-3.5 text-rose-400 animate-pulse" />
+            <span>🔥 ProMotion (5% - 50%)</span>
+          </Button>
           <Button variant="outline" size="sm" onClick={fetchData} className="gap-2 text-xs flex-1 sm:flex-initial">
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
@@ -578,6 +594,19 @@ export default function ProductsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => {
+                                setPromoTargetProductId(prod.id);
+                                setIsPromoModalOpen(true);
+                              }}
+                              className="h-8 px-2 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                              title="Set ProMotion (5% - 50%)"
+                            >
+                              <Flame className="h-3.5 w-3.5 mr-1" />
+                              Promo
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEditProduct(prod)}
                               className="h-8 px-2.5 text-xs text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
                             >
@@ -695,7 +724,19 @@ export default function ProductsPage() {
                             </Badge>
                           </button>
                         </TableCell>
-                        <TableCell className="text-right space-x-2">
+                        <TableCell className="text-right space-x-1 sm:space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setPromoTargetProductId(prod.id);
+                              setIsPromoModalOpen(true);
+                            }}
+                            className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                            title="Set ProMotion (5% - 50%)"
+                          >
+                            <Flame className="h-4 w-4" />
+                          </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleEditProduct(prod)}>
                             <Edit className="h-4 w-4 text-blue-400" />
                           </Button>
@@ -806,6 +847,21 @@ export default function ProductsPage() {
           }}
           onSuccess={handleCategorySaved}
           editCategory={selectedCategory}
+        />
+      )}
+
+      {/* ProMotion (5% - 50%) Modal */}
+      {isPromoModalOpen && (
+        <PromotionModal
+          isOpen={isPromoModalOpen}
+          onClose={() => {
+            setIsPromoModalOpen(false);
+            setPromoTargetProductId(null);
+          }}
+          products={products}
+          categories={categories}
+          onPromotionUpdated={fetchData}
+          initialProductId={promoTargetProductId}
         />
       )}
     </div>

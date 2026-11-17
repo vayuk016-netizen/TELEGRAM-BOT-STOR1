@@ -416,6 +416,22 @@ class BakongService:
             # Mark order as PAID so admin can fulfill manually
             order.status = "PAID"
             await db.commit()
+
+            # Alert admin urgently on Telegram
+            if settings.ADMIN_TELEGRAM_ID:
+                try:
+                    from app.bot.bot import bot
+                    admin_alert = (
+                        f"⚠️ <b>URGENT: Order #{order.id} PAID but OUT OF STOCK!</b>\n"
+                        f"👤 Customer: {order.user.first_name if order.user else 'Customer'} (ID: <code>{order.user.telegram_id if order.user else 'N/A'}</code>)\n"
+                        f"📦 Product: {product.title} (Needed: {quantity}, Available: {len(digital_keys)})\n"
+                        f"💵 Paid: ${order.total_amount:.2f}\n"
+                        f"👉 Please restock keys and fulfill order in Admin Panel!"
+                    )
+                    await bot.send_message(chat_id=settings.ADMIN_TELEGRAM_ID, text=admin_alert)
+                except Exception as e:
+                    logger.warning(f"Could not notify admin of out-of-stock paid order: {e}")
+
             return False, "Insufficient stock. Admin alerted for manual fulfillment."
 
         # Decrypt keys
@@ -432,17 +448,36 @@ class BakongService:
         # Mark keys sold
         await stock_repo.mark_keys_as_sold([k.id for k in digital_keys], order.id)
 
-        # Record transaction if not already logged
+        # Record transaction idempotently (prevent duplicate khqr_md5 unique constraint crash)
         tx_hash = tx_data.get("hash") if tx_data else None
-        tx = Transaction(
-            user_id=order.user_id,
-            amount=order.total_amount,
-            payment_method="KHQR",
-            khqr_md5=order.khqr_md5,
-            status="SUCCESS",
-            description=f"Auto KHQR Payment for Order #{order.id} (Hash: {tx_hash or 'verified'})",
-        )
-        db.add(tx)
+        if order.khqr_md5:
+            stmt_tx = select(Transaction).where(Transaction.khqr_md5 == order.khqr_md5)
+            res_tx = await db.execute(stmt_tx)
+            existing_tx = res_tx.scalar_one_or_none()
+            if not existing_tx:
+                tx = Transaction(
+                    user_id=order.user_id,
+                    amount=order.total_amount,
+                    payment_method="KHQR",
+                    khqr_md5=order.khqr_md5,
+                    status="SUCCESS",
+                    description=f"Auto KHQR Payment for Order #{order.id} (Hash: {tx_hash or 'verified'})",
+                )
+                db.add(tx)
+            else:
+                existing_tx.status = "SUCCESS"
+                existing_tx.description = f"Auto KHQR Payment for Order #{order.id} (Hash: {tx_hash or 'verified'})"
+        else:
+            tx = Transaction(
+                user_id=order.user_id,
+                amount=order.total_amount,
+                payment_method="KHQR",
+                khqr_md5=None,
+                status="SUCCESS",
+                description=f"Auto KHQR Payment for Order #{order.id} (Hash: {tx_hash or 'verified'})",
+            )
+            db.add(tx)
+
         await db.commit()
 
         from app.core.redis import invalidate_catalog_cache, invalidate_analytics_cache
