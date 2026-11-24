@@ -9,13 +9,54 @@ import { PromoSticker } from "@/components/storefront/PromoSticker";
 import { getProductDiscount } from "@/lib/promo";
 import { Button } from "@/components/ui/button";
 
+// Localized English short descriptions when the storefront language is set to English
+const getProductShortDescription = (product: StoreProduct, lang: string): string => {
+  if (lang !== "en") {
+    return product.description || "សេវាកម្មឌីជីថលស្របច្បាប់ ប្រព័ន្ធស្វ័យប្រវត្តិកម្រិតខ្ពស់។";
+  }
+
+  const title = (product.title || "").toLowerCase();
+  if (title.includes("adobe")) {
+    return "20+ Premium Adobe apps, 100GB Cloud storage & full AI creative tools.";
+  }
+  if (title.includes("youtube")) {
+    return "Enjoy ad-free streaming, background playback, downloads & YouTube Music.";
+  }
+  if (title.includes("capcut")) {
+    if (title.includes("1 month")) {
+      return "Full Pro features, AI video effects, smooth transitions & 4K exports (1 Month).";
+    }
+    if (title.includes("6 month")) {
+      return "Full Pro features, AI video effects, smooth transitions & 4K exports (6 Months).";
+    }
+    return "Full Pro features, AI video effects, smooth transitions & 4K exports (1 Year).";
+  }
+  if (title.includes("canva")) {
+    return "Unlock Canva Pro templates, brand kits, AI magic studio & background remover.";
+  }
+  if (title.includes("gemini")) {
+    if (title.includes("6 month")) {
+      return "Unlock Google Gemini Pro AI assistance, smart coding, research & 5TB Drive (6 Months).";
+    }
+    if (title.includes("12 month")) {
+      return "Unlock Google Gemini Pro AI assistance, smart coding, research & 5TB Drive (1 Year).";
+    }
+    if (title.includes("18 month")) {
+      return "Unlock Google Gemini Pro AI assistance, smart coding, research & 5TB Drive (18 Months).";
+    }
+    return "Unlock Google Gemini Pro AI assistance, smart coding, research & 5TB Drive.";
+  }
+
+  return product.description || "High quality instant automated subscription license.";
+};
+
 interface ProductCardProps {
   product: StoreProduct;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const navigate = useNavigate();
-  const { t } = useLanguageStore();
+  const { t, language } = useLanguageStore();
   const discount = getProductDiscount(product);
   const [loadedUrl, setLoadedUrl] = React.useState<string | null>(null);
   const imgLoaded = Boolean(product.image_url && loadedUrl === product.image_url);
@@ -45,20 +86,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         
         {/* Top Banner: Category & Stock Status */}
         <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between gap-2 mb-3 min-w-0">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800 min-w-0 max-w-[65%] flex-shrink">
-              <span className="flex-shrink-0">{product.category?.icon || "📦"}</span>
-              <span className="truncate whitespace-nowrap">{product.category?.name || "General"}</span>
+          <div className="flex items-center justify-between gap-1.5 mb-3 min-w-0">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800 shrink-0 whitespace-nowrap">
+              <span className="shrink-0">{product.category?.icon || "📦"}</span>
+              <span className="whitespace-nowrap">{product.category?.name || "General"}</span>
             </span>
 
             {isOutOfStock ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 whitespace-nowrap flex-shrink-0">
-                <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 whitespace-nowrap shrink-0">
+                <AlertTriangle className="h-3 w-3 shrink-0" />
                 <span>{t("out_of_stock")}</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap flex-shrink-0">
-                <CheckCircle2 className="h-3 w-3 flex-shrink-0" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap shrink-0">
+                <CheckCircle2 className="h-3 w-3 shrink-0" />
                 <span>{product.stock_count} {t("in_stock")}</span>
               </span>
             )}
@@ -104,14 +145,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Product Title */}
           <Link to={`/products/${product.id}`} className="block group-hover:text-blue-400 transition-colors">
-            <h3 className="font-bold text-sm sm:text-base text-slate-100 line-clamp-1 mb-1.5 h-6 flex items-center" title={product.title}>
+            <h3 className="font-bold text-sm sm:text-base text-slate-100 line-clamp-2 mb-1.5 h-11 flex items-start leading-snug" title={product.title}>
               {product.title}
             </h3>
           </Link>
 
           {/* Description snippet */}
-          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4 h-9 overflow-hidden">
-            {product.description || "High quality instant automated subscription license."}
+          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4 h-10 overflow-hidden" title={getProductShortDescription(product, language)}>
+            {getProductShortDescription(product, language)}
           </p>
         </div>
 
