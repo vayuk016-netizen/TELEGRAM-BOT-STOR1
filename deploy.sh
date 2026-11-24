@@ -7,7 +7,7 @@
 set -e
 
 # Configuration
-EC2_HOST="${EC2_HOST:-18.189.192.183}"
+EC2_HOST="${EC2_HOST:-sophasok.store}"
 EC2_USER="${EC2_USER:-ubuntu}"
 REMOTE_DIR="/var/www/TELEGRAM-BOT-STOR1"
 DOMAIN="sophasok.store"
