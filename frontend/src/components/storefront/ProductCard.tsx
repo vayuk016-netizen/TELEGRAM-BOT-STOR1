@@ -70,7 +70,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product.id]);
 
   return (
-    <div className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 shadow-[0_12px_28px_-4px_rgba(15,23,42,0.1),0_6px_12px_-4px_rgba(15,23,42,0.05)] dark:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.85)] hover:shadow-[0_20px_35px_-6px_rgba(15,23,42,0.16)] dark:hover:shadow-[0_20px_40px_-8px_rgba(0,0,0,0.95)] flex flex-col justify-between h-full w-full">
+    <div className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 ease-out hover:scale-[1.025] hover:z-20 shadow-[0_12px_28px_-4px_rgba(15,23,42,0.1),0_6px_12px_-4px_rgba(15,23,42,0.05)] dark:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.85)] hover:shadow-[0_22px_45px_-8px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_24px_50px_-10px_rgba(0,0,0,0.95),0_0_25px_rgba(56,189,248,0.2)] flex flex-col justify-between h-full w-full transform-gpu origin-center">
       
       {/* 💎 Glass Base Border Frame (Replaces the plain black/dark border) */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-slate-200/90 via-slate-200/40 to-slate-200/80 dark:from-white/20 dark:via-white/5 dark:to-white/15 pointer-events-none" />
