@@ -50,6 +50,66 @@ const getProductShortDescription = (product: StoreProduct, lang: string): string
   return product.description || "High quality instant automated subscription license.";
 };
 
+// "SO COOL" Key Feature Chips for High-Tech Aesthetic
+const getProductFeatureChips = (product: StoreProduct, lang: string): string[] => {
+  const isEn = lang === "en";
+  const title = (product.title || "").toLowerCase();
+
+  if (title.includes("canva")) {
+    return isEn
+      ? ["🎨 100M+ Assets", "🪄 Magic AI", "⚡ Brand Kit"]
+      : ["🎨 Template រាប់លាន", "🪄 Magic Studio", "⚡ Brand Kit"];
+  }
+
+  if (title.includes("adobe")) {
+    return isEn
+      ? ["🚀 20+ Pro Apps", "☁️ 100GB Cloud", "🤖 All AI Tools"]
+      : ["🚀 20+ កម្មវិធី", "☁️ 100GB Cloud", "🤖 មុខងារ AI"];
+  }
+
+  if (title.includes("youtube")) {
+    return isEn
+      ? ["🚫 Ad-Free Video", "🎵 YT Music Pro", "📱 Background Play"]
+      : ["🚫 គ្មានពាណិជ្ជកម្ម", "🎵 Music Premium", "📱 ចាក់ក្រោយអេក្រង់"];
+  }
+
+  if (title.includes("capcut")) {
+    if (title.includes("1 year")) {
+      return isEn
+        ? ["🎬 4K Pro Export", "✨ VIP AI Effects", "👑 1 Full Year"]
+        : ["🎬 កាត់ត 4K Pro", "✨ VIP AI Effects", "👑 ពេញ ១ ឆ្នាំ"];
+    }
+    if (title.includes("6 month")) {
+      return isEn
+        ? ["🎬 4K Pro Export", "✨ VIP AI Effects", "⚡ 6 Months"]
+        : ["🎬 កាត់ត 4K Pro", "✨ VIP AI Effects", "⚡ ប្រើ 6 ខែ"];
+    }
+    return isEn
+      ? ["🎬 4K Pro Export", "✨ VIP AI Effects", "⚡ 1 Month"]
+      : ["🎬 កាត់ត 4K Pro", "✨ VIP AI Effects", "⚡ ប្រើ 1 ខែ"];
+  }
+
+  if (title.includes("gemini")) {
+    if (title.includes("18 month")) {
+      return isEn
+        ? ["🤖 Advanced AI", "💾 5TB Drive", "🚀 18 Months"]
+        : ["🤖 AI ជំនួយការ", "💾 5TB Drive", "🚀 ប្រើ 18 ខែ"];
+    }
+    if (title.includes("12 month")) {
+      return isEn
+        ? ["🤖 Advanced AI", "💾 5TB Drive", "👑 1 Full Year"]
+        : ["🤖 AI ជំនួយការ", "💾 5TB Drive", "👑 ពេញ ១ ឆ្នាំ"];
+    }
+    return isEn
+      ? ["🤖 Advanced AI", "💾 5TB Drive", "⚡ 6 Months"]
+      : ["🤖 AI ជំនួយការ", "💾 5TB Drive", "⚡ ប្រើ 6 ខែ"];
+  }
+
+  return isEn
+    ? ["⚡ Instant Key", "🔒 Genuine License", "🛡️ 24/7 Delivery"]
+    : ["⚡ ផ្ញើ Key ភ្លាមៗ", "🔒 គណនីស្របច្បាប់", "🛡️ ប្រព័ន្ធស្វ័យប្រវត្ត"];
+};
+
 interface ProductCardProps {
   product: StoreProduct;
 }
@@ -87,19 +147,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Top Banner: Category & Stock Status */}
         <div className="flex-1 flex flex-col">
           <div className="flex items-center justify-between gap-1.5 mb-3 min-w-0">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-950/80 text-slate-300 border border-slate-800 shrink-0 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-950/80 text-slate-200 border border-slate-800 shadow-inner shrink-0 whitespace-nowrap">
               <span className="shrink-0">{product.category?.icon || "📦"}</span>
               <span className="whitespace-nowrap">{product.category?.name || "General"}</span>
             </span>
 
             {isOutOfStock ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 whitespace-nowrap shrink-0">
-                <AlertTriangle className="h-3 w-3 shrink-0" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10.5px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/25 whitespace-nowrap shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-rose-400 shrink-0" />
                 <span>{t("out_of_stock")}</span>
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 whitespace-nowrap shrink-0">
-                <CheckCircle2 className="h-3 w-3 shrink-0" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10.5px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 whitespace-nowrap shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                 <span>{product.stock_count} {t("in_stock")}</span>
               </span>
             )}
@@ -145,13 +205,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Product Title */}
           <Link to={`/products/${product.id}`} className="block group-hover:text-blue-400 transition-colors">
-            <h3 className="font-bold text-sm sm:text-base text-slate-100 line-clamp-2 mb-1.5 h-11 flex items-start leading-snug" title={product.title}>
+            <h3 className="font-extrabold text-sm sm:text-base text-slate-100 line-clamp-2 mb-2 h-11 flex items-start leading-snug">
               {product.title}
             </h3>
           </Link>
 
-          {/* Description snippet */}
-          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed mb-4 h-10 overflow-hidden" title={getProductShortDescription(product, language)}>
+          {/* 🚀 Feature Highlights Micro-Chips (High-tech Look) */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-2 h-7 overflow-hidden">
+            {getProductFeatureChips(product, language).map((chip, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 border border-slate-700/60 shadow-sm transition-colors whitespace-nowrap shrink-0"
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+
+          {/* Clean Description Subtitle (No native tooltip) */}
+          <p className="text-[11px] text-slate-400 line-clamp-1 leading-normal mb-3.5 h-4 overflow-hidden">
             {getProductShortDescription(product, language)}
           </p>
         </div>
