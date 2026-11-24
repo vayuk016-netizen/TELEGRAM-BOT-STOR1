@@ -57,6 +57,21 @@ class ProductRepository(BaseRepository[Product]):
             return None
         return row[0], row[1]
 
+    async def get_products_by_category_with_stock(self, category_id: int) -> List[Tuple[Product, int]]:
+        """Single-query bulk fetch: returns all active products in a category with their real-time unsold key counts."""
+        stmt = (
+            select(
+                Product,
+                func.count(DigitalKey.id).filter(DigitalKey.is_sold == False).label("stock_count"),
+            )
+            .outerjoin(DigitalKey, DigitalKey.product_id == Product.id)
+            .where(Product.category_id == category_id, Product.is_active == True)
+            .group_by(Product.id)
+            .order_by(Product.id.asc())
+        )
+        res = await self.session.execute(stmt)
+        return list(res.all())
+
     async def get_all_products_with_stock(self) -> List[Tuple[Product, int]]:
         stmt = (
             select(

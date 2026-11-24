@@ -74,13 +74,8 @@ async def show_category_products(callback: CallbackQuery, session: AsyncSession,
         await callback.answer("⚠️ Category not found!", show_alert=True)
         return
 
-    products = await product_repo.get_products_by_category(category_id, only_active=True)
-    products_with_stock = []
-
-    for prod in products:
-        prod_tuple = await product_repo.get_product_with_stock(prod.id)
-        if prod_tuple:
-            products_with_stock.append(prod_tuple)
+    # Single-query fetch: replaces previous N+1 database queries
+    products_with_stock = await product_repo.get_products_by_category_with_stock(category_id)
 
     if not products_with_stock:
         text = get_text(lang, "no_products", icon=category.icon or "📦", name=category.name)
