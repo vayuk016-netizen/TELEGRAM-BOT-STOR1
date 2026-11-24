@@ -130,14 +130,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product.id]);
 
   return (
-    <div className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 ease-out hover:scale-[1.025] hover:z-20 shadow-[0_12px_28px_-4px_rgba(15,23,42,0.1),0_6px_12px_-4px_rgba(15,23,42,0.05)] dark:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.85)] hover:shadow-[0_22px_45px_-8px_rgba(15,23,42,0.2)] dark:hover:shadow-[0_24px_50px_-10px_rgba(0,0,0,0.95),0_0_25px_rgba(56,189,248,0.2)] flex flex-col justify-between h-full w-full transform-gpu origin-center">
+    <div className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 ease-out hover:scale-[1.02] hover:z-30 shadow-[0_12px_28px_-4px_rgba(15,23,42,0.1),0_6px_12px_-4px_rgba(15,23,42,0.05)] dark:shadow-[0_16px_36px_-8px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_50px_-10px_rgba(15,23,42,0.22)] dark:hover:shadow-[0_24px_50px_-10px_rgba(0,0,0,0.95),0_0_25px_rgba(56,189,248,0.25)] flex flex-col justify-between h-full w-full transform-gpu origin-center isolate [transform:translateZ(0)]">
       
       {/* 💎 Glass Base Border Frame (Replaces the plain black/dark border) */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-slate-200/90 via-slate-200/40 to-slate-200/80 dark:from-white/20 dark:via-white/5 dark:to-white/15 pointer-events-none" />
 
-      {/* 💫 Glowing Running Beam that travels around the box */}
+      {/* 💫 Glowing Running Beam that travels around the box smoothly without phase jumps */}
       <div
-        className="absolute -inset-[150%] animate-border-beam pointer-events-none opacity-85 group-hover:opacity-100 group-hover:animate-border-beam-fast transition-opacity duration-300 bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_280deg,rgba(56,189,248,0.25)_305deg,#38bdf8_330deg,#818cf8_348deg,#ec4899_360deg)] dark:bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_270deg,rgba(56,189,248,0.35)_300deg,#38bdf8_330deg,#818cf8_350deg,#f43f5e_360deg)]"
+        className="absolute -inset-[150%] animate-border-beam pointer-events-none opacity-80 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-300 bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_280deg,rgba(56,189,248,0.25)_305deg,#38bdf8_330deg,#818cf8_348deg,#ec4899_360deg)] dark:bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,transparent_270deg,rgba(56,189,248,0.35)_300deg,#38bdf8_330deg,#818cf8_350deg,#f43f5e_360deg)]"
         style={{ animationDelay: beamDelay }}
       />
 

@@ -54,8 +54,7 @@ export const LazyProductGrid: React.FC<LazyProductGridProps> = ({
         {products.map((prod) => (
           <div
             key={prod.id}
-            className="h-full flex flex-col"
-            style={{ contentVisibility: "auto", containIntrinsicSize: "380px" }}
+            className="h-full flex flex-col overflow-visible"
           >
             <ProductCard product={prod} />
           </div>
