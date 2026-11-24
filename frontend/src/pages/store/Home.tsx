@@ -72,70 +72,20 @@ export const HomePage: React.FC = () => {
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={() => navigate("/products")}
-              className="group relative inline-flex items-center justify-center h-12 px-8 rounded-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] active:scale-95 bg-white/90 dark:bg-slate-900/80 hover:bg-white dark:hover:bg-slate-900/90 backdrop-blur-2xl shadow-[0_10px_25px_-4px_rgba(15,23,42,0.12),0_4px_10px_-2px_rgba(37,99,235,0.12)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.25)] hover:shadow-[0_14px_32px_-4px_rgba(15,23,42,0.18)] dark:hover:shadow-[0_12px_36px_-4px_rgba(0,0,0,0.9),0_0_30px_rgba(59,130,246,0.45)]"
+              className="group relative inline-flex items-center justify-center h-12 px-8 rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] active:scale-95 bg-white/90 dark:bg-slate-900/85 hover:bg-white dark:hover:bg-slate-900 backdrop-blur-2xl border border-slate-200/90 dark:border-slate-800 shadow-[0_10px_25px_-4px_rgba(15,23,42,0.12),0_4px_10px_-2px_rgba(37,99,235,0.12)] dark:shadow-[0_12px_30px_-4px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.25)] hover:shadow-[0_14px_32px_-4px_rgba(15,23,42,0.18)] dark:hover:shadow-[0_12px_36px_-4px_rgba(0,0,0,0.9),0_0_30px_rgba(59,130,246,0.45)]"
             >
-              {/* 💫 SVG Running Border Beam (Uniform speed along all 4 edges) */}
-              <svg
-                className="absolute inset-0 w-full h-full pointer-events-none rounded-2xl overflow-visible"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient id="heroBtnBeamLight" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#2563eb" />
-                    <stop offset="50%" stopColor="#7c3aed" />
-                    <stop offset="100%" stopColor="#e11d48" />
-                  </linearGradient>
-                  <linearGradient id="heroBtnBeamDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#38bdf8" />
-                    <stop offset="50%" stopColor="#818cf8" />
-                    <stop offset="100%" stopColor="#f43f5e" />
-                  </linearGradient>
-                </defs>
+              {/* ✨ Surface Shimmer Swipe Light (Glides across the button face) */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                <div className="absolute top-0 bottom-0 left-0 w-32 bg-gradient-to-r from-transparent via-blue-500/15 dark:via-cyan-300/20 via-white/25 to-transparent animate-swipe-light-surface pointer-events-none" />
+              </div>
 
-                {/* Base subtle glass border frame */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="15"
-                  fill="none"
-                  stroke="currentColor"
-                  className="text-slate-200/90 dark:text-white/15"
-                  strokeWidth="1.5"
-                />
+              {/* 💫 Bottom Edge Swipe Light (Dynamic illuminated flare along bottom border) */}
+              <div className="absolute bottom-0 left-0 right-0 h-[2.5px] overflow-hidden rounded-b-2xl pointer-events-none">
+                <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-sky-400 via-indigo-400 to-rose-400 to-transparent animate-swipe-light-bottom blur-[0.5px] shadow-[0_0_12px_2px_rgba(56,189,248,0.75)]" />
+              </div>
 
-                {/* Active laser beam running around the box */}
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="15"
-                  fill="none"
-                  stroke="url(#heroBtnBeamLight)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  className="dark:hidden animate-border-beam-svg"
-                  style={{ strokeDasharray: "110 440" }}
-                />
-                <rect
-                  x="1"
-                  y="1"
-                  width="calc(100% - 2px)"
-                  height="calc(100% - 2px)"
-                  rx="15"
-                  fill="none"
-                  stroke="url(#heroBtnBeamDark)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  className="hidden dark:block animate-border-beam-svg"
-                  style={{
-                    strokeDasharray: "110 440",
-                    filter: "drop-shadow(0 0 5px rgba(56, 189, 248, 0.75))",
-                  }}
-                />
-              </svg>
+              {/* 🌟 Ambient Bottom Glow */}
+              <div className="absolute -bottom-1.5 left-1/4 right-1/4 h-2 bg-gradient-to-r from-cyan-500/30 via-indigo-500/40 to-rose-500/30 blur-sm pointer-events-none opacity-70 group-hover:opacity-100 transition-opacity" />
 
               {/* 🧊 Clear Button Text & Icon */}
               <div className="relative z-10 flex items-center justify-center gap-2.5 font-extrabold text-sm sm:text-base text-[#0f172a] dark:text-white">
