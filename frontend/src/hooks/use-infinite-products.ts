@@ -13,7 +13,7 @@ export function useInfiniteProducts({
   categoryId = null,
   search = "",
   sort = "newest",
-  pageSize = 8,
+  pageSize = 16,
   debounceMs = 0,
 }: UseInfiniteProductsOptions = {}) {
   const [products, setProducts] = useState<StoreProduct[]>([]);

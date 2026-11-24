@@ -128,8 +128,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
     const trimmedOrig = originalPrice.trim();
     const numOriginalPrice = trimmedOrig ? Number(trimmedOrig) : null;
-    if (trimmedOrig && (numOriginalPrice === null || isNaN(numOriginalPrice) || numOriginalPrice < 0)) {
-      setErrorMsg("តម្លៃពីមុនមិនត្រឹមត្រូវទេ (Invalid original price).");
+    if (trimmedOrig && (numOriginalPrice === null || isNaN(numOriginalPrice) || numOriginalPrice <= 0)) {
+      setErrorMsg("តម្លៃដើមត្រូវតែជាលេខធំជាង $0 (Original price must be greater than $0).");
+      return;
+    }
+    if (numOriginalPrice !== null && numOriginalPrice <= numPrice) {
+      setErrorMsg("តម្លៃដើម (Original Price) ត្រូវតែធំជាងតម្លៃលក់ (Sale Price) ដើម្បីបញ្ចុះតម្លៃ");
       return;
     }
     if (!categoryId) {
@@ -283,12 +287,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               <Input
                 type="number"
                 step="0.01"
+                min="0.01"
                 value={price}
                 onChange={(e) => {
                   setPrice(e.target.value);
                   setErrorMsg(null);
                 }}
-                placeholder="5.00"
+                placeholder="0.00"
                 className="text-slate-100 font-mono h-10"
                 required
               />
@@ -297,16 +302,16 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <div className="space-y-1">
               <div className="h-5 flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-300 truncate" title="តម្លៃដើម (Original $)">
-                  តម្លៃដើម (Original $)
+                  តម្លៃដើម <span className="text-[10px] text-slate-400 font-normal">(Optional)</span>
                 </label>
-                {Number(originalPrice) > Number(price) && (
+                {Number(originalPrice) > 0 && (
                   <button
                     type="button"
                     onClick={() => {
-                      if (originalPrice) setPrice(originalPrice);
                       setOriginalPrice("");
                     }}
                     className="text-[10px] font-bold text-slate-400 hover:text-rose-400 transition-colors whitespace-nowrap ml-1"
+                    title="លុបតម្លៃដើម"
                   >
                     ✕ លុប
                   </button>
@@ -315,12 +320,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               <Input
                 type="number"
                 step="0.01"
+                min="0.01"
                 value={originalPrice}
                 onChange={(e) => {
                   setOriginalPrice(e.target.value);
                   setErrorMsg(null);
                 }}
-                placeholder="10.00"
+                placeholder=""
                 className="text-slate-100 font-mono h-10"
               />
             </div>
@@ -332,13 +338,12 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 </label>
               </div>
               <div className="flex h-10 w-full items-center justify-between rounded-xl border border-slate-700/80 bg-slate-950/80 px-3 text-sm">
-                <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs whitespace-nowrap">
-                  <Key className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+                <span className="flex items-center gap-1.5 text-slate-400 font-medium text-xs shrink-0 whitespace-nowrap">
+                  <Key className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
                   <span>Available:</span>
                 </span>
-                <span className="font-bold text-emerald-400 font-mono text-sm whitespace-nowrap">
-                  {initialProduct ? initialProduct.stock_count : 0}{" "}
-                  <span className="text-[11px] text-emerald-400/80 font-sans font-normal">Keys</span>
+                <span className="font-bold text-emerald-400 font-mono text-xs sm:text-sm shrink-0 whitespace-nowrap ml-2">
+                  {initialProduct ? initialProduct.stock_count : 0} Keys
                 </span>
               </div>
             </div>

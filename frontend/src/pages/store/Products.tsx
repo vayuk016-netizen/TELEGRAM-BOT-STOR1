@@ -47,7 +47,7 @@ export const StoreProductsPage: React.FC = () => {
     categoryId: selectedCategory,
     search,
     sort,
-    pageSize: 8,
+    pageSize: 16,
     debounceMs: 250,
   });
 

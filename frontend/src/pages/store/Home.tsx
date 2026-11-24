@@ -44,7 +44,7 @@ export const HomePage: React.FC = () => {
     sentinelRef,
   } = useInfiniteProducts({
     categoryId: selectedCategory,
-    pageSize: 8,
+    pageSize: 16,
   });
 
   return (

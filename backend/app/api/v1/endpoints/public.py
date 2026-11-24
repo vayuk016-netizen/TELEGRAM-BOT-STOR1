@@ -293,11 +293,12 @@ async def get_public_products(
     )
 
     if sort == "price_asc":
-        stmt = stmt.order_by(Product.price.asc(), Product.id.desc())
+        stmt = stmt.order_by(Product.price.asc(), Product.id.asc())
     elif sort == "price_desc":
-        stmt = stmt.order_by(Product.price.desc(), Product.id.desc())
+        stmt = stmt.order_by(Product.price.desc(), Product.id.asc())
     else:
-        stmt = stmt.order_by(Product.id.desc())
+        # Default: group cleanly by category and order by price/duration
+        stmt = stmt.order_by(Product.category_id.asc(), Product.price.asc(), Product.id.asc())
 
     if offset > 0:
         stmt = stmt.offset(offset)
